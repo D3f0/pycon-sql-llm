@@ -1,0 +1,132 @@
+---
+title: "text2sql (TBD)"
+subtitle: "Using LLMs to create SQL "
+# Add IBM logo
+author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
+date: September, 2025
+embed-resources: true
+format:
+  revealjs:
+    theme: dark
+    toc: true
+    toc-depth: 1
+    slide-number: true
+    transition: slide
+    code-copy: true
+    highlight-style: github
+    revelaljs:
+      include-in-header: 
+        text: |
+          <style>
+          .center-xy {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -ms-transform: translateY(-50%), translateX(-50%);
+            transform: translateY(-50%), translateX(-50%);
+          }
+          </style>
+
+---
+
+
+## About myself
+
+::: {.columns}
+::: {.column width="40%"}
+![](./img/myself.jpg){.center-xy}
+:::
+
+::: {.column width="60%"}
+
+::: {.incremental}
+- 🇦🇷 🧉 Argentinian
+- Software Engineer at IBM Research  Nairobi
+- Worked in Agritech at Hello Tractor
+- Worked in Foundational Models for Geospatial applications 🛰️🗺️🤖
+- Currently working on Flowpilot
+:::
+
+:::
+:::
+
+
+---
+
+### LLMs used for SQL generation
+
+{.incremental}
+
+Our research project aims to provide a flexible framework for SQL generation.
+Our goal is to enable smaller models to perform in par with frontier models 
+optimizing for accuracy and cost.
+
+Sarasa
+
+
+Sarasa
+
+---
+
+## Current OSS tooling
+
+- 🦜 ⛓️ LangChain: [`QA over SQL data`](https://python.langchain.com/docs/tutorials/sql_qa/)
+
+::: fragment
+```{python}
+print(1)
+
+```
+::: 
+---
+
+## Pydantic AI 
+
+2- PyDantic's AI [`SQL workbench`](https://ai.pydantic.dev/examples/sql-gen/)
+
+---
+
+## Common challenges
+
+- Some databases have specific dialects, e.g. SQLite, Postgres, MySQL, Oracle, db2, etc.
+- The training set of the models may not have a sufficient examples 
+  for the database engine we're interested in.
+- Providing tables is great, but some times, schemas are quite big
+  and the table and column names may be not human friendly.
+
+
+---
+
+## Pipelines
+
+Our work was focused on prompt optimization by a small team, but as 
+our teams tarted to grown we needed to allow different research team
+to focus on different areas.
+
+We created a framework inspired in LangGraph tailored to the text2sql 
+generation. 
+
+
+```mermaid
+graph DR
+  A -> B
+````
+
+## Engineering Challenges
+
+Some
+
+- Bird benchmarks
+- Benchmarks frameworks
+	- Unitxt
+- Pipelines
+- 
+- Providing context 
+	- 
+- Shape of the context 
+- Model sizes
+	- Limits
+- other node
+
+---
