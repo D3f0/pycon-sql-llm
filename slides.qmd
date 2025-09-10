@@ -1,6 +1,6 @@
 ---
-title: "text2sql (TBD)"
-subtitle: "Using LLMs to create SQL "
+title: "Asking questions to your database with LLMs"
+subtitle: "Techniques for effective SQL generation"
 # Add IBM logo
 author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
 date: September, 2025
@@ -18,7 +18,7 @@ format:
       include-in-header: 
         text: |
           <style>
-          .center-xy {
+          .center-xy, .center-xy *{
             margin: 0;
             position: absolute;
             top: 50%;
@@ -41,11 +41,11 @@ format:
 ::: {.column width="60%"}
 
 ::: {.incremental}
-- 🇦🇷 🧉 Argentinian
-- Software Engineer at IBM Research  Nairobi
 - Worked in Agritech at Hello Tractor
+- Software Engineer at IBM Research  Nairobi
 - Worked in Foundational Models for Geospatial applications 🛰️🗺️🤖
-- Currently working on Flowpilot
+- Currently working on Flowpilot project, providing core features to 
+  different products and divisions.
 :::
 
 :::
@@ -54,24 +54,177 @@ format:
 
 ---
 
-### LLMs used for SQL generation
+## LLMs used for SQL generation
 
-{.incremental}
+LLMs have been  capable of generating SQL from text questions for some time.
+Models have been trained with large sets of queries enabling the generation of complex joins expressions, window functions with custom aggregation as well as breaking
+down the problem into pieces using common table expressions.
 
-Our research project aims to provide a flexible framework for SQL generation.
-Our goal is to enable smaller models to perform in par with frontier models 
-optimizing for accuracy and cost.
+---
 
-Sarasa
+## What is our goal
+
+::: {.incremental}
+- Develop and test new and existing SoTA techinques against public and proprietary datasets
+  - Benchmarking (e.g. [unitxt](https://github.com/IBM/unitxt))
+- Support multiple dialects (CSV, SQLite, Postgres, Presto, db2) 
+- Multi tenancy in internal SaaS.
+- Augmented **chat** interaction as well ass **api** access (both as SaaS ☁️ and on-prem 🏢 deployments)
+- Enable tool calling for *agentic* use cases
+- Extensibility and auto-configuration based on benchmarks.
+:::
+
+---
+
+## Where to start
+
+### Spider dataset
+
+![](./img/spider-1.png)
+
+::: footer 
+166 SQLite databases, code repository and public leaderboard.
+:::
+
+---
+### Example of a SQLite DB in spider
+
+![](./img/spider-1-sample.png)
 
 
-Sarasa
+---
+
+### Example of the queries {.scrollable}
+
+:::: {.columns}
+::: {.column with="50%"}
+![](./img/spider_examples_easy_med.png)
+:::
+::: {.column with="50%" height="100%"}
+
+![](./img/spider_examples.png)
+:::
+
+::::
+
+---
+
+### Spider leaderboard
+
+
+<div style="height: 80%">
+![](./img/leaderboard-bird1.png)
+</div>
+
+::: footer
+#TODO put IBM
+:::
+---
+
+### Spider 2
+
+![](./img/spider.png)
+
+Comes in 3 flavours
+
+:::: {.columns}
+
+::: {.column width="33%"}
+Snowflake
+::: 
+
+::: {.column width="33%"}
+SQLite
+::: 
+
+::: {.column width="33%"}
+`dbt` (data build toolkit)
+::: 
+
+::::
+---
+
+### Spider 2 
+
+![](./img/Spider2-structure.png)
+
+---
+
+### Spider 2
+
+This focuses on larger datasets, in many cases, analytic databases.
+
+:::: {.columns}
+
+
+::: {.column with="50%"}
+TBD
+:::
+::: {.column with="50%"}
+TBD
+:::
+
+::::
+
+
+---
+
+### BIRD
+
+![](./img/bird.png){.center-xy} 
+
+::: footer
+
+:::
+
+---
+
+## Relevant challenges
+
+::: {.incremental}
+- 💬 Chat interfaces are good for question input
+- 🧑🏽‍🏫 ... not very convenient to provide samples (sql tends to be long)
+- Generally we need to provide the DDL (strucutre) if it fits
+- 🥴 Models can hallucinate making up inexistent tables, columns or functions
+- SQL dialects have their nuances (SQLite, Postgres, MySQL)
+:::
+
+
+---
+
+## Providing context
+
+### Schema linking
+
+SL is an common improvement over prompt engineering to improve the of the generated SQL, which consists on mapping words to tables, columns and values.
+
+---
+
+### Schema Liking Techniques
+
+::: {.incremental}
+- Prompt engineering
+  - Providing `CREATE TABLE customers (name varchar...)`
+- Retrieval Augmented Generation RAG
+- Agentic approaches, function calling
+  - `give_me_tables(user_input)`
+- Fine tuned models
+  - Provide SQL examples and their meaning
+:::
+
+---
+
+-
+
+---
+
+## Fixing errors
 
 ---
 
 ## Current OSS tooling
 
-- 🦜 ⛓️ LangChain: [`QA over SQL data`](https://python.langchain.com/docs/tutorials/sql_qa/)
+- 🦜 ⛓️ LangChain: [`Q/A over SQL data`](https://python.langchain.com/docs/tutorials/sql_qa/)
 
 ::: fragment
 ```{python}
