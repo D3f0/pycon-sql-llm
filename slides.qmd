@@ -1,7 +1,6 @@
 ---
 title: "Asking questions to your database with LLMs"
 subtitle: "Techniques for effective SQL generation"
-# Add IBM logo
 author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
 date: September, 2025
 embed-resources: true
@@ -16,17 +15,7 @@ format:
     highlight-style: github
     revelaljs:
       include-in-header: 
-        text: |
-          <style>
-          .center-xy, .center-xy *{
-            margin: 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            -ms-transform: translateY(-50%), translateX(-50%);
-            transform: translateY(-50%), translateX(-50%);
-          }
-          </style>
+        
 
 ---
 
@@ -74,19 +63,43 @@ down the problem into pieces using common table expressions.
 - Extensibility and auto-configuration based on benchmarks.
 :::
 
+<!-- ---
+
+## Relevant challenges
+
+::: {.incremental}
+- 💬 Chat interfaces are good for question input
+- Providing the DB structure helps a lot to reduce hallucinations
+- 🧑🏽‍🏫 showing examples to LLMs improves performance
+- 🥴 Models can hallucinate making up inexistent tables, columns or functions
+- SQL dialects have their nuances (SQLite, Postgres, MySQL)
+::: -->
+
+
 ---
 
-## Where to start
+# Where to start
 
-### Spider dataset
+---
+
+### Spider
 
 ![](./img/spider-1.png)
+
+[ {{< bi folder-symlink-fill >}} https://yale-lily.github.io/spider](https://yale-lily.github.io/spider)
+
 
 ::: footer 
 166 SQLite databases, code repository and public leaderboard.
 :::
 
+
+::: notes
+Dataset
+:::
+
 ---
+
 ### Example of a SQLite DB in spider
 
 ![](./img/spider-1-sample.png)
@@ -117,7 +130,7 @@ down the problem into pieces using common table expressions.
 </div>
 
 ::: footer
-#TODO put IBM
+#TODO put IBM {{< bi alarm >}}
 :::
 ---
 
@@ -142,14 +155,15 @@ SQLite
 ::: 
 
 ::::
+
 ---
 
 ### Spider 2 
 
 ![](./img/Spider2-structure.png)
 
+<!-- 
 ---
-
 ### Spider 2
 
 This focuses on larger datasets, in many cases, analytic databases.
@@ -164,14 +178,19 @@ TBD
 TBD
 :::
 
-::::
+:::: -->
 
 
 ---
 
 ### BIRD
 
+:::: {.center-xy}
 ![](./img/bird.png){.center-xy} 
+
+[{{< bi  folder-symlink-fill >}} https://bird-bench.github.io/](https://bird-bench.github.io/)
+
+::::
 
 ::: footer
 
@@ -179,24 +198,29 @@ TBD
 
 ---
 
-## Relevant challenges
-
-::: {.incremental}
-- 💬 Chat interfaces are good for question input
-- 🧑🏽‍🏫 ... not very convenient to provide samples (sql tends to be long)
-- Generally we need to provide the DDL (strucutre) if it fits
-- 🥴 Models can hallucinate making up inexistent tables, columns or functions
-- SQL dialects have their nuances (SQLite, Postgres, MySQL)
-:::
-
+# Breaking down the problem
 
 ---
 
-## Providing context
+::: {.center-xy .background-dark}
 
-### Schema linking
+Usage example
 
-SL is an common improvement over prompt engineering to improve the of the generated SQL, which consists on mapping words to tables, columns and values.
+
+![](./img/arch.drawio.svg)
+
+:::
+
+---
+
+# Improving accuracy
+
+---
+
+## Schema linking
+
+SL is an common improvement over in text to SQL generation to improve accuracy and reduce
+hallucinations. It consists on mapping natural language words to `tables`, `views`, `columns` and `values`.
 
 ---
 
@@ -214,11 +238,34 @@ SL is an common improvement over prompt engineering to improve the of the genera
 
 ---
 
--
+### SL with RAG
+
+TBD
 
 ---
 
 ## Fixing errors
+
+---
+
+# Putting things together
+
+---
+
+## DSL for pipelines
+
+```{mermaid}
+graph LR
+    1[User input] --> 2[Find relevant tables]
+    2 --> 3[Find relevant values]
+    3 --> 4[Find relevant examples]
+    4 --> 5[Create prompt using templating]
+    5 --> 6[Call LLM, parse results]
+    6 --> 7[Correct results]
+    7 --> 8[Run query on the database]
+    8 --> 1
+```
+
 
 ---
 
@@ -261,20 +308,15 @@ We created a framework inspired in LangGraph tailored to the text2sql
 generation. 
 
 
-```mermaid
-graph DR
-  A -> B
-````
 
-## Engineering Challenges
 
-Some
+--- 
 
-- Bird benchmarks
-- Benchmarks frameworks
+
+- [x]  Bird benchmarks
+- [x] Benchmarks frameworks and leaderboards
 	- Unitxt
 - Pipelines
-- 
 - Providing context 
 	- 
 - Shape of the context 

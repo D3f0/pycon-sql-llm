@@ -3,3 +3,17 @@
 #TOC ul li {
   font-size: .5em;
 }
+
+/* Center */
+.center-xy{
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translateY(-50%), translateX(-50%);
+  transform: translateY(-50%), translateX(-50%);
+}
+/* SVG images */
+.background-dark p img {
+  background: #fff;
+}
