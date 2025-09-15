@@ -11,7 +11,7 @@ embed-resources: false
 
 ::: {.columns}
 ::: {.column width="40%"}
-![](./img/myself.jpg)
+![](./img/myself.jpg){height="12em"}
 :::
 
 ::: {.column width="60%"}
@@ -69,12 +69,15 @@ down the problem into pieces using common table expressions.
 
 ---
 
-### Spider
+## Spider
 
-![](./img/spider-1.png)
+![](./img/spider-1.png){fig-align="center"}
 
+. . .
+
+::: {.center}
 [ {{< bi folder-symlink-fill >}} https://yale-lily.github.io/spider](https://yale-lily.github.io/spider)
-
+:::
 
 ::: footer 
 166 SQLite databases, code repository and public leaderboard.
@@ -89,7 +92,7 @@ Dataset
 
 ### Example of a SQLite DB in spider
 
-![](./img/spider-1-sample.png)
+![](./img/spider-1-sample.png){fig-align="center"}
 
 
 ---
@@ -111,34 +114,35 @@ Dataset
 
 ### Spider leaderboard
 
-
-<div style="height: 80%">
-![](./img/leaderboard-bird1.png)
-</div>
+![](./img/leaderboard-bird1.png){height="20em" fig-align="center"}
 
 ::: footer
 #TODO put IBM {{< bi alarm >}}
 :::
 ---
 
-### Spider 2
+## Spider 2
 
-![](./img/spider.png){height="7em" .center-xy}
+![](./img/spider.png){fig-align="center" height="8em"}
+
+. . .
 
 Comes in 3 flavours
 
 :::: {.columns}
 
 ::: {.column width="33%"}
-![](./img/logo/Snowflake-Logo-500x281.png){height="0.75em"} Snowflake
+<!-- ❄️ Snowflake -->
+![](./img/logo/snowflake.png){height="1em"}
 ::: 
 
 ::: {.column width="33%"}
-SQLite
+<!-- 📦 SQLite -->
+![](./img/logo/sqlite.png){height="1em"}
 ::: 
 
 ::: {.column width="33%"}
-`dbt` (data build toolkit)
+dbt
 ::: 
 
 ::::
@@ -172,17 +176,11 @@ TBD
 
 ### BIRD
 
-
-
-
 ![](./img/bird.png){fig-align="center"}
 
-
-
+. . .
 
 [{{< bi  folder-symlink-fill >}} https://bird-bench.github.io/](https://bird-bench.github.io/)
-
-
 
 ::: footer
 BIRD
@@ -194,14 +192,20 @@ BIRD
 
 ---
 
-::: {.center-xy}
+## Some concepts
 
-Usage example
-
-
-![Spider 2](./img/arch.drawio.svg){.center-xy}
-
+::: {.incremental}
+- **DDL**, the part of SQL dialect that defines the **tables** and their **relationships**.
+  - we well call it the *schema* 
+- **DML**, the SQL part that operates on the data, creation, modification and retrieval.
+  - We're mostly interested in `SELECT` (and `WITH`).
 :::
+
+---
+
+![Chat example](./img/arch.drawio.svg){fig-align="center"}
+
+
 
 ---
 
