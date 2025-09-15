@@ -3,28 +3,15 @@ title: "Asking questions to your database with LLMs"
 subtitle: "Techniques for effective SQL generation"
 author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
 date: September, 2025
-embed-resources: true
-format:
-  revealjs:
-    theme: dark
-    toc: true
-    toc-depth: 1
-    slide-number: true
-    transition: slide
-    code-copy: true
-    highlight-style: github
-    revelaljs:
-      include-in-header: 
-        
-
+embed-resources: false
 ---
 
 
-## About myself
+# About myself
 
 ::: {.columns}
 ::: {.column width="40%"}
-![](./img/myself.jpg){.center-xy}
+![](./img/myself.jpg)
 :::
 
 ::: {.column width="60%"}
@@ -136,14 +123,14 @@ Dataset
 
 ### Spider 2
 
-![](./img/spider.png)
+![](./img/spider.png){height="7em" .center-xy}
 
 Comes in 3 flavours
 
 :::: {.columns}
 
 ::: {.column width="33%"}
-Snowflake
+![](./img/logo/Snowflake-Logo-500x281.png){height="0.75em"} Snowflake
 ::: 
 
 ::: {.column width="33%"}
@@ -185,15 +172,20 @@ TBD
 
 ### BIRD
 
-:::: {.center-xy}
-![](./img/bird.png){.center-xy} 
+
+
+
+![](./img/bird.png){fig-align="center"}
+
+
+
 
 [{{< bi  folder-symlink-fill >}} https://bird-bench.github.io/](https://bird-bench.github.io/)
 
-::::
+
 
 ::: footer
-
+BIRD
 :::
 
 ---
@@ -202,12 +194,12 @@ TBD
 
 ---
 
-::: {.center-xy .background-dark}
+::: {.center-xy}
 
 Usage example
 
 
-![](./img/arch.drawio.svg)
+![Spider 2](./img/arch.drawio.svg){.center-xy}
 
 :::
 
@@ -274,7 +266,7 @@ graph LR
 - 🦜 ⛓️ LangChain: [`Q/A over SQL data`](https://python.langchain.com/docs/tutorials/sql_qa/)
 
 ::: fragment
-```{python}
+```{.python}
 print(1)
 
 ```

@@ -10,9 +10,12 @@ website:
       # - about.qmd
 
 format:
-  html:
-    theme:
-      dark: [cosmo, styles.css]
-      # - brand
-    # css: styles.css
+  revealjs:
     toc: true
+    toc-depth: 1
+    slide-number: true
+    transition: slide
+    code-copy: true
+    highlight-style: github
+    theme: [dark, custom.scss]  
+  
