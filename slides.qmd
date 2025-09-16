@@ -1,5 +1,5 @@
 ---
-title: "Asking questions to your database with LLMs"
+title: "💬 ❓ Asking questions to your database with LLMs 🤖"
 subtitle: "Techniques for effective SQL generation"
 author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
 date: September, 2025
@@ -17,7 +17,7 @@ embed-resources: false
 ::: {.column width="60%"}
 
 ::: {.incremental}
-- Worked in Agritech at Hello Tractor
+- Worked in Agritech at Hello Tractor 
 - Software Engineer at IBM Research  Nairobi
 - Worked in Foundational Models for Geospatial applications 🛰️🗺️🤖
 - Currently working on Flowpilot project, providing core features to 
@@ -33,34 +33,68 @@ embed-resources: false
 ## LLMs used for SQL generation
 
 LLMs have been  capable of generating SQL from text questions for some time.
-Models have been trained with large sets of queries enabling the generation of complex joins expressions, window functions with custom aggregation as well as breaking
-down the problem into pieces using common table expressions.
 
+Frontier models have been trained with large sets of queries enabling the generation of complex `join`s expressions, window functions `over` with custom aggregation as well as breaking
+down the problem into pieces using common table expressions `WITH ...`.
+
+::: {.notes}
+Claude, GPT-4 and DeepSeek can create a quite advanced SQLs
+:::
 ---
 
-## What is our goal
+![](./img/memes/not-enough.gif){.meme .not-enough}
 
-::: {.incremental}
-- Develop and test new and existing SoTA techinques against public and proprietary datasets
-  - Benchmarking (e.g. [unitxt](https://github.com/IBM/unitxt))
-- Support multiple dialects (CSV, SQLite, Postgres, Presto, db2) 
-- Multi tenancy in internal SaaS.
-- Augmented **chat** interaction as well ass **api** access (both as SaaS ☁️ and on-prem 🏢 deployments)
-- Enable tool calling for *agentic* use cases
-- Extensibility and auto-configuration based on benchmarks.
+::: {.notes}
+If we don't tell the model the structure of the database, it's very unlikely the
+LLM will come back with correct SQL.
 :::
 
-<!-- ---
+
+---
 
 ## Relevant challenges
 
 ::: {.incremental}
-- 💬 Chat interfaces are good for question input
-- Providing the DB structure helps a lot to reduce hallucinations
-- 🧑🏽‍🏫 showing examples to LLMs improves performance
+- 🔒 Confidentiality of the data sent to the LLMs
+  - Can I run it on prem?
 - 🥴 Models can hallucinate making up inexistent tables, columns or functions
 - SQL dialects have their nuances (SQLite, Postgres, MySQL)
-::: -->
+  - e.g. date manipulation, `CURDATE()` vs `CURRENT_DATE` vs `GETDATE()` vs `SYSDATE`
+
+:::
+
+::: {.notes}
+These are challenges relevant in the B2B space, where I work.
+
+Date manipulation MySQL/PostgreSQL/SQL Server/Oracle
+:::
+
+---
+
+## Our project goals
+
+::: {.incremental .smaller}
+- Create and validate existing state of the art techniques in the text to SQL space...
+  -  Starting with public datasets but focused on tailor for propietary databases
+  - Benchmarking (OSS'ed framework [unitxt](https://github.com/IBM/unitxt))
+- Support multiple dialects (SQLite, Postgres {{< bi database >}}, Presto {{< bi database >}}, IBM db2 {{< bi database >}}, {{< bi filetype-csv >}} CSV,  {{< bi filetype-xls >}} Excel, etc).
+- Extensibility and auto-configuration based on benchmarks.
+:::
+
+::: {.note}
+
+:::
+---
+
+## Engineering goals
+
+::: {.incremental}
+
+- Internal SaaS with 💬 chat and ↔️ APIs available.
+  - Multi tenancy
+- Python SDK for developers who want to extend
+  
+:::
 
 
 ---
@@ -69,17 +103,26 @@ down the problem into pieces using common table expressions.
 
 ---
 
-## Spider
+![](./img/memes/robots.gif)
 
-![](./img/spider-1.png){fig-align="center"}
-
-. . .
-
-::: {.center}
-[ {{< bi folder-symlink-fill >}} https://yale-lily.github.io/spider](https://yale-lily.github.io/spider)
+::: {.notes}
+Let's start talking about the state of the art. 
+There are a few set of annotated databases that can help to gauge 
+our solution, we refer to them as public datasets and there are 3 of them
+we used extensively.
 :::
 
-::: footer 
+---
+
+## Spider
+
+![](./img/spider-1.png){fig-align="center" height="500px"}
+
+<div style='text-align: center'>
+[ {{< bi folder-symlink-fill >}} https://yale-lily.github.io/spider](https://yale-lily.github.io/spider)
+</div>
+
+::: {.notes} 
 166 SQLite databases, code repository and public leaderboard.
 :::
 
@@ -114,11 +157,12 @@ Dataset
 
 ### Spider leaderboard
 
-![](./img/leaderboard-bird1.png){height="20em" fig-align="center"}
+![](./img/leaderboard-bird1.png){height="600px" fig-align="center"}
 
 ::: footer
 #TODO put IBM {{< bi alarm >}}
 :::
+
 ---
 
 ## Spider 2
@@ -138,7 +182,7 @@ Comes in 3 flavours
 
 ::: {.column width="33%"}
 <!-- 📦 SQLite -->
-![](./img/logo/sqlite.png){height="1em"}
+![](./img/logo/sqlite.png){height="1em"} SQLite
 ::: 
 
 ::: {.column width="33%"}
@@ -147,6 +191,9 @@ dbt
 
 ::::
 
+::: {.footer}
+{{<bi alarm >}} fix style up👆
+:::
 ---
 
 ### Spider 2 
@@ -201,15 +248,46 @@ BIRD
   - We're mostly interested in `SELECT` (and `WITH`).
 :::
 
+
 ---
+
+```{dot}
+digraph {
+  rankdir=LR;  // Sets direction from Left to Right
+  user [style=dashed]
+  user -> Question;
+  LLM [shape=box, style=filled,  color="#AABBCC"];
+  extract[shape=box, label="SQL Extraction", style=filled, color="#AACCEE"];
+  execute[shape=box, label="Execution"];
+  Question -> LLM [label="User input"];
+  LLM -> extract [label="Find braced sql ```"];
+  extract -> execute;
+}
+```
+
+::: {.fade-in}
+
+- 🔥
+  
+:::
+
+---
+
 
 ![Chat example](./img/arch.drawio.svg){fig-align="center"}
 
-
+Move this to a more appropriate place.
+- 🏛️ Providing the DB structure helps a lot to reduce hallucinations
+- 🧑🏽‍🏫 Adding examples of queries with their description usually also improved performance
 
 ---
 
-# Improving accuracy
+::: {.incremental}
+- Can we pass all the DDL in the prompt with the user question?
+- Can we entice the LLM to select the most appropriate pares of that DDL?
+  - ➡️ RAG over tables, columns and values
+::: 
+
 
 ---
 
@@ -217,6 +295,10 @@ BIRD
 
 SL is an common improvement over in text to SQL generation to improve accuracy and reduce
 hallucinations. It consists on mapping natural language words to `tables`, `views`, `columns` and `values`.
+
+. . . 
+
+We can do it with a different approaches, FTS, Vector Databases, etc.
 
 ---
 
@@ -241,6 +323,15 @@ TBD
 ---
 
 ## Fixing errors
+
+The LLM in use may generate invalid SQL:
+
+::: {.incremental}
+- {{< bi bi-table >}}  tables or columns that don't exist
+- dialect functions that don't exist
+  - *TBD* time functions
+- 
+:::
 
 ---
 
@@ -309,7 +400,7 @@ generation.
 --- 
 
 
-- [x]  Bird benchmarks
+<!-- - [x]  Bird benchmarks
 - [x] Benchmarks frameworks and leaderboards
 	- Unitxt
 - Pipelines
@@ -320,4 +411,4 @@ generation.
 	- Limits
 - other node
 
----
+--- -->
