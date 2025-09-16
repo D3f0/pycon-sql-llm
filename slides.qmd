@@ -1,5 +1,5 @@
 ---
-title: "💬 ❓ Asking questions to your database with LLMs 🤖"
+title: "💬 ❓ 🤖 Asking questions to your database with LLMs "
 subtitle: "Techniques for effective SQL generation"
 author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
 date: September, 2025
@@ -7,7 +7,7 @@ embed-resources: false
 ---
 
 
-# About myself
+# About myself {.smaller}
 
 ::: {.columns}
 ::: {.column width="40%"}
@@ -253,6 +253,9 @@ BIRD
 
 ```{dot}
 digraph {
+  background="transparent";
+    fontname="Arial";
+
   rankdir=LR;  // Sets direction from Left to Right
   user [style=dashed]
   user -> Question;
@@ -265,11 +268,11 @@ digraph {
 }
 ```
 
-::: {.fade-in}
+:::: {.fade-in}
 
 - 🔥
   
-:::
+::::
 
 ---
 

@@ -17,5 +17,5 @@ format:
     transition: slide
     code-copy: true
     highlight-style: github
-    theme: [dark, custom.scss]  
+    theme: [solarized, custom.scss]  
   
