@@ -1,13 +1,16 @@
 [project]
-name = "python-"
+name = "sql-llms-pyconke-25"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "aiohttp>=3.12.15",
+    "fsspec[http,libarchive,tqdm]>=2025.9.0",
     "invoke>=2.2.0",
     "jupyter>=1.1.1",
     "pandas>=2.3.0",
+    "requests>=2.32.4",
     "seaborn>=0.13.2",
     "tabulate>=0.9.0",
 ]
