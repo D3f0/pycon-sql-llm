@@ -10,15 +10,15 @@ dependencies = [
     "invoke>=2.2.0",
     "jupyter>=1.1.1",
     "litellm[proxy]>=1.63.7",
-    "marimo>=0.15.5",
-    "ollama>=0.5.4",
-    "openai==1.61.0",
-    "pandas>=2.3.0",
+    # "marimo>=0.15.5",
+    # "ollama>=0.5.4",
+    # "openai==1.61.0",
+    # "pandas>=2.3.0",
     "pdbpp>=0.11.7",
     "requests>=2.32.4",
     "rich>=14.1.0",
-    "seaborn>=0.13.2",
-    "tabulate>=0.9.0",
+    # "seaborn>=0.13.2",
+    # "tabulate>=0.9.0",
 ]
 
 [tool.uv.workspace]
