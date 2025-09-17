@@ -8,14 +8,3 @@ website:
       - href: slides.qmd
         text: Home
       # - about.qmd
-
-format:
-  revealjs:
-    toc: true
-    toc-depth: 1
-    slide-number: true
-    transition: slide
-    code-copy: true
-    highlight-style: github
-    theme: [solarized, custom.scss]  
-  
