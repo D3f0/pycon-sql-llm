@@ -4,10 +4,14 @@ title: "💬 ❓ 🤖 Asking questions to your database with LLMs "
 author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
 date: September, 2025
 embed-resources: false
+# https://quarto.org/docs/computations/caching.html
+execute: 
+  cache: true
+  keep-ipynb: true
 format:
   revealjs:
     toc: true
-    toc-depth: 2
+    toc-depth: 1
     slide-number: true
     transition: slide
     code-copy: true
@@ -58,33 +62,143 @@ todo: >
 
 ---
 
-## LLMs used for SQL generation
-
-LLMs have been  capable of generating SQL from text questions for some time.
-
-. . .
-
-Let's take a look 
-<!-- . . .
-
-LLMs have been trained with large sets of queries enabling the generation of complex `join`s expressions, window functions `over` with custom aggregation as well as breaking
-down the problem into pieces using common table expressions `WITH ...`. -->
+# Getting started
 
 ---
 
-![](./img/memes/not-enough.gif){.meme .not-enough}
+## About LLMs
 
-::: {.notes}
-If we don't tell the model the structure of the database, it's very unlikely the
-LLM will come back with correct SQL.
+LLMs are quite capable of writing functional SQL queries.
+
+. . . 
+
+For those of us who have been writing code for some time and 
+fell in love with ORMs when they were the *hot* new thing, LLMs
+can take us to the next level!
+
+. . . 
+
+But they don't know the 🏗️ structure of our database, and may hallucinate 
+about it, or create some flat out invalid SQL, so we will need to handle
+some of this scenarios.
+
+::: notes
+In Flowpilot we created a framework inspired on LangGraph for this.
 :::
 
 ---
 
+## Before we start, Which LLMs should we use
+::: {.fragment .fade-in-then-out}
+There are some reasonably good LLMs under the coder and instruct in Hugging Face.
+Some of these can be run locally with some inference server like `Ollama`, 
+`llama.cpp` or `LMStudio`, and also use pubic 
+ones.
+:::
+
+::: {.fragment .fade-in-then-out}
+Running LLMs locally or on-prem scenarios is quite important when
+we need to preserve the confidentiality of the data. 
+:::
+
+::: {.fragment .fade-in-then-out}
+We'll take a look at a library/proxy that can help us move between LLMs
+called `litellm` (can also add observability, cost tracking, etc.).
+:::
+
+---
+
+### Contacting LLMs with `littellm` SDK
+
+::: {.fragment .fade-in-then-out}
+`uv add littellm` and, for local execution, we can also add ollama Python package `uv add ollama`.
+
+:::
+
+::: {.fragment .fade-in-then-out}
+`litellm` uses a prefix for the provider of the LLM (it supports 100+ providers)
+
+For `ollama`, we will check if it's running as a service (if not check the docs, its OS specific)
+:::
+
+::: {.fragment}
+Is 🦙 running?
+```{python}
+#| echo: true 
+
+import socket; s = socket.socket(); s.settimeout(.5); s.connect_ex(('localhost', 11434)) == 0
+```
+:::
+
+---
+
+### Getting some completions
+
+```{python}
+#| echo: true
+#| output: true
+#| code-overflow: wrap
+import ollama
+print("Models:", *(f"ollama/{m.model}" for m in ollama.list()["models"]))
+from litellm import completion
+```
+
+```{python}
+#| echo: true
+#| output: true
+#| 
+from litellm import completion
+
+messages = [
+  {"role": "user", 
+  "content": "Create a small customer table in SQL"}]
+response = completion(
+  model="ollama/hf.co/unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF:F16", 
+  messages=messages, stream=False
+)
+print(response['choices'][0]['message']['content'])
+```
+
+---
+
+### More tools ⚒️ for dealing with SQL
+
+::: {.columns .small_text}
+::: {.column }
+#### SQLGlot
+
+A sql parser, converts SQL into an AST and back.
+Can translate multiple dialects
+:::
+
+::: {.column}
+#### SQLAlchemy
+
+Can connect to multiple databases and execute queries. 
+Has a great inspection API which can give us back
+the structure of the DB.
+:::
+
+:::
+
+
+---
+
+## Let's grab some {{< bi database >}} from 🐦 benchmark
+
 ::: {.smaller}
 ```{python}
 #| echo: true
-import os
+import fsspec, rich
+url = "http://bird-bench.oss-cn-beijing.aliyuncs.com/dev.zip"
+rfs, *_ = fsspec.mapping.url_to_fs(f"filecache::zip::{url}", mode="r")
+
+inner_zip_path, *_ = rfs.glob('**/dev_databases.zip')
+rich.print(inner_zip_path)
+#db_zips = rfs.open(inner_zip_path)
+
+
+
 ```
 :::
 
