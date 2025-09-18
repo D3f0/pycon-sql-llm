@@ -23,7 +23,8 @@ console = Console()
     help={
         "file_path": "Path to the file to watch",
         "interval": "Check interval in milliseconds (default: 500)",
-    }
+    }, 
+    aliases=['w']
 )
 def watch(
     ctx,
@@ -63,7 +64,9 @@ def watch(
         return False
 
 
-@task()
+@task(
+    aliases=['p']
+)
 def preview(ctx: Context, port: str = "", args_: list[str] = []):
     """Build slides"""
     # if which("entr"):
@@ -91,7 +94,9 @@ def publish(ctx: Context):
     ctx.run("quarto publish gh-pages --no-prompt")
 
 
-@task()
+@task(
+    aliases=['c']
+)
 def checkpoint(ctx: Context):
     """Checkpoint in git"""
     now = datetime.now()
@@ -121,7 +126,7 @@ def litellm_model_ollama(ctx: Context):
     ctx.run("uv run python", in_stream=StringIO(code_body))
 
 
-@task()
+@task(aliases=['i'])
 def ipython(ctx: Context):
     """Launch IPython shell installed via UV."""
     command = "uv run ipython --ext rich"
