@@ -62,25 +62,43 @@ todo: >
 
 ---
 
+## Follow along (or at 🏡) {.center}
+
+{{< qrcode https://jmbuhr.de >}}
+
+
+---
+
 # Getting started
 
 ---
 
 ## About LLMs
 
+::: {.fragment .fade-in-then-semi-out}
 LLMs are quite capable of writing functional SQL queries.
+:::
 
-. . . 
 
+::: {.fragment .fade-in-then-semi-out}
 For those of us who have been writing code for some time and 
 fell in love with ORMs when they were the *hot* new thing, LLMs
 can take us to the next level!
+:::
 
-. . . 
-
+::: {.fragment .fade-in-then-semi-out}
 But they don't know the 🏗️ structure of our database, and may hallucinate 
 about it, or create some flat out invalid SQL, so we will need to handle
 some of this scenarios.
+:::
+
+::: {.fragment .fade-in-then-semi-out}
+Some research papers from our team from our team:
+
+[{{< bi filetype-pdf >}} Weakly Supervised Detection of Hallucinations in LLMs](https://arxiv.org/pdf/2312.02798)
+
+[{{< bi filetype-pdf >}} Localizing Persona Representations In LLMs](https://arxiv.org/pdf/2505.24539)
+:::
 
 ::: notes
 In Flowpilot we created a framework inspired on LangGraph for this.
@@ -88,20 +106,20 @@ In Flowpilot we created a framework inspired on LangGraph for this.
 
 ---
 
-## Before we start, Which LLMs should we use
-::: {.fragment .fade-in-then-out}
+## LLMs for Code Generation ✍️
+::: {.fragment .fade-in-then-semi-out}
 There are some reasonably good LLMs under the coder and instruct in Hugging Face.
 Some of these can be run locally with some inference server like `Ollama`, 
 `llama.cpp` or `LMStudio`, and also use pubic 
 ones.
 :::
 
-::: {.fragment .fade-in-then-out}
+::: {.fragment .fade-in-then-semi-out}
 Running LLMs locally or on-prem scenarios is quite important when
 we need to preserve the confidentiality of the data. 
 :::
 
-::: {.fragment .fade-in-then-out}
+::: {.fragment .fade-in-then-semi-out}
 We'll take a look at a library/proxy that can help us move between LLMs
 called `litellm` (can also add observability, cost tracking, etc.).
 :::
@@ -110,43 +128,99 @@ called `litellm` (can also add observability, cost tracking, etc.).
 
 ### Contacting LLMs with `littellm` SDK
 
-::: {.fragment .fade-in-then-out}
+::: {.fragment .fade-in-then-semi-out}
 `uv add littellm` and, for local execution, we can also add ollama Python package `uv add ollama`.
-
 :::
 
-::: {.fragment .fade-in-then-out}
-`litellm` uses a prefix for the provider of the LLM (it supports 100+ providers)
-
-For `ollama`, we will check if it's running as a service (if not check the docs, its OS specific)
+::: {.fragment .fade-in-then-semi-out}
+`litellm` uses a prefix for the provider of the LLM (it supports 100+ providers) 
+[{{< bi question-octagon >}}](̌https://docs.litellm.ai/docs/set_keys)
 :::
 
-::: {.fragment}
-Is 🦙 running?
-```{python}
-#| echo: true 
+::: {.fragment .fade-in-then-semi-out}
+Quick example of how to use it...
 
-import socket; s = socket.socket(); s.settimeout(.5); s.connect_ex(('localhost', 11434)) == 0
+```python
+import litellm
+
+response = litellm.completion(
+            model="ollama/granite-code:20b",
+            messages=[{"role": "user", "content": "Hey, how's it going?"}],
+        )
+print(response)
 ```
 :::
 
 ---
 
-### Getting some completions {.center}
+### Example response
+
+::: {.fragment .fade-in-then-semi-out}
+```python
+ModelResponse(
+  id='chatcmpl-c34aae0e-a299-42a0-922e-aabd96e3a91e', 
+  created=1758269174, 
+  model='ollama/granite-code:20b', 
+  object='chat.completion', 
+  system_fingerprint=None, 
+  choices=[Choices(
+    finish_reason='stop', 
+    index=0, 
+    message=Message(
+      content='### Bot:\nHey there! How can I assist you today?\n\n', 
+      role='assistant', 
+      tool_calls=None, 
+      function_call=None, 
+      provider_specific_fields=None
+      )
+    )], 
+    usage=Usage(
+      completion_tokens=17, 
+      prompt_tokens=20, 
+      total_tokens=37, 
+      completion_tokens_details=None, 
+      prompt_tokens_details=None
+      )
+    )
+```
+:::
+
+
+
+---
+
+## Structure and Configuration
+
+::: {.fragment .fade-in-then-semi-out}
+For simplicity we hardcoded the model to 🦙 model `ollama/granite-code:20b`. Let's take a look
+at how we can make this more flexible with a configuration class.
+:::
+
+::: {.fragment .fade-in-then-semi-out}
+We're going to use Pydantic configuration system (`uv add pydantic-settings`), whihc
+will serve us as a `load_dotenv()` on steroids {{< bi hurricane >}}
+::: 
+
+::: {.fragment .fade-in-then-semi-out}
+Our goal is to have most of the configuration defined either in environment variables
+or also loadable from a our popular `.env`.
+:::
+
+---
+
+### Configuration with Pydantic Settings
 
 ```{python}
 #| echo: true
-#| output: true
-#| code-overflow: wrap
-import ollama
-print("Models:", *(f"ollama/{m.model}" for m in ollama.list()["models"]), sep="\n")
-from litellm import completion
+from pydantic_settings import BaseSettings
+
+
 ```
 
 ---
 
 ### Getting some completions (cont.) {.center}
-```{python}
+```python
 #| echo: true
 #| output: true
 #| 
@@ -162,6 +236,95 @@ response = completion(
 print(response['choices'][0]['message']['content'])
 ```
 
+---
+
+## Workflows 
+
+::: {.fragment .fade-in-then-semi-out}
+When our code starts to become larger than a script can handle 🏋🏾‍♀️, `LangGraph` is a great
+tool to provide some reusable organization. We can add it with `uv add langgraph`.
+:::
+
+::: {.fragment .fade-in-then-semi-out}
+This will help us to separate some concerns like  📐 *validation* , 🏃🏽 *execution* and later,  ☢️ *enrichment*.
+:::
+
+::: {.fragment .fade-in-then-semi-out .center}
+Let's see how we can create something like this:
+```{mermaid}
+%%| fig-align: center
+flowchart LR
+    S[Start]
+    CallLLM[Call litellm's completion]
+    S -->|State: Dict| CallLLM
+    CallLLM --> End
+    
+```
+:::
+
+---
+
+## Workflows - LangGraph
+```python
+#| code-overflow: wrap
+
+from typing import Dict, Any, List
+from pydantic import BaseModel, Field
+from langgraph.graph import StateGraph
+from litellm import completion
+import os
+
+# Configuration using Pydantic
+class ModelConfig(BaseModel):
+    model_name: str = Field(default="gpt-3.5-turbo")
+    temperature: float = Field(default=0.7)
+    max_tokens: int = Field(default=500)
+
+# Global configuration object
+config = ModelConfig()
+
+# State definition
+class State(BaseModel):
+    input: str
+    output: str = ""
+
+# Node function to call the LLM
+def call_llm(state: State) -> State:
+    response = completion(
+        model=config.model_name,
+        messages=[{"role": "user", "content": state.input}],
+        temperature=config.temperature,
+        max_tokens=config.max_tokens
+    )
+    
+    state.output = response.choices[0].message.content
+    return state
+
+# Create the graph
+def create_workflow() -> StateGraph:
+    # Define the graph
+    workflow = StateGraph(State)
+    
+    # Add nodes
+    workflow.add_node("call_llm", call_llm)
+    
+    # Define the edges
+    workflow.set_entry_point("call_llm")
+    
+    # Compile the graph
+    return workflow.compile()
+
+# # Example usage
+# if __name__ == "__main__":
+#     # Configure the model
+#     config.model_name = "gpt-4"
+#     config.temperature = 0.5
+    
+#     # Create and run the workflow
+#     graph = create_workflow()
+#     result = graph.invoke({"input": "Explain quantum computing in simple terms."})
+#     print(result.output)
+```
 ---
 
 <!-- ### More tools ⚒️ for dealing with SQL {background-image="./img/memes/old-man-giving-link-a-sword-in-the-legend-of-zelda.jpg"} -->
