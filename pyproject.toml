@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "aiohttp>=3.12.15",
+    "diskcache>=5.6.3",
     "fsspec[http,libarchive,tqdm]>=2025.9.0",
     "invoke>=2.2.0",
     "jupyter>=1.1.1",
@@ -13,7 +14,7 @@ dependencies = [
     "langchain-community>=0.3.29",
     "langchain-core>=0.3.76",
     "langgraph>=0.6.7",
-    "litellm[proxy]>=1.63.7",
+    "litellm[proxy,caching]>=1.63.7",
     # "marimo>=0.15.5",
     # "ollama>=0.5.4",
     # "openai==1.61.0",
@@ -21,10 +22,12 @@ dependencies = [
     "ollama>=0.5.4",
     "pdbpp>=0.11.7",
     "prisma>=0.15.0",
+    "pydantic-settings>=2.10.1",
     "requests>=2.32.4",
     "rich>=14.1.0",
     # "seaborn>=0.13.2",
     # "tabulate>=0.9.0",
+    "textual>=6.1.0",
 ]
 
 [tool.uv.workspace]

@@ -4,3 +4,4 @@ _site/
 /.quarto/
 .jupyter_cache/
 slides_files/
+.envrc.local
