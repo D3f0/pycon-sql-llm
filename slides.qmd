@@ -435,27 +435,23 @@ with open("messages.json", "w") as fp:
 
 ### Calling the LLM with the prompt {.smaller}
 
-::: {style="font-size: 90%;"}
+
 ::: {.fragment .fade-in-then-semi-out}
 
-Instead of a provider specific client, we will use *litellm*.
+`litellm` is a client for multiple LLM providers [{{< bi info-circle >}} `model` list](https://docs.litellm.ai/docs/providers)
 
 ```{python}
 #| echo: true
-!uv add litellm --quiet
+!uv add litellm --quiet   # it can be be added with uv 
 ```
-
-There are some `extras` [^extras]
-
 :::
 
-[^extras]: 
-  
-  `caching` , `extra-proxy` , `mlflow` , `proxy` , `semantic-router`, `utils`
+<!-- [^extras]:   
+  `caching` , `extra-proxy` , `mlflow` , `proxy` , `semantic-router`, `utils` -->
 
-:::: {.columns}
+
 ::: {.fragment .fade-in}
-::: {.column width="70%"}
+To run inference, we just call the [`completions`](https://docs.litellm.ai/docs/completion/input) module function:
 
 <!-- Enable disk cachesq -->
 
@@ -463,37 +459,27 @@ There are some `extras` [^extras]
 #| echo: false
 # Speed up execution
 import litellm 
+
 from litellm.caching.caching import Cache
 litellm.cache = Cache(type="disk")
+# Remove debug messages
+litellm.suppress_debug_info = True
 ```
 
 ```{python}
+#| echo: true
+#| output-location: slide
 import litellm
-try:
-    response = litellm.completion(
-    model="ollama/granite-code:20b",
-    messages=messages,
-    )
-except Exception as e:
-    print("error", e)
-else:
-    print(response) # or response
+
+model = "ollama_chat/granite-code:20b"
+
+response = litellm.completion(
+  model=model,
+  messages=messages,
+)
+
+response
 ```
-
-:::
-
-
-
-
-::: {.column width="5%" }
-:::
-
-::: {.column width="25%" }
-[{{< bi info-circle >}} `model` list](https://docs.litellm.ai/docs/providers)
-
-:::
-:::
-:::
 
 :::
 
@@ -504,65 +490,45 @@ There are some reasonably good LLMs under the coder and instruct in Hugging Face
 Some of these can be run locally with some inference server like `Ollama`, 
 `llama.cpp` or `LMStudio`, and also use pubic 
 ones.
+
 :::
----
-
-### litellm response object
-
-::: {.fragment .fade-in-then-semi-out}
-```python
-ModelResponse(
-  id='chatcmpl-c34aae0e-a299-42a0-922e-aabd96e3a91e', 
-  created=1758269174, 
-  model='ollama/granite-code:20b', 
-  object='chat.completion', 
-  system_fingerprint=None, 
-  choices=[Choices(
-    finish_reason='stop', 
-    index=0, 
-    message=Message(
-      content='### Bot:\nHey there! How can I assist you today?\n\n', 
-      role='assistant', 
-      tool_calls=None, 
-      function_call=None, 
-      provider_specific_fields=None
-      )
-    )], 
-    usage=Usage(
-      completion_tokens=17, 
-      prompt_tokens=20, 
-      total_tokens=37, 
-      completion_tokens_details=None, 
-      prompt_tokens_details=None
-      )
-    )
-```
-:::
-
-
-
 
 ---
 
-### Getting some completions (cont.) {.center}
-```python
+## Structured output
+
+::: {.fragment}
+Now that we get the SQL, we're going to use a popular feature to get the 
+SQL as JSON.
+:::
+
+::: {.fragment}
+```{python}
 #| echo: true
-#| output: true
-#| 
-from litellm import completion
+#| output-location: slide
 
-messages = [
-  {"role": "user", 
-  "content": "Create a small customer table in SQL"}]
-response = completion(
-  model="ollama/hf.co/unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF:F16", 
-  messages=messages, stream=False
+from pydantic import BaseModel, Field
+class SQLOutput(BaseModel):
+    sql: str = Field(description="The SQL query")
+    explanation: str = Field(description="The reasoning for the query construction")
+
+# Optional
+litellm.enable_json_schema_validation = True
+
+response = litellm.completion(
+  model=model,
+  messages=messages,
+  response_format=SQLOutput,
 )
-print(response['choices'][0]['message']['content'])
+response
 ```
+
+:::
+
 
 
 ---
+
 # Create a workflow
 
 ---
@@ -637,6 +603,7 @@ more deterministic approach.
 
 
 ---
+
 # Lessons learned
 
 ---
@@ -647,4 +614,3 @@ more deterministic approach.
 ## Metadata about the columns
 
 ## Dynamic context
--

@@ -11,3 +11,5 @@ slides_files/
 dist/*
 minidev*
 __MACOS*
+# Debugging (pre langchain)
+messages.json
