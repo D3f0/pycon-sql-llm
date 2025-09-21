@@ -19,78 +19,25 @@ import inspect
 console = Console()
 
 
-@task(
-    help={
-        "file_path": "Path to the file to watch",
-        "interval": "Check interval in milliseconds (default: 500)",
-    },
-    aliases=["w"],
-)
-def watch(
-    ctx,
-    file_path,
-    interval=500,
-) -> bool:
-    """Watch a file for changes and optionally execute a command."""
-    if not os.path.exists(file_path):
-        console.print(f"[bold red]Error:[/] File '{file_path}' not found")
-        return
-
-    interval_sec = interval / 1000
-    last_modified = os.stat(file_path).st_mtime
-
-    console.print(
-        Panel(
-            f"[bold green]Watching[/] [bold cyan]{file_path}[/] (every {interval}ms)",
-            title="File Watcher",
-            subtitle="Press Ctrl+C to stop",
-        )
-    )
-
-    try:
-        while True:
-            current_modified = os.stat(file_path).st_mtime
-
-            if current_modified != last_modified:
-                timestamp = datetime.now().strftime("%H:%M:%S")
-                change_text = Text(f"✨ File changed at {timestamp}")
-                console.print(Panel(change_text, style="green"))
-                return True
-
-            time.sleep(interval_sec)
-
-    except KeyboardInterrupt:
-        console.print("\n[bold yellow]Watcher stopped[/]")
-        return False
-
-
 @task(aliases=["p"])
 def preview(
     ctx: Context, port: str = "", args_: list[str] = [], file_: str = "slides.qmd"
 ):
-    """Build slides"""
-    # if which("entr"):
-    #     ctx.run(
-    #         "quarto preview --render revealjs --port $PORT", env={"PORT": os.getenv("PORT")}
-    #     )
-    # else:
-    #     print("Not using entr for reload")
-    args = " ".join(
-        [
-            file_,
-        ]
-        + args_
-    )
-    while True:
+    """Preview slides in revealjs format"""
+    args = " ".join(args_)
+    if which("entr"):
+        console.print("[bold]entr[/bold] found, hot reloading after crash enabled ✨")
+        ctx.run(
+            f"echo {file_} | entr -c quarto preview /_ --render revealjs --port $PORT"
+        )
+    else:
         ran = ctx.run(
-            f"quarto preview --render revealjs --port $PORT {args}",
+            f"quarto preview {file_} --render revealjs --port $PORT {args}",
             env={"PORT": port or os.getenv("PORT")},
             warn=True,
         )
         if not ran.ok:
-            print(ran.return_code)
-            if not watch(ctx, file_path="slides.qmd"):
-                return
+            console.print("😞 quarto preview crashed, please launch again")
 
 
 @task()
@@ -114,7 +61,7 @@ def checkpoint(ctx: Context):
     ctx.run(f"git commit -m 'Checkpoint {now}'")
 
 
-@task()
+@task(aliases=["l"])
 def litellm_model_ollama(ctx: Context):
     """List models installed with Ollama"""
 

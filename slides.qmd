@@ -1,5 +1,5 @@
 ---
-title: "💬 ❓ 🤖 Asking questions to your database with LLMs "
+title: "💬 {{< bi database >}} 🤖 Asking questions to your database with LLMs "
 # subtitle: "Techniques for effective SQL generation"
 author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
 date: September, 2025
@@ -23,10 +23,10 @@ format:
     # header-logo-left: ./img/Python-logo-notext.svg
     # header-logo-left-url: https://quarto.org
     # header-logo-left-height: 2em
-    header-logo-right: ./img/Python-logo-notext.svg
+    header-logo-right: ./img/pynbo.png
     header-logo-right-url: https://pycon-kenya-2025.sessionize.com/
-    header-logo-right-height: 50px
-
+    header-logo-right-height: 2em
+    preview-links: auto
 
 filters:
  - reveal-logo
@@ -91,16 +91,16 @@ TODO: Put some drawing & rephrase
 :::
 
 ::: {.fragment .fade-right}
-- 🕷️ Spider
+- [🕷️ Spider](https://yale-lily.github.io/spider){target="_bank"}
 :::
 ::: {.fragment .fade-right}
-- 🕷️ 🕷️ Spider 2
+- [🕷️ 🕷️ Spider 2](https://spider2-sql.github.io/){target="_bank"}
 :::
 ::: {.fragment .fade-right}
-- 🐦 BIRD
+- 🐦 [BIRD](https://bird-bench.github.io/){target="_bank"}
 :::
 ::: {.fragment .fade-right}
-- 🏹 Archer 
+- [🏹 Archer](https://sig4kg.github.io/archer-bench/){target="_bank"}
 :::
 :::
 ::: {.column}
@@ -136,9 +136,17 @@ to get to the top of the leatherboard in 2024/6
 
 ---
 
-### BIRD
+### BIRD mini-dev
 
-- https://github.com/bird-bench/mini_dev
+- It consist of 500 queries classified as **simple**, **moderate** and **challenging** [{{< bi box-arrow-up-right >}}](https://github.com/bird-bench/mini_dev)
+
+::: {.fragment .fade-left}
+```{python}
+from rich.console import Console
+_c = Console(width=75)
+# Ensure print are contained within the range
+print = _c.print
+```
 
 ```{python}
 #| echo: true
@@ -153,8 +161,10 @@ dataset = load_dataset(
 # Contents
 print("Database types: ", *dataset.keys())
 sqlite_df = dataset["mini_dev_sqlite"].to_pandas()
+sqlite_df = sqlite_df.drop(columns=['question_id'])
 display(sqlite_df.head(2))
 ```
+:::
 
 ---
 
@@ -237,7 +247,7 @@ print(f"{query!r}")
 
 ---
 
-### Execute the queries
+### Execute the queries {.smaller}
 
 ```{python}
 #| echo: true
@@ -246,8 +256,11 @@ from sqlalchemy import text
 with engine.connect() as conn:
     result = conn.execute(text(query))
     res_df = pd.DataFrame(result.fetchall()) # 🐼 ✨
-    display(question)
-    display(query)
+    print(
+        f"[bold]Question:[/bold] {question}, ",
+        f"[bold]SQL:[/bold] {query}", 
+        "[bold]Result[/bold]", sep="\n"
+    )
     display(res_df)
 ```
 
@@ -282,30 +295,63 @@ As we can see, the table names may not be immediately understandable 🤔
 
 ---
 
-# Convert natural language questions into SQL
+# Convert natural language questions into SQL {.smaller}
 
-::: {.fragment .fade-in-then-semi-out}
-LLMs are quite capable of writing functional SQL queries.
+:::: {.columns}
+::: {.column}
+::: {.fragment .fade-left}
+LLMs are quite capable of writing functional SQL queries, from the `code` or `coder`
+ones, to specific ones for SQL generation.
 :::
 
 
-::: {.fragment .fade-in-then-semi-out}
+:::
+
+::: {.column}
+
+::: {.fragment .fade-left}
+For example, some IBM trained models include:
+
+- granite-20b-code-instruct
+- granite-34b-code-instruct
+- granite-20b-code-base-schema-linking
+- granite-20b-code-base-sql-gen
+
+[More info on these models {{< bi box-arrow-up-right >}}](https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-models-ibm.html?context=wx&locale=en&audience=wdp#granite-code-instruct-models)
+:::
+
+:::
+
+::::
+
+::: notes
 For those of us who have been writing code for some time and 
 fell in love with ORMs when they were the *hot* new thing, LLMs
 can take us to the next level!
 :::
 
+
+## Prompts for SQL generation {transition="convex"}
+
+
 ::: {.fragment .fade-in-then-semi-out}
-But they don't know the 🏗️ structure of our database, and may hallucinate 
-about it, or create some flat out invalid SQL, so we will need to handle
-some of this scenarios.
+LLMs don't know the  🏗️ structure of our database, and may hallucinate 
+about it, or create some flat out invalid SQL.
+:::
+
+::: {.fragment .fade-in-then-semi-out}
+We have to  provide __extra__ information about the structure in the instructions.
+
+For this we will use a **prompt** string with some palace-holders {{< bi braces >}}.
 :::
 
 ::: {.fragment .fade-in-then-semi-out}
 Some research papers from our team from our team:
 
 [{{< bi filetype-pdf >}} Weakly Supervised Detection of Hallucinations in LLMs](https://arxiv.org/pdf/2312.02798)
+:::
 
+::: {.fragment .fade-in-then-semi-out}
 [{{< bi filetype-pdf >}} Localizing Persona Representations In LLMs](https://arxiv.org/pdf/2505.24539)
 :::
 
@@ -315,35 +361,78 @@ In Flowpilot we created a framework inspired on LangGraph for this.
 
 ---
 
-### Messages ✍️
-<!-- ::: {.fragment .fade-in-then-semi-out}
-There are some reasonably good LLMs under the coder and instruct in Hugging Face.
-Some of these can be run locally with some inference server like `Ollama`, 
-`llama.cpp` or `LMStudio`, and also use pubic 
-ones.
+### Prompts {.smaller}
+
+```{python} 
+#| echo: true
+#| code-line-numbers: "1-7|9-14|15-18"
+
+system_message = """
+Given an input question, create a syntactically correct {dialect} query to
+run to help find the answer. Unless the user specifies in his question a
+specific number of examples they wish to obtain, always limit your query to
+at most {top_k} results. You can order the results by a relevant column to
+return the most interesting examples in the database.
+
+Never query for all the columns from a specific table, only ask for a the
+few relevant columns given the question.
+
+Pay attention to use only the column names that you can see in the schema
+description. Be careful to not query for columns that do not exist. Also,
+pay attention to which column is in which table.
+
+Only use the following tables:
+{table_info}
+"""
+```
+
+::: {.small_text}
+
+[source {{< bi box-arrow-up-right >}}](https://python.langchain.com/docs/tutorials/sql_qa/#convert-question-to-sql-query)
+
 :::
 
-::: {.fragment .fade-in-then-semi-out}
-Running LLMs locally or on-prem scenarios is quite important when
-we need to preserve the confidentiality of the data. 
-:::
+--- 
 
-::: {.fragment .fade-in-then-semi-out}
-We'll take a look at a library/proxy that can help us move between LLMs
-called `litellm` (can also add observability, cost tracking, etc.).
-::: -->
+## Creating a prompt {.smaller}
 
+Now we construct a function that utilizes lanngchain's `ChatPromptTemplate` to build prompts
+```{python}
+#| echo: true
+#| output-location: slide
+from langchain.prompts import ChatPromptTemplate
 
+def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
+    # Create a ChatPromptTemplate
+    prompt_template = ChatPromptTemplate.from_messages([
+        ("system", system_message),
+        ("human", "{question}")
+    ])
+    
+    # Format the prompt with your parameters
+    formatted_messages = prompt_template.format_messages(
+        dialect=dialect, top_k=top_k, table_info=table_info, question=question
+    )
+    
+    # Convert LangChain messages to the format expected by LiteLLM
+    messages = [
+        {"role": msg.type, "content": msg.content}
+        for msg in formatted_messages
+    ]
+    return messages
 
+messages = generate_messages(question=question, dialect=db.dialect, top_k=10, table_info=db.get_table_info())
+messages
+```
 
 ---
 
-### Contacting LLMs with `littellm` {.smaller}
+### Calling the LLM with the prompt {.smaller}
 
 ::: {style="font-size: 90%;"}
 ::: {.fragment .fade-in-then-semi-out}
 
-Installing *litellm* is a simple as
+Instead of a provider specific client, we will use *litellm*.
 
 `uv add littellm` 
 
@@ -358,7 +447,7 @@ There are some `extras` [^extras]
 :::: {.columns}
 ::: {.fragment .fade-in}
 ::: {.column width="70%"}
-```python
+```{python}
 import litellm
 
 response = litellm.completion(
@@ -388,6 +477,14 @@ print(response) # or response
 
 :::
 
+
+::: notes
+
+There are some reasonably good LLMs under the coder and instruct in Hugging Face.
+Some of these can be run locally with some inference server like `Ollama`, 
+`llama.cpp` or `LMStudio`, and also use pubic 
+ones.
+:::
 ---
 
 ### litellm response object
@@ -530,3 +627,4 @@ more deterministic approach.
 ## Metadata about the columns
 
 ## Dynamic context
+-
