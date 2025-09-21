@@ -1494,6 +1494,22 @@ wheels = [
 ]
 
 [[package]]
+name = "jupytext"
+version = "1.17.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py" },
+    { name = "mdit-py-plugins" },
+    { name = "nbformat" },
+    { name = "packaging" },
+    { name = "pyyaml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/15/14/41faf71e168fcc6c48268f0fc67ba0d6acf6ee4e2c5c785c2bccb967c29d/jupytext-1.17.3.tar.gz", hash = "sha256:8b6dae76d63c95cad47b493c38f0d9c74491fb621dcd0980abfcac4c8f168679", size = 3753151, upload-time = "2025-08-28T18:30:51.117Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/36/86/751ec86adb66104d15e650b704f89dddd64ba29283178b9651b9bc84b624/jupytext-1.17.3-py3-none-any.whl", hash = "sha256:09b0a94cd904416e823a5ba9f41bd181031215b6fc682d2b5c18e68354feb17c", size = 166548, upload-time = "2025-08-28T18:30:47.733Z" },
+]
+
+[[package]]
 name = "langchain"
 version = "0.3.27"
 source = { registry = "https://pypi.org/simple" }
@@ -3215,6 +3231,7 @@ dependencies = [
     { name = "invoke" },
     { name = "jupyter" },
     { name = "jupyter-cache" },
+    { name = "jupytext" },
     { name = "langchain-community" },
     { name = "langchain-core" },
     { name = "langgraph" },
@@ -3242,6 +3259,7 @@ requires-dist = [
     { name = "invoke", specifier = ">=2.2.0" },
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "jupyter-cache", specifier = ">=1.0.1" },
+    { name = "jupytext", specifier = ">=1.17.3" },
     { name = "langchain-community", specifier = ">=0.3.29" },
     { name = "langchain-core", specifier = ">=0.3.76" },
     { name = "langgraph", specifier = ">=0.6.7" },

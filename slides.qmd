@@ -512,19 +512,19 @@ class SQLOutput(BaseModel):
     sql: str = Field(description="The SQL query")
     explanation: str = Field(description="The reasoning for the query construction")
 
-# Optional
-litellm.enable_json_schema_validation = True
+# Optional 
+# litellm.enable_json_schema_validation = True
 
 response = litellm.completion(
   model=model,
   messages=messages,
   response_format=SQLOutput,
 )
-response
+output = SQLOutput.model_validate_json(response.choices[0].message.content)
+print(output)
 ```
 
 :::
-
 
 
 ---
@@ -541,20 +541,67 @@ tool to provide some reusable organization. We can add it with `uv add langgraph
 :::
 
 ::: {.fragment .fade-in-then-semi-out}
-This will help us to separate some concerns like  📐 *validation* , 🏃🏽 *execution* and later,  ☢️ *enrichment*.
+We will build a small pipeline where to run SQL generation and execution.
 :::
 
-::: {.fragment .fade-in-then-semi-out .center}
-Let's see how we can create something like this:
-```{mermaid}
-%%| fig-align: center
-flowchart LR
-    S[Start]
-    CallLLM[Call litellm's completion]
-    S -->|State: Dict| CallLLM
-    CallLLM --> End
-    
+::: {.fragment .fade-in-then-semi-out}
+Each node in the pipeline will be a function that received a state object
+and returns another state object.
+:::
+
+---
+
+### Nodes 
+
+::: {style="font-size: 80%;"}
+::::: {.fragment}
+- The workflow state can be a `dict` or `TypedDict`, but `dataclass` or a `BaseModel` is 
+  more convenient.
+```{.python}
+class State(BaseModel):
+  connection: ...
+  messages: ...
+  schema: ...
 ```
+:::::
+::::: {.fragment}
+:::: {.columns}
+::: {.column width="48%"}
+::::: {.fragment}
+- A simple function that works with the state.
+```{.python}
+def create_sql(state: State) -> State:
+  # Do something
+  return State(...)
+```
+:::::
+:::
+
+::: {.column width="4%"}
+<!-- Gap -->
+:::
+::: {.column width="48%"}
+
+::::: {.fragment}
+- This can also be a class if we want to pass more information.
+
+```{.python}
+class CreateSQLNode:
+  def __init__(self, config: ...) -> None:
+    self.config = config
+  
+  def __call__(
+    self, state: State
+  ) -> State:
+    # do something
+    return State(...)
+```
+:::::
+
+:::
+::::
+:::::
+
 :::
 
 ---

@@ -12,6 +12,7 @@ dependencies = [
     "invoke>=2.2.0",
     "jupyter>=1.1.1",
     "jupyter-cache>=1.0.1",
+    "jupytext>=1.17.3",
     "langchain-community>=0.3.29",
     "langchain-core>=0.3.76",
     "langgraph>=0.6.7",
