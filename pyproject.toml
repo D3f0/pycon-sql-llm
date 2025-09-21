@@ -15,7 +15,7 @@ dependencies = [
     "langchain-community>=0.3.29",
     "langchain-core>=0.3.76",
     "langgraph>=0.6.7",
-    "litellm[proxy,caching]>=1.63.7",
+    "litellm[caching,proxy]>=1.63.7",
     # "marimo>=0.15.5",
     # "ollama>=0.5.4",
     # "openai==1.61.0",

@@ -1,20 +1,23 @@
 # pylint: disable=dangerous-default-value
 
-from io import StringIO
+import inspect
 import os
 import shlex
-from shutil import which
 import sys
+import time
+from datetime import datetime
+from io import StringIO
+from pathlib import Path
+from shutil import which
 from textwrap import dedent
+
+import httpx
 from invoke import task
 from invoke.context import Context
 from invoke.runners import Result
-from datetime import datetime
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
-import time
-import inspect
 
 console = Console()
 
@@ -83,3 +86,16 @@ def ipython(ctx: Context):
     argv = shlex.split(command)
     cmd = argv[0]
     os.execvp(cmd, argv)
+
+
+@task(autoprint=True)
+def length(ctx: Context, input_="messages.json", model="granite-code:20b"):
+    if not model:
+        sys.exit("model not defined")
+    content = Path(input_).read_text()
+    resp = httpx.post(
+        "http://localhost:11434/api/embeddings",
+        json={"model": model, "prompt": content},
+    )
+    resp.raise_for_status()
+    return resp

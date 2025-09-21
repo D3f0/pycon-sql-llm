@@ -406,8 +406,10 @@ def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
     # Create a ChatPromptTemplate
     prompt_template = ChatPromptTemplate.from_messages([
         ("system", system_message),
-        ("human", "{question}")
+        ("user", "{question}")
     ])
+
+    print(prompt_template)
     
     # Format the prompt with your parameters
     formatted_messages = prompt_template.format_messages(
@@ -419,12 +421,20 @@ def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
         {"role": msg.type, "content": msg.content}
         for msg in formatted_messages
     ]
+    print(*(m['role'] for m in messages))
     return messages
 
 messages = generate_messages(question=question, dialect=db.dialect, top_k=10, table_info=db.get_table_info())
 messages
 ```
 
+
+```{python}
+#| echo: false
+import json
+with open("messages.json", "w") as fp:
+    json.dump(messages, fp)
+```
 ---
 
 ### Calling the LLM with the prompt {.smaller}
@@ -434,7 +444,10 @@ messages
 
 Instead of a provider specific client, we will use *litellm*.
 
-`uv add littellm` 
+```{python}
+#| echo: true
+!uv add litellm --quiet
+```
 
 There are some `extras` [^extras]
 
@@ -447,22 +460,31 @@ There are some `extras` [^extras]
 :::: {.columns}
 ::: {.fragment .fade-in}
 ::: {.column width="70%"}
+
+<!-- Enable disk cachesq -->
+```{python}
+#| echo: false
+# Speed up execution
+import litellm 
+from litellm.caching.caching import Cache
+litellm.cache = Cache(type="disk")
+```
+
 ```{python}
 import litellm
-
-response = litellm.completion(
-  model="ollama/granite-code:20b",
-  messages=[
-    {
-      "role": "user",
-      "content": "How are you?"
-    }
-  ],
-  # stream=False
-)
-print(response) # or response
+try:
+    response = litellm.completion(
+    model="ollama/granite-code:20b",
+    messages=messages,
+    )
+except Exception as e:
+    print("error", e)
+else:
+    print(response) # or response
 ```
+
 :::
+
 
 
 ::: {.column width="5%" }
