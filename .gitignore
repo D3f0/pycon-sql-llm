@@ -5,3 +5,7 @@ _site/
 .jupyter_cache/
 slides_files/
 .envrc.local
+
+# Cache of LLM calls
+.*_cache/
+dist/*

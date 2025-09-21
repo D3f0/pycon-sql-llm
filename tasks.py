@@ -23,8 +23,8 @@ console = Console()
     help={
         "file_path": "Path to the file to watch",
         "interval": "Check interval in milliseconds (default: 500)",
-    }, 
-    aliases=['w']
+    },
+    aliases=["w"],
 )
 def watch(
     ctx,
@@ -64,10 +64,10 @@ def watch(
         return False
 
 
-@task(
-    aliases=['p']
-)
-def preview(ctx: Context, port: str = "", args_: list[str] = []):
+@task(aliases=["p"])
+def preview(
+    ctx: Context, port: str = "", args_: list[str] = [], file_: str = "slides.qmd"
+):
     """Build slides"""
     # if which("entr"):
     #     ctx.run(
@@ -75,7 +75,12 @@ def preview(ctx: Context, port: str = "", args_: list[str] = []):
     #     )
     # else:
     #     print("Not using entr for reload")
-    args = " ".join(args_)
+    args = " ".join(
+        [
+            file_,
+        ]
+        + args_
+    )
     while True:
         ran = ctx.run(
             f"quarto preview --render revealjs --port $PORT {args}",
@@ -94,9 +99,7 @@ def publish(ctx: Context):
     ctx.run("quarto publish gh-pages --no-prompt")
 
 
-@task(
-    aliases=['c']
-)
+@task(aliases=["c"])
 def checkpoint(ctx: Context):
     """Checkpoint in git"""
     now = datetime.now()
@@ -126,7 +129,7 @@ def litellm_model_ollama(ctx: Context):
     ctx.run("uv run python", in_stream=StringIO(code_body))
 
 
-@task(aliases=['i'])
+@task(aliases=["i"])
 def ipython(ctx: Context):
     """Launch IPython shell installed via UV."""
     command = "uv run ipython --ext rich"

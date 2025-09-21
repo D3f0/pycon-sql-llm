@@ -4,40 +4,35 @@ title: "💬 ❓ 🤖 Asking questions to your database with LLMs "
 author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
 date: September, 2025
 embed-resources: false
+footer: "*Asking question to {{< bi database >}} with LLMs* - 🐍 PyCon 🇰🇪 2025"
 # https://quarto.org/docs/computations/caching.html
 execute: 
   cache: true
   keep-ipynb: true
 format:
   revealjs:
-    toc: true
+    toc: false
     toc-depth: 1
     slide-number: true
     transition: slide
     code-copy: true
     highlight-style: github
-    theme: [solarized, custom.scss]  
-  
-notes: >
-  This talk will cover a research project within IBM Research focused on generating structured 
-  query language queries for your data using open-source models based on the work of the 
-  Nairobi and Johannesbug Research labs.
+    code-overflow: wrap
+    theme: [solarized, custom.scss]
+    # For the reveal-logo extension
+    # header-logo-left: ./img/Python-logo-notext.svg
+    # header-logo-left-url: https://quarto.org
+    # header-logo-left-height: 2em
+    header-logo-right: ./img/Python-logo-notext.svg
+    header-logo-right-url: https://pycon-kenya-2025.sessionize.com/
+    header-logo-right-height: 50px
 
-  We will cover the state of the art in terms of techniques to augment the prompt in terms of 
-  database structure and contents to help build more specific queries, error correction, 
-  prompt reformulation, and other approaches. We will briefly discuss how 
-  fine-tuning of models can help in some scenarios.
 
-  We will close this talk by discussing the tools used for building this kind 
-  of project and some of the lessons learned along the way.
-
-todo: >
-  https://research.ibm.com/projects/flowpilot
-  Add https://www.youtube.com/watch?v=bEgnVKb_J4k
-
+filters:
+ - reveal-logo
 ---
 
-# About myself {.smaller}
+## About myself {.smaller}
 
 :::: {.columns}
 ::: {.column width="40%"}
@@ -68,12 +63,226 @@ todo: >
 
 
 ---
+# Intro
 
-# Getting started
+In this talk we're gonna show how to use Python to:
+
+  - Connect to a database and execute the queries
+  - Convert natural language questions into SQL
+  - Create a workflow
+  - Fix common errors
+  - Lessons learned
+  
+TODO: Put some drawing & rephrase
 
 ---
 
-## About LLMs
+# Connect to a database and execute the queries
+
+
+---
+
+## Public datasets used in text to SQL
+
+:::: {.columns}
+::: {.column}
+::: {.fragment .fade-right}
+
+:::
+
+::: {.fragment .fade-right}
+- 🕷️ Spider
+:::
+::: {.fragment .fade-right}
+- 🕷️ 🕷️ Spider 2
+:::
+::: {.fragment .fade-right}
+- 🐦 BIRD
+:::
+::: {.fragment .fade-right}
+- 🏹 Archer 
+:::
+:::
+::: {.column}
+::: {.fragment .fade-left .small_text}
+These datasets define:
+
+- ❓ Natural language questions
+- 🫰 Expected SQL
+- 🏗️ Database schema & content
+- 🔎 Evaluation metrics 
+- 🥇 Leaderboard
+:::
+:::
+::::
+
+
+::: notes
+:::
+
+---
+
+## BIRD 
+
+![](./img/ibm-granite-leaderboard.png){height="400px" fig-align="center"}
+
+[{{<bi article>}} article](https://research.ibm.com/blog/granite-LLM-text-to-SQL)
+
+
+::: notes
+We're select BIRD dataset since we have some experience with it, we managed
+to get to the top of the leatherboard in 2024/6
+:::
+
+---
+
+### BIRD
+
+- https://github.com/bird-bench/mini_dev
+
+```{python}
+#| echo: true
+#| output-location: slide
+from datasets import load_dataset, DownloadConfig 
+
+# Load the dataset
+dataset = load_dataset(
+  "birdsql/bird_mini_dev", download_config=DownloadConfig(disable_tqdm=True)
+)
+
+# Contents
+print("Database types: ", *dataset.keys())
+sqlite_df = dataset["mini_dev_sqlite"].to_pandas()
+display(sqlite_df.head(2))
+```
+
+---
+
+### Downloading BIRD databases
+
+<!-- - We will be using [`uvx`](https://docs.astral.sh/uv/concepts/tools/#tool-versions)[^uvx] with the `gdown` package as follows: -->
+
+```shell
+uvx gdown https://drive.google.com/file/d/13VLWIwpw5E3d5DUkMvzw7hvHE67a4XkG/
+```
+![](./img/download_minidev.png)
+<!-- Or just download from the [ {{< bi google >}} {{< bi hdd >}} link](https://drive.google.com/file/d/13VLWIwpw5E3d5DUkMvzw7hvHE67a4XkG/view?usp=sharing)  -->
+
+Extracting the archive (3.3GiB)
+
+```shell
+unzip minidev_703.zip
+```
+<!-- [^uvx]: It comes as part of `uv`, it's a shorthand for `uv tool run` -->
+
+::: footer
+:::
+---
+
+### Picking the example database `california_schools`
+
+In `minidev/MINIDEV/dev_databases/california_schools/` we find the {{< bi database >}} {{< bi file >}}
+
+![](./img/california_school.png)
+
+
+---
+
+### Creating the `Engine`
+
+```{python}
+#| echo: true
+#| code-overflow: wrap
+
+from sqlalchemy import create_engine
+path = './minidev/MINIDEV/dev_databases/california_schools/california_schools.sqlite'
+engine = create_engine(f'sqlite:///{path}')
+engine
+```
+
+
+---
+
+### Grabbing a simple question and its  {{< bi database >}} 
+
+```{python}
+#| echo: true
+california_schools_df = sqlite_df[sqlite_df.db_id == 'california_schools']
+simple_queries_df = california_schools_df[sqlite_df.difficulty == 'simple']
+simple_queries_df.head(2).set_index("db_id")
+
+```
+
+---
+
+```{python}
+#| echo: true
+import pandas as pd
+pd.set_option('display.max_colwidth', 0)
+
+question_sql_df = simple_queries_df[["question","SQL"]].reset_index()
+# question_sql_df[0:1].T
+```
+
+::: {.fragment .fade-left}
+```{python}
+#| echo: true
+
+question = question_sql_df.loc[0, "question"]
+query = question_sql_df.loc[0, "SQL"]
+print(f"{question!r}")
+print(f"{query!r}")
+```
+:::
+
+---
+
+### Execute the queries
+
+```{python}
+#| echo: true
+
+from sqlalchemy import text
+with engine.connect() as conn:
+    result = conn.execute(text(query))
+    res_df = pd.DataFrame(result.fetchall()) # 🐼 ✨
+    display(question)
+    display(query)
+    display(res_df)
+```
+
+---
+
+### Database schema with 🦜 ⛓️
+
+LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information [^qa_lc]
+
+```{python}
+#| echo: true
+!uv pip install langchain-community
+```
+
+```{python}
+#| echo: true
+
+from langchain_community.utilities import SQLDatabase
+db = SQLDatabase(engine=engine)
+
+display(db.get_usable_table_names())
+```
+
+::: {.fragment .slide-left}
+As we can see, the table names may not be immediately understandable 🤔
+:::
+[^qa_lc]: [SQL Question Answering](https://python.langchain.com/docs/tutorials/sql_qa/#system-prompt){target="_blank"}
+
+::: notes
+
+:::
+
+---
+
+# Convert natural language questions into SQL
 
 ::: {.fragment .fade-in-then-semi-out}
 LLMs are quite capable of writing functional SQL queries.
@@ -106,8 +315,8 @@ In Flowpilot we created a framework inspired on LangGraph for this.
 
 ---
 
-## LLMs for Code Generation ✍️
-::: {.fragment .fade-in-then-semi-out}
+### Messages ✍️
+<!-- ::: {.fragment .fade-in-then-semi-out}
 There are some reasonably good LLMs under the coder and instruct in Hugging Face.
 Some of these can be run locally with some inference server like `Ollama`, 
 `llama.cpp` or `LMStudio`, and also use pubic 
@@ -122,38 +331,66 @@ we need to preserve the confidentiality of the data.
 ::: {.fragment .fade-in-then-semi-out}
 We'll take a look at a library/proxy that can help us move between LLMs
 called `litellm` (can also add observability, cost tracking, etc.).
-:::
+::: -->
+
+
+
 
 ---
 
-### Contacting LLMs with `littellm` SDK
+### Contacting LLMs with `littellm` {.smaller}
 
+::: {style="font-size: 90%;"}
 ::: {.fragment .fade-in-then-semi-out}
-`uv add littellm` and, for local execution, we can also add ollama Python package `uv add ollama`.
+
+Installing *litellm* is a simple as
+
+`uv add littellm` 
+
+There are some `extras` [^extras]
+
 :::
 
-::: {.fragment .fade-in-then-semi-out}
-`litellm` uses a prefix for the provider of the LLM (it supports 100+ providers) 
-[{{< bi question-octagon >}}](̌https://docs.litellm.ai/docs/set_keys)
-:::
+[^extras]: 
+  
+  `caching` , `extra-proxy` , `mlflow` , `proxy` , `semantic-router`, `utils`
 
-::: {.fragment .fade-in-then-semi-out}
-Quick example of how to use it...
-
+:::: {.columns}
+::: {.fragment .fade-in}
+::: {.column width="70%"}
 ```python
 import litellm
 
 response = litellm.completion(
-            model="ollama/granite-code:20b",
-            messages=[{"role": "user", "content": "Hey, how's it going?"}],
-        )
-print(response)
+  model="ollama/granite-code:20b",
+  messages=[
+    {
+      "role": "user",
+      "content": "How are you?"
+    }
+  ],
+  # stream=False
+)
+print(response) # or response
 ```
+:::
+
+
+::: {.column width="5%" }
+:::
+
+::: {.column width="25%" }
+[{{< bi info-circle >}} `model` list](https://docs.litellm.ai/docs/providers)
+
+:::
+:::
+:::
+
 :::
 
 ---
 
-### Example response
+### litellm response object
 
 ::: {.fragment .fade-in-then-semi-out}
 ```python
@@ -187,35 +424,6 @@ ModelResponse(
 
 
 
----
-
-## Structure and Configuration
-
-::: {.fragment .fade-in-then-semi-out}
-For simplicity we hardcoded the model to 🦙 model `ollama/granite-code:20b`. Let's take a look
-at how we can make this more flexible with a configuration class.
-:::
-
-::: {.fragment .fade-in-then-semi-out}
-We're going to use Pydantic configuration system (`uv add pydantic-settings`), whihc
-will serve us as a `load_dotenv()` on steroids {{< bi hurricane >}}
-::: 
-
-::: {.fragment .fade-in-then-semi-out}
-Our goal is to have most of the configuration defined either in environment variables
-or also loadable from a our popular `.env`.
-:::
-
----
-
-### Configuration with Pydantic Settings
-
-```{python}
-#| echo: true
-from pydantic_settings import BaseSettings
-
-
-```
 
 ---
 
@@ -236,9 +444,13 @@ response = completion(
 print(response['choices'][0]['message']['content'])
 ```
 
+
+---
+# Create a workflow
+
 ---
 
-## Workflows 
+# Chaining generation and execution
 
 ::: {.fragment .fade-in-then-semi-out}
 When our code starts to become larger than a script can handle 🏋🏾‍♀️, `LangGraph` is a great
@@ -264,110 +476,32 @@ flowchart LR
 
 ---
 
-## Workflows - LangGraph
-```python
-#| code-overflow: wrap
+## State
 
-from typing import Dict, Any, List
+LangGraph uses state that is propagated through nodes.
+
+This state can be defined with a TypedDict or a Pydantic BaseModel.
+
+```{python}
+#| echo: true
 from pydantic import BaseModel, Field
-from langgraph.graph import StateGraph
-from litellm import completion
-import os
+from typing import Optional
 
-# Configuration using Pydantic
-class ModelConfig(BaseModel):
-    model_name: str = Field(default="gpt-3.5-turbo")
-    temperature: float = Field(default=0.7)
-    max_tokens: int = Field(default=500)
-
-# Global configuration object
-config = ModelConfig()
-
-# State definition
 class State(BaseModel):
-    input: str
-    output: str = ""
+    question: str = ""
+    schema: str = ""
+    sql: Optional[str] = Field(default=None, description="")
 
-# Node function to call the LLM
-def call_llm(state: State) -> State:
-    response = completion(
-        model=config.model_name,
-        messages=[{"role": "user", "content": state.input}],
-        temperature=config.temperature,
-        max_tokens=config.max_tokens
-    )
-    
-    state.output = response.choices[0].message.content
-    return state
-
-# Create the graph
-def create_workflow() -> StateGraph:
-    # Define the graph
-    workflow = StateGraph(State)
-    
-    # Add nodes
-    workflow.add_node("call_llm", call_llm)
-    
-    # Define the edges
-    workflow.set_entry_point("call_llm")
-    
-    # Compile the graph
-    return workflow.compile()
-
-# # Example usage
-# if __name__ == "__main__":
-#     # Configure the model
-#     config.model_name = "gpt-4"
-#     config.temperature = 0.5
-    
-#     # Create and run the workflow
-#     graph = create_workflow()
-#     result = graph.invoke({"input": "Explain quantum computing in simple terms."})
-#     print(result.output)
 ```
 ---
 
-<!-- ### More tools ⚒️ for dealing with SQL {background-image="./img/memes/old-man-giving-link-a-sword-in-the-legend-of-zelda.jpg"} -->
-### More tools ⚒️ for dealing with SQL {background-image="https://static0.thegamerimages.com/wordpress/wp-content/uploads/2023/04/old-man-giving-link-a-sword-in-the-legend-of-zelda.jpg?q=50&fit=crop&w=1100&h=618&dpr=1.5"}
+# Fix common errors
+## Adding a node for safety
 
-::: {.columns .small_text}
-::: {.column }
-#### LangGraph
-
-Allows us to create code **Workflows** with nodes and edges.
-Nodes can be function or classes.
+::: notes
+Usually done through LLMs in agentic workflows, we are going to take a
+more deterministic approach.
 :::
-
-::: {.column}
-#### Pydantic
-
-**Data validation** library, allows to convert JSON into
-Python objects easily and has very good performance given
-that it's been re-written in Rust 🦀
-:::
-
-:::
-
-
-::: {.columns .small_text}
-::: {.column }
-#### SQLGlot
-
-A sql **parser** and transpiler. Generates an AST for multiple 
-[31+ database engines](https://sqlglot.com/sqlglot/dialects.html) that can be converted from one format to another.
-:::
-
-::: {.column}
-#### SQLAlchemy
-
-Can connect to multiple databases and execute queries. 
-Has a great inspection API which can give us back
-the structure of the DB.
-:::
-
-:::
-
----
 
 ## Let's go for Bobby tables {.center}
 
@@ -379,22 +513,20 @@ the structure of the DB.
 
 ---
 
-## Let's grab some {{< bi database >}} from 🐦 benchmark
+# Adding more information in the prompt
 
-::: {.smaller}
-```{python}
-#| echo: true
-import fsspec, rich
-url = "http://bird-bench.oss-cn-beijing.aliyuncs.com/dev.zip"
-rfs, *_ = fsspec.mapping.url_to_fs(f"filecache::zip::{url}", mode="r")
-
-inner_zip_path, *_ = rfs.glob('**/dev_databases.zip')
-rich.print(inner_zip_path)
-#db_zips = rfs.open(inner_zip_path)
+## Acronyms
 
 
-
-```
-:::
 
 ---
+# Lessons learned
+
+---
+
+## Reducing the schema for simpler queries
+
+
+## Metadata about the columns
+
+## Dynamic context

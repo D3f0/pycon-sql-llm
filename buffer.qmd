@@ -1977,3 +1977,82 @@ The LLM in use may generate invalid SQL:
 # Putting things together
 
 ---
+
+
+
+### Getting some completions {.center}
+
+```python
+#| echo: true
+#| output: true
+#| code-overflow: wrap
+import ollama
+print("Models:", *(f"ollama/{m.model}" for m in ollama.list()["models"]), sep="\n")
+from litellm import completion
+```
+
+
+
+### FSSPEC 
+
+::: {.smaller}
+```{python}
+#| echo: true
+import fsspec, rich
+url = "http://bird-bench.oss-cn-beijing.aliyuncs.com/dev.zip"
+rfs, *_ = fsspec.mapping.url_to_fs(f"filecache::zip::{url}", mode="r")
+
+inner_zip_path, *_ = rfs.glob('**/dev_databases.zip')
+rich.print(inner_zip_path)
+#db_zips = rfs.open(inner_zip_path)
+
+
+
+```
+:::
+
+
+
+---
+
+
+
+<!-- ### More tools ⚒️ for dealing with SQL {background-image="./img/memes/old-man-giving-link-a-sword-in-the-legend-of-zelda.jpg"} -->
+### More tools ⚒️ for dealing with SQL {background-image="https://static0.thegamerimages.com/wordpress/wp-content/uploads/2023/04/old-man-giving-link-a-sword-in-the-legend-of-zelda.jpg?q=50&fit=crop&w=1100&h=618&dpr=1.5"}
+
+::: {.columns .small_text}
+::: {.column }
+#### LangGraph
+
+Allows us to create code **Workflows** with nodes and edges.
+Nodes can be function or classes.
+:::
+
+::: {.column}
+#### Pydantic
+
+**Data validation** library, allows to convert JSON into
+Python objects easily and has very good performance given
+that it's been re-written in Rust 🦀
+:::
+
+:::
+
+
+::: {.columns .small_text}
+::: {.column }
+#### SQLGlot
+
+A sql **parser** and transpiler. Generates an AST for multiple 
+[31+ database engines](https://sqlglot.com/sqlglot/dialects.html) that can be converted from one format to another.
+:::
+
+::: {.column}
+#### SQLAlchemy
+
+Can connect to multiple databases and execute queries. 
+Has a great inspection API which can give us back
+the structure of the DB.
+:::
+
+:::
