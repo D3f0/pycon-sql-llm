@@ -9,3 +9,4 @@ slides_files/
 # Cache of LLM calls
 .*_cache/
 dist/*
+minidev*
