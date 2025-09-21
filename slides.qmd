@@ -1,12 +1,10 @@
 ---
-title: "💬 {{< bi database >}} 🤖 Asking questions to your database with LLMs "
-# subtitle: "Techniques for effective SQL generation"
+title: '💬 {{< bi database >}} 🤖 Asking questions to your database with LLMs '
 author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
 date: September, 2025
 embed-resources: false
-footer: "*Asking question to {{< bi database >}} with LLMs* - 🐍 PyCon 🇰🇪 2025"
-# https://quarto.org/docs/computations/caching.html
-execute: 
+footer: '*Asking question to {{< bi database >}} with LLMs* - 🐍 PyCon 🇰🇪 2025'
+execute:
   cache: true
   keep-ipynb: true
 format:
@@ -18,20 +16,20 @@ format:
     code-copy: true
     highlight-style: github
     code-overflow: wrap
-    theme: [solarized, custom.scss]
-    # For the reveal-logo extension
-    # header-logo-left: ./img/Python-logo-notext.svg
-    # header-logo-left-url: https://quarto.org
-    # header-logo-left-height: 2em
+    theme:
+      - solarized
+      - custom.scss
     header-logo-right: ./img/pynbo.png
     header-logo-right-url: https://pycon-kenya-2025.sessionize.com/
     header-logo-right-height: 2em
     preview-links: auto
-
 filters:
- - reveal-logo
+  - reveal-logo
+jupyter: python3
 ---
-
+```{python}
+%load_ext rich
+```
 ## About myself {.smaller}
 
 :::: {.columns}
@@ -63,6 +61,7 @@ filters:
 
 
 ---
+
 # Intro
 
 In this talk we're gonna show how to use Python to:
@@ -141,6 +140,7 @@ to get to the top of the leatherboard in 2024/6
 - It consist of 500 queries classified as **simple**, **moderate** and **challenging** [{{< bi box-arrow-up-right >}}](https://github.com/bird-bench/mini_dev)
 
 ::: {.fragment .fade-left}
+
 ```{python}
 from rich.console import Console
 _c = Console(width=75)
@@ -164,6 +164,7 @@ sqlite_df = dataset["mini_dev_sqlite"].to_pandas()
 sqlite_df = sqlite_df.drop(columns=['question_id'])
 display(sqlite_df.head(2))
 ```
+
 :::
 
 ---
@@ -210,7 +211,6 @@ engine = create_engine(f'sqlite:///{path}')
 engine
 ```
 
-
 ---
 
 ### Grabbing a simple question and its  {{< bi database >}} 
@@ -220,7 +220,6 @@ engine
 california_schools_df = sqlite_df[sqlite_df.db_id == 'california_schools']
 simple_queries_df = california_schools_df[sqlite_df.difficulty == 'simple']
 simple_queries_df.head(2).set_index("db_id")
-
 ```
 
 ---
@@ -235,6 +234,7 @@ question_sql_df = simple_queries_df[["question","SQL"]].reset_index()
 ```
 
 ::: {.fragment .fade-left}
+
 ```{python}
 #| echo: true
 
@@ -243,6 +243,7 @@ query = question_sql_df.loc[0, "SQL"]
 print(f"{question!r}")
 print(f"{query!r}")
 ```
+
 :::
 
 ---
@@ -363,9 +364,9 @@ In Flowpilot we created a framework inspired on LangGraph for this.
 
 ### Prompts {.smaller}
 
-```{python} 
+```{python}
 #| echo: true
-#| code-line-numbers: "1-7|9-14|15-18"
+#| code-line-numbers: 1-7|8-14|15-18
 
 system_message = """
 Given an input question, create a syntactically correct {dialect} query to
@@ -396,39 +397,30 @@ Only use the following tables:
 
 ## Creating a prompt {.smaller}
 
-Now we construct a function that utilizes lanngchain's `ChatPromptTemplate` to build prompts
+Now we construct a list of messages. These are `dicts` which have a key
+`user` or `system`, and a `content`.
+
 ```{python}
 #| echo: true
-from langchain.prompts import ChatPromptTemplate
-
+#| output-location: slide
 def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
     # Create a ChatPromptTemplate
-    prompt_template = ChatPromptTemplate.from_messages([
-        ("system", system_message),
-        ("user", "{question}")
-    ])    
-    # Format the prompt with your parameters
-    formatted_messages = prompt_template.format_messages(
-        dialect=dialect, top_k=top_k, table_info=table_info, question=question
-    )
-    
-    # Convert LangChain messages to the format expected by LiteLLM
-    # human -> user 
     messages = [
-        {
-            "role": msg.type if msg.type != "human" else "user",  # human -> user
-            "content": msg.content, 
-        }
-        for msg in formatted_messages
+      {"role": "system", 
+      "content": system_message.format(
+        dialect=dialect, 
+        top_k=top_k, 
+        table_info=table_info
+       )},
+      {
+        "role": "user", 
+        "content": question
+      }
     ]
+    
     return messages
 
-messages = generate_messages(question=question, dialect=db.dialect, table_info=db.get_table_info())
-```
----
-
-```{python}
-!# echo: True
+messages = generate_messages(question=question, dialect=db.dialect, top_k=10, table_info=db.get_table_info())
 messages
 ```
 
@@ -438,6 +430,7 @@ import json
 with open("messages.json", "w") as fp:
     json.dump(messages, fp)
 ```
+
 ---
 
 ### Calling the LLM with the prompt {.smaller}
@@ -445,14 +438,14 @@ with open("messages.json", "w") as fp:
 ::: {style="font-size: 90%;"}
 ::: {.fragment .fade-in-then-semi-out}
 
-Instead of a provider specific client, we will use 🚅 [*litellm*](https://docs.litellm.ai/docs/providers).
+Instead of a provider specific client, we will use *litellm*.
 
 ```{python}
 #| echo: true
 !uv add litellm --quiet
 ```
 
-
+There are some `extras` [^extras]
 
 :::
 
@@ -460,41 +453,46 @@ Instead of a provider specific client, we will use 🚅 [*litellm*](https://docs
   
   `caching` , `extra-proxy` , `mlflow` , `proxy` , `semantic-router`, `utils`
 
-
+:::: {.columns}
 ::: {.fragment .fade-in}
-
+::: {.column width="70%"}
 
 <!-- Enable disk cachesq -->
+
 ```{python}
 #| echo: false
 # Speed up execution
 import litellm 
 from litellm.caching.caching import Cache
 litellm.cache = Cache(type="disk")
-litellm.suppress_debug_info = True
-%load_ext rich
 ```
 
-
 ```{python}
-#| echo: true
-#| classes: scrollable
-#| output-location: slide
-
 import litellm
-model = "ollama_chat/granite-code:20b"
 try:
     response = litellm.completion(
-        model=model,
-        messages=messages,
+    model="ollama/granite-code:20b",
+    messages=messages,
     )
 except Exception as e:
     print("error", e)
 else:
-    display(response) # or response
+    print(response) # or response
 ```
 
+:::
 
+
+
+
+::: {.column width="5%" }
+:::
+
+::: {.column width="25%" }
+[{{< bi info-circle >}} `model` list](https://docs.litellm.ai/docs/providers)
+
+:::
+:::
 :::
 
 :::
@@ -507,31 +505,60 @@ Some of these can be run locally with some inference server like `Ollama`,
 `llama.cpp` or `LMStudio`, and also use pubic 
 ones.
 :::
+---
+
+### litellm response object
+
+::: {.fragment .fade-in-then-semi-out}
+```python
+ModelResponse(
+  id='chatcmpl-c34aae0e-a299-42a0-922e-aabd96e3a91e', 
+  created=1758269174, 
+  model='ollama/granite-code:20b', 
+  object='chat.completion', 
+  system_fingerprint=None, 
+  choices=[Choices(
+    finish_reason='stop', 
+    index=0, 
+    message=Message(
+      content='### Bot:\nHey there! How can I assist you today?\n\n', 
+      role='assistant', 
+      tool_calls=None, 
+      function_call=None, 
+      provider_specific_fields=None
+      )
+    )], 
+    usage=Usage(
+      completion_tokens=17, 
+      prompt_tokens=20, 
+      total_tokens=37, 
+      completion_tokens_details=None, 
+      prompt_tokens_details=None
+      )
+    )
+```
+:::
+
+
+
 
 ---
 
-### Extracting the SQL with output_format
-
-We could traverse the `response.messages`, but there's a more robust way called 
-`output_format` that accepts JSONSchema or a Pydantic `BaseModel`.
-
-```{python}
+### Getting some completions (cont.) {.center}
+```python
 #| echo: true
-#| output-location: slide
+#| output: true
 #| 
-class SQLOutput(BaseModel):
-    sql: str = Field(description="The SQL query")
-    reasoning = Optional[str] = Field(description="Reasoning for the query") 
+from litellm import completion
 
-# Optional
-litellm.enable_json_schema_validation = True
-
-response = litellm.completion(
-  model=model, 
-  messages=messages,
-  response_format=SQLOutput,
+messages = [
+  {"role": "user", 
+  "content": "Create a small customer table in SQL"}]
+response = completion(
+  model="ollama/hf.co/unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF:F16", 
+  messages=messages, stream=False
 )
-display(response)
+print(response['choices'][0]['message']['content'])
 ```
 
 
@@ -581,8 +608,8 @@ class State(BaseModel):
     question: str = ""
     schema: str = ""
     sql: Optional[str] = Field(default=None, description="")
-
 ```
+
 ---
 
 # Fix common errors

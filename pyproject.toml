@@ -34,9 +34,6 @@ dependencies = [
 [tool.uv]
 package = true
 
-[tool.setuptools]
-packages = ["code.utils"]
-
 [dependency-groups]
 dev = [
     "invoke>=2.2.0",
