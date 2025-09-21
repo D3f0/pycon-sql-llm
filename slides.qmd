@@ -421,7 +421,7 @@ def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
     return messages
 
 messages = generate_messages(question=question, dialect=db.dialect, top_k=10, table_info=db.get_table_info())
-messages
+print(messages)
 ```
 
 ```{python}
@@ -526,6 +526,13 @@ print(output)
 
 :::
 
+---
+
+```{.python}
+with engine.connect() as c:
+  response = c.execute(text(output.sql))
+  print(response.fetchall(()))
+```
 
 ---
 
