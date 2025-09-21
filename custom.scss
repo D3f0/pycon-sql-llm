@@ -43,3 +43,8 @@
 
   font-size: 20px
 }
+
+.scrollable {
+  max-height: 500px;
+  overflow-y: auto;
+}

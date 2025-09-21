@@ -399,7 +399,6 @@ Only use the following tables:
 Now we construct a function that utilizes lanngchain's `ChatPromptTemplate` to build prompts
 ```{python}
 #| echo: true
-#| output-location: slide
 from langchain.prompts import ChatPromptTemplate
 
 def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
@@ -407,27 +406,31 @@ def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
     prompt_template = ChatPromptTemplate.from_messages([
         ("system", system_message),
         ("user", "{question}")
-    ])
-
-    print(prompt_template)
-    
+    ])    
     # Format the prompt with your parameters
     formatted_messages = prompt_template.format_messages(
         dialect=dialect, top_k=top_k, table_info=table_info, question=question
     )
     
     # Convert LangChain messages to the format expected by LiteLLM
+    # human -> user 
     messages = [
-        {"role": msg.type, "content": msg.content}
+        {
+            "role": msg.type if msg.type != "human" else "user",  # human -> user
+            "content": msg.content, 
+        }
         for msg in formatted_messages
     ]
-    print(*(m['role'] for m in messages))
     return messages
 
-messages = generate_messages(question=question, dialect=db.dialect, top_k=10, table_info=db.get_table_info())
+messages = generate_messages(question=question, dialect=db.dialect, table_info=db.get_table_info())
+```
+---
+
+```{python}
+!# echo: True
 messages
 ```
-
 
 ```{python}
 #| echo: false
@@ -442,14 +445,14 @@ with open("messages.json", "w") as fp:
 ::: {style="font-size: 90%;"}
 ::: {.fragment .fade-in-then-semi-out}
 
-Instead of a provider specific client, we will use *litellm*.
+Instead of a provider specific client, we will use 🚅 [*litellm*](https://docs.litellm.ai/docs/providers).
 
 ```{python}
 #| echo: true
 !uv add litellm --quiet
 ```
 
-There are some `extras` [^extras]
+
 
 :::
 
@@ -457,9 +460,9 @@ There are some `extras` [^extras]
   
   `caching` , `extra-proxy` , `mlflow` , `proxy` , `semantic-router`, `utils`
 
-:::: {.columns}
+
 ::: {.fragment .fade-in}
-::: {.column width="70%"}
+
 
 <!-- Enable disk cachesq -->
 ```{python}
@@ -468,33 +471,30 @@ There are some `extras` [^extras]
 import litellm 
 from litellm.caching.caching import Cache
 litellm.cache = Cache(type="disk")
+litellm.suppress_debug_info = True
+%load_ext rich
 ```
 
+
 ```{python}
+#| echo: true
+#| classes: scrollable
+#| output-location: slide
+
 import litellm
+model = "ollama_chat/granite-code:20b"
 try:
     response = litellm.completion(
-    model="ollama/granite-code:20b",
-    messages=messages,
+        model=model,
+        messages=messages,
     )
 except Exception as e:
     print("error", e)
 else:
-    print(response) # or response
+    display(response) # or response
 ```
 
-:::
 
-
-
-::: {.column width="5%" }
-:::
-
-::: {.column width="25%" }
-[{{< bi info-circle >}} `model` list](https://docs.litellm.ai/docs/providers)
-
-:::
-:::
 :::
 
 :::
@@ -507,60 +507,31 @@ Some of these can be run locally with some inference server like `Ollama`,
 `llama.cpp` or `LMStudio`, and also use pubic 
 ones.
 :::
----
-
-### litellm response object
-
-::: {.fragment .fade-in-then-semi-out}
-```python
-ModelResponse(
-  id='chatcmpl-c34aae0e-a299-42a0-922e-aabd96e3a91e', 
-  created=1758269174, 
-  model='ollama/granite-code:20b', 
-  object='chat.completion', 
-  system_fingerprint=None, 
-  choices=[Choices(
-    finish_reason='stop', 
-    index=0, 
-    message=Message(
-      content='### Bot:\nHey there! How can I assist you today?\n\n', 
-      role='assistant', 
-      tool_calls=None, 
-      function_call=None, 
-      provider_specific_fields=None
-      )
-    )], 
-    usage=Usage(
-      completion_tokens=17, 
-      prompt_tokens=20, 
-      total_tokens=37, 
-      completion_tokens_details=None, 
-      prompt_tokens_details=None
-      )
-    )
-```
-:::
-
-
-
 
 ---
 
-### Getting some completions (cont.) {.center}
-```python
+### Extracting the SQL with output_format
+
+We could traverse the `response.messages`, but there's a more robust way called 
+`output_format` that accepts JSONSchema or a Pydantic `BaseModel`.
+
+```{python}
 #| echo: true
-#| output: true
+#| output-location: slide
 #| 
-from litellm import completion
+class SQLOutput(BaseModel):
+    sql: str = Field(description="The SQL query")
+    reasoning = Optional[str] = Field(description="Reasoning for the query") 
 
-messages = [
-  {"role": "user", 
-  "content": "Create a small customer table in SQL"}]
-response = completion(
-  model="ollama/hf.co/unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF:F16", 
-  messages=messages, stream=False
+# Optional
+litellm.enable_json_schema_validation = True
+
+response = litellm.completion(
+  model=model, 
+  messages=messages,
+  response_format=SQLOutput,
 )
-print(response['choices'][0]['message']['content'])
+display(response)
 ```
 
 

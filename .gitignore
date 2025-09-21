@@ -10,3 +10,4 @@ slides_files/
 .*_cache/
 dist/*
 minidev*
+__MACOS*
