@@ -88,14 +88,20 @@ def ipython(ctx: Context):
     os.execvp(cmd, argv)
 
 
-@task(autoprint=True)
-def length(ctx: Context, input_="messages.json", model="granite-code:20b"):
-    if not model:
-        sys.exit("model not defined")
-    content = Path(input_).read_text()
-    resp = httpx.post(
-        "http://localhost:11434/api/embeddings",
-        json={"model": model, "prompt": content},
-    )
-    resp.raise_for_status()
-    return resp
+# @task(autoprint=True)
+# def length(ctx: Context, input_="messages.json", model="granite-code:20b"):
+#     if not model:
+#         sys.exit("model not defined")
+#     content = Path(input_).read_text()
+#     resp = httpx.post(
+#         "http://localhost:11434/api/embeddings",
+#         json={"model": model, "prompt": content},
+#     )
+#     resp.raise_for_status()
+#     return resp
+
+@task(aliases=["d"])
+def slide_code_debug_in_ipython(ctx: Context, file="slides.qmd"):
+    """ QMD -> IPYNB ; ipython --pdb ..."""
+    ctx.run("quarto convert slides.qmd")
+    ctx.run("direnv exec . uv run ipython --pdb --ext rich slides.ipynb")
