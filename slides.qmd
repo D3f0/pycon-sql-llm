@@ -14,7 +14,7 @@ format:
     slide-number: true
     transition: slide
     code-copy: true
-    highlight-style: github
+    highlight-style: a11y
     code-overflow: wrap
     theme:
       - solarized
@@ -45,6 +45,7 @@ jupyter: python3
 - 🚜 Worked as CTO in  Hello Tractor 
 - 🧪 Software Engineer at IBM Research 
 - 🛰️ Worked in Foundational Models for Geospatial applications
+  - [There's a workshop on Saturday 🤩](https://pycon-kenya-2025.sessionize.com/session/954933)
 - 💬 Currently working on [Flowpilot {{< bi link-45deg >}}](https://research.ibm.com/projects/flowpilot), providing core features to 
   different products and divisions.
 ::: 
@@ -66,11 +67,11 @@ jupyter: python3
 
 In this talk we're gonna show how to use Python to:
 
-  - Connect to a database and execute the queries
-  - Convert natural language questions into SQL
-  - Create a workflow
-  - Fix common errors
-  - Lessons learned
+  - {{< bi database >}} Connect to a database and execute the queries (🐦)
+  - {{< bi filetype-sql >}}Convert natural language questions into SQL 
+  - {{< bi diagram-3 >}} Create a workflow 
+  - {{< bi bug-fill >}}Fix common errors
+  - {{< bi bookmark-check >}}Lessons learned
   
 TODO: Put some drawing & rephrase
 
@@ -123,10 +124,7 @@ These datasets define:
 
 ## BIRD 
 
-![](./img/ibm-granite-leaderboard.png){height="400px" fig-align="center"}
-
-[{{<bi article>}} article](https://research.ibm.com/blog/granite-LLM-text-to-SQL)
-
+![[IBM Research in the lederboard 2024-06-02](https://research.ibm.com/blog/granite-LLM-text-to-SQL)](./img/ibm-granite-leaderboard.png){height="400px" fig-align="center"}
 
 ::: notes
 We're select BIRD dataset since we have some experience with it, we managed
@@ -201,13 +199,15 @@ In `minidev/MINIDEV/dev_databases/california_schools/` we find the {{< bi databa
 
 ### Creating the `Engine`
 
+Creating an `Engine` instance connected to a SQLite database.
 ```{python}
 #| echo: true
 #| code-overflow: wrap
-
+from pathlib import Path
 from sqlalchemy import create_engine
-path = './minidev/MINIDEV/dev_databases/california_schools/california_schools.sqlite'
-engine = create_engine(f'sqlite:///{path}')
+base = Path('./minidev/MINIDEV/dev_databases/california_schools/')
+db_path = base / 'california_schools.sqlite'
+engine = create_engine(f'sqlite:///{db_path}')
 engine
 ```
 
@@ -225,15 +225,20 @@ simple_queries_df.head(2).set_index("db_id")
 ---
 
 ```{python}
-#| echo: true
+#| echo: false
 import pandas as pd
 pd.set_option('display.max_colwidth', 0)
+```
+
+```{python}
+#| echo: true
+import pandas as pd
 
 question_sql_df = simple_queries_df[["question","SQL"]].reset_index()
-# question_sql_df[0:1].T
 ```
 
 ::: {.fragment .fade-left}
+Let's take a look at the `question` and `SQL` column.
 
 ```{python}
 #| echo: true
@@ -250,6 +255,11 @@ print(f"{query!r}")
 
 ### Execute the queries {.smaller}
 
+::: {style="font-size: 60%;"}
+Now we run the `SQL` column captured in the variable `query` through SQLAlchemy and
+plot the results as a DataFrame.
+:::
+
 ```{python}
 #| echo: true
 
@@ -264,6 +274,9 @@ with engine.connect() as conn:
     )
     display(res_df)
 ```
+
+::: footer
+:::
 
 ---
 
@@ -293,6 +306,19 @@ As we can see, the table names may not be immediately understandable 🤔
 ::: notes
 
 :::
+
+---
+
+###
+
+```{python}
+#| echo: true
+#| code-overflow: wrap
+#| 
+db.get_table_info()
+
+
+```
 
 ---
 
@@ -403,6 +429,7 @@ Now we construct a list of messages. These are `dicts` which have a key
 ```{python}
 #| echo: true
 #| output-location: slide
+
 def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
     # Create a ChatPromptTemplate
     messages = [
@@ -429,6 +456,17 @@ print(messages)
 import json
 with open("messages.json", "w") as fp:
     json.dump(messages, fp)
+```
+
+--- 
+
+### Inspecting the `system` message
+
+```{python}
+#| echo: false
+#| output-location: default
+#| classes: scrollable 
+print(messages[0]['content'])
 ```
 
 ---
@@ -468,17 +506,17 @@ litellm.suppress_debug_info = True
 
 ```{python}
 #| echo: true
-#| output-location: slide
+
 import litellm
 
-model = "ollama_chat/granite-code:20b"
+# model = "ollama_chat/granite-code:20b"
+model = "watsonx/ibm/granite-3-2-8b-instruct"
 
 response = litellm.completion(
   model=model,
   messages=messages,
 )
 
-response
 ```
 
 :::
@@ -495,17 +533,25 @@ ones.
 
 ---
 
+```{python}
+#| echo: true
+#| classes: scrollable
+response
+```
+---
+
 ## Structured output
 
 ::: {.fragment}
-Now that we get the SQL, we're going to use a popular feature to get the 
-SQL as JSON.
+Now that we get the SQL, we're going to ask the LLM to return
+the response as JSON using a Pydantic model.
 :::
 
 ::: {.fragment}
 ```{python}
 #| echo: true
 #| output-location: slide
+#| code-line-numbers: "1|2-5|9-13|14-15"
 
 from pydantic import BaseModel, Field
 class SQLOutput(BaseModel):
@@ -613,7 +659,7 @@ class CreateSQLNode:
 
 ---
 
-## State
+## State for SQL workflow
 
 LangGraph uses state that is propagated through nodes.
 
