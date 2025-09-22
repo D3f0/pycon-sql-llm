@@ -45,10 +45,16 @@
 }
 
 .scrollable {
-  max-height: 500px;
+  max-height: 90%;
   overflow-y: auto;
 }
 .slide .output-location-slide pre {
-  max-height: 500px;
+  max-height: 90%;
+  overflow-y: auto;
+}
+
+
+.output-location-slide .cell-output-display {
+  max-height: 90%;
   overflow-y: auto;
 }
