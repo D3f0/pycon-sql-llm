@@ -345,6 +345,8 @@ For example, some IBM trained models include:
 - granite-20b-code-base-sql-gen
 
 [More info on these models {{< bi box-arrow-up-right >}}](https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-models-ibm.html?context=wx&locale=en&audience=wdp#granite-code-instruct-models)
+[And also in 🤗 {{< bi box-arrow-up-right >}}](https://huggingface.co/models?search=sql)
+
 :::
 
 :::
@@ -607,14 +609,157 @@ and returns another state object.
 
 ---
 
-### Nodes 
+## State for SQL workflow
+
+LangGraph uses state that is propagated through nodes.
+
+This state can be defined with a TypedDict or a Pydantic BaseModel.
+
+```{python}
+#| echo: true
+from typing import Optional, Dict, List
+from dataclasses import dataclass, field
+from sqlalchemy import Engine
+
+@dataclass
+class State:
+    question: str = ""
+    engine: Optional[Engine] = None
+    database: Optional[SQLDatabase] = None
+    messages: List[Dict[str, str]] = field(default_factory=list)
+    sql: Optional[str] = None
+    results: Optional[str] = None
+```
+
+---
+
+## Creating Nodes
+
+The initial node will receive the user input and create the state.
+```{python}
+#| echo: true
+
+def init(user_input: Dict[str, str]) -> State:
+  engine = create_engine(user_input["database"])
+  database = SQLDatabase(engine=engine)
+  return State(
+    question=user_input["question"], 
+    database=database,
+  )
+```
+
+---
+
+## Generating the prompt
+
+```{python}
+#| echo: true
+
+def make_prompt(state: State) -> State:
+    messages = [
+      {
+        "role": "system", 
+        "content": system_message.format(
+          dialect=state.database.dialect, 
+          top_k=top_k,
+          table_info=state.database.get_table_info()
+        )},
+      {
+        "role": "user", 
+        "content": state.question,
+      }
+    ]
+    return state
+
+```
+
+
+---
+
+## Calling the LLM
+
+The initial node will receive the user input and create the state.
+```{python}
+#| echo: true
+
+def generate(state: State) -> State:
+
+  response = litellm.completion(
+    model=model,
+    messages=messages,
+    response_format=SQLOutput,
+  )
+  output = SQLOutput.model_validate_json(response.choices[0].message.content)
+  print(output)
+  engine = create_engine(user_input["database"])
+  database = SQLDatabase(engine=engine)
+  return State(
+    question=user_input["question"], 
+    database=database,
+  )
+```
+
+---
+
+## Graph creation
+
+```{.python}
+#| echo: true
+#| code-line-numbers: "1"
+#| output-location: slide
+from langgraph.graph import StateGraph, START, END
+
+graph_builder = StateGraph(State)
+graph_builder.add_node("init", init)
+graph_builder.add_node("make_prompt", make_prompt)
+graph_builder.add_node("generate", generate)
+graph_builder.add_node("execute", execute)
+graph_builder.add_edge(START, "init")
+graph_builder.add_edge("init", "make_prompt")
+graph_builder.add_edge("lambda_2", END)
+display(graph_builder.compile())
+```
+
+---
+
+# Fix common errors
+## Adding a node for safety
+
+::: notes
+Usually done through LLMs in agentic workflows, we are going to take a
+more deterministic approach.
+:::
+
+## Let's go for Bobby tables {.center}
+
+![](./img/memes/exploits_of_a_mom.png)
+
+::: footer
+[`xkcd 327`](https://www.explainxkcd.com/wiki/index.php/327:_Exploits_of_a_Mom)
+::: 
+
+---
+
+# Adding more information in the prompt
+
+## Acronyms
+
+
+
+---
+
+# Lessons learned
+
+---
+
+## Move from function to classes
 
 ::: {style="font-size: 80%;"}
 ::::: {.fragment}
 - The workflow state can be a `dict` or `TypedDict`, but `dataclass` or a `BaseModel` is 
   more convenient.
 ```{.python}
-class State(BaseModel):
+class State(TypedDict):
   connection: ...
   messages: ...
   schema: ...
@@ -662,80 +807,31 @@ class CreateSQLNode:
 
 ---
 
-## State for SQL workflow
-
-LangGraph uses state that is propagated through nodes.
-
-This state can be defined with a TypedDict or a Pydantic BaseModel.
-
-```{python}
-#| echo: true
-from pydantic import BaseModel, Field
-from typing import Optional
-
-class State(BaseModel):
-    database: str = Field(description="SQLAlchemy database string")
-    question: str = ""
-    schema: str = ""
-    sql: Optional[str] = Field(default=None, description="")
-```
-
----
-
----
-
-## Graph creation
-
-```{.python}
-#| echo: true
-#| code-line-numbers: "1"
-from langgraph.graph import StateGraph, START, END
-
-graph_builder = StateGraph(State)
-graph_builder.add_node("get_schema", lambda s: s)
-graph_builder.add_node("generate_sql_query", lambda s: s)
-graph_builder.add_node("run_query", lambda s: s)
-graph_builder.add_edge(START, "lambda_1")
-graph_builder.add_edge("lambda_1", "lambda_2")
-graph_builder.add_edge("lambda_2", END)
-display(graph_builder.compile())
-```
-
----
-
-# Fix common errors
-## Adding a node for safety
-
-::: notes
-Usually done through LLMs in agentic workflows, we are going to take a
-more deterministic approach.
-:::
-
-## Let's go for Bobby tables {.center}
-
-![](./img/memes/exploits_of_a_mom.png)
-
-::: footer
-[`xkcd 327`](https://www.explainxkcd.com/wiki/index.php/327:_Exploits_of_a_Mom)
-::: 
-
----
-
-# Adding more information in the prompt
-
-## Acronyms
-
-
-
----
-
-# Lessons learned
-
----
-
 ## Reducing the schema for simpler queries
 
+TBD
+
+--- 
 
 ## Metadata about the columns
 
+TBD reducing the involved columns
+
+---
+
 ## Dynamic context
+
+- Date related acronyms, like Q1, Q2, etc.
+- Function nodes
+  - WASM?
+
+---
+## Extensibility through packages
+
+---
+
+# Questions
+
+---
+
+# Thank you
