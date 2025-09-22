@@ -699,6 +699,29 @@ def generate(state: State) -> State:
   )
 ```
 
+## Executing the SQL 
+
+The initial node will receive the user input and create the state.
+```{python}
+#| echo: true
+
+def execute(state: State) -> State:
+
+  response = litellm.completion(
+    model=model,
+    messages=messages,
+    response_format=SQLOutput,
+  )
+  output = SQLOutput.model_validate_json(response.choices[0].message.content)
+  print(output)
+  engine = create_engine(user_input["database"])
+  database = SQLDatabase(engine=engine)
+  return State(
+    question=user_input["question"], 
+    database=database,
+  )
+```
+
 ---
 
 ## Graph creation
@@ -716,7 +739,8 @@ graph_builder.add_node("generate", generate)
 graph_builder.add_node("execute", execute)
 graph_builder.add_edge(START, "init")
 graph_builder.add_edge("init", "make_prompt")
-graph_builder.add_edge("lambda_2", END)
+graph_builder.add_edge("make_prompt", "generate")
+graph_builder.add_edge("generate", "execute")
 display(graph_builder.compile())
 ```
 
@@ -807,26 +831,39 @@ class CreateSQLNode:
 
 ---
 
-## Reducing the schema for simpler queries
+## Enhancing the context
 
-TBD
-
---- 
-
-## Metadata about the columns
-
-TBD reducing the involved columns
+- Tables with a high number of columns can make the context larger
+  - RAG at the column level is a common technique to improve efficiency and accuracy
+- Retrieving the values from the DB can help the LLM produce better queries
+- Providing some examples in the context with the `question` and `SQL` pairs
+  also improves efficiency.
 
 ---
 
 ## Dynamic context
 
-- Date related acronyms, like Q1, Q2, etc.
-- Function nodes
+- Other types of examples of well understood terms may require 
+  some mapping.
+  
+  - For example, the term Q1 can mean, *quarter one*, but it should
+    be supplied dynamically.
+
+- Function nodes, when we want to modify the query another approach
+  is to create
   - WASM?
 
 ---
+
 ## Extensibility through packages
+
+::: {.sequential}
+- Pipelines defined as YAML.
+- Each node is registered in a collection of nodes, and each
+  node in the pipeline accepts the `__init__` arguments.
+- Use Python's built in `entry-point` system to *install* nodes.
+  This is a good approach to separate production from 
+:::
 
 ---
 

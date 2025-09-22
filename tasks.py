@@ -4,20 +4,14 @@ import inspect
 import os
 import shlex
 import sys
-import time
 from datetime import datetime
 from io import StringIO
-from pathlib import Path
 from shutil import which
 from textwrap import dedent
 
-import httpx
 from invoke import task
 from invoke.context import Context
-from invoke.runners import Result
 from rich.console import Console
-from rich.panel import Panel
-from rich.text import Text
 
 console = Console()
 
@@ -100,8 +94,9 @@ def ipython(ctx: Context):
 #     resp.raise_for_status()
 #     return resp
 
+
 @task(aliases=["d"])
 def slide_code_debug_in_ipython(ctx: Context, file="slides.qmd"):
-    """ QMD -> IPYNB ; ipython --pdb ..."""
+    """QMD -> IPYNB ; ipython --pdb ..."""
     ctx.run("quarto convert slides.qmd")
     ctx.run("direnv exec . uv run ipython --pdb --ext rich slides.ipynb")
