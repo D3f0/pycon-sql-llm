@@ -584,6 +584,9 @@ with engine.connect() as c:
 
 # Create a workflow
 
+::: notes
+
+:::
 ---
 
 # Chaining generation and execution
@@ -671,9 +674,31 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 class State(BaseModel):
+    database: str = Field(description="SQLAlchemy database string")
     question: str = ""
     schema: str = ""
     sql: Optional[str] = Field(default=None, description="")
+```
+
+---
+
+---
+
+## Graph creation
+
+```{.python}
+#| echo: true
+#| code-line-numbers: "1"
+from langgraph.graph import StateGraph, START, END
+
+graph_builder = StateGraph(State)
+graph_builder.add_node("get_schema", lambda s: s)
+graph_builder.add_node("generate_sql_query", lambda s: s)
+graph_builder.add_node("run_query", lambda s: s)
+graph_builder.add_edge(START, "lambda_1")
+graph_builder.add_edge("lambda_1", "lambda_2")
+graph_builder.add_edge("lambda_2", END)
+display(graph_builder.compile())
 ```
 
 ---
