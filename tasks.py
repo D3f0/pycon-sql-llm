@@ -96,7 +96,13 @@ def ipython(ctx: Context):
 
 
 @task(aliases=["d"])
-def slide_code_debug_in_ipython(ctx: Context, file="slides.qmd"):
+def slide_code_debug_in_ipython(ctx: Context, file="slides.qmd", exec_=True):
     """QMD -> IPYNB ; ipython --pdb ..."""
-    ctx.run("quarto convert slides.qmd")
-    ctx.run("direnv exec . uv run ipython --pdb --ext rich slides.ipynb")
+    ctx.run("quarto convert slides.qmd --output ipynb/slides.ipynb")
+    cmd = "direnv exec . uv run ipython --pdb --ext rich ipynb/slides.ipynb"
+    if not exec_:
+        ctx.run(cmd, pty=True)
+    else:
+        argv = shlex.split(cmd)
+        cmd = argv[0]
+        os.execvp(cmd, argv)

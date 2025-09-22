@@ -1,6 +1,6 @@
 ---
 title: '💬 {{< bi database >}} 🤖 Asking questions to your database with LLMs '
-author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
+author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Africa
 date: September, 2025
 embed-resources: false
 footer: '*Asking question to {{< bi database >}} with LLMs* - 🐍 PyCon 🇰🇪 2025'
@@ -58,7 +58,7 @@ jupyter: python3
 
 ## Follow along (or at 🏡) {.center}
 
-{{< qrcode https://jmbuhr.de >}}
+{{< qrcode https://ibm.com >}}
 
 
 ---
@@ -153,7 +153,8 @@ from datasets import load_dataset, DownloadConfig
 
 # Load the dataset
 dataset = load_dataset(
-  "birdsql/bird_mini_dev", download_config=DownloadConfig(disable_tqdm=True)
+  "birdsql/bird_mini_dev", 
+  download_config=DownloadConfig(disable_tqdm=True)
 )
 
 # Contents
@@ -267,12 +268,13 @@ from sqlalchemy import text
 with engine.connect() as conn:
     result = conn.execute(text(query))
     res_df = pd.DataFrame(result.fetchall()) # 🐼 ✨
-    print(
-        f"[bold]Question:[/bold] {question}, ",
-        f"[bold]SQL:[/bold] {query}", 
-        "[bold]Result[/bold]", sep="\n"
-    )
     display(res_df)
+```
+
+
+```{python}
+print(f"[bold]Question:[/bold] {question}")
+print(f"[bold]SQL:[/bold] {query}")
 ```
 
 ::: footer
@@ -315,10 +317,14 @@ As we can see, the table names may not be immediately understandable 🤔
 #| echo: true
 #| code-overflow: wrap
 #| 
-db.get_table_info()
+print(db.get_table_info())
 
 
 ```
+
+<!-- Disable footer -->
+::: footer
+:::
 
 ---
 
@@ -330,7 +336,6 @@ db.get_table_info()
 LLMs are quite capable of writing functional SQL queries, from the `code` or `coder`
 ones, to specific ones for SQL generation.
 :::
-
 
 :::
 
@@ -482,7 +487,7 @@ print(messages[0]['content'])
 
 ```{python}
 #| echo: true
-!uv add litellm --quiet   # it can be be added with uv 
+!uv add litellm --quiet
 ```
 :::
 
@@ -576,10 +581,13 @@ print(output)
 
 ---
 
-```{.python}
-with engine.connect() as c:
-  response = c.execute(text(output.sql))
-  print(response.fetchall(()))
+```{python}
+try:
+  with engine.connect() as c:
+    response = c.execute(text(output.sql))
+    print(response.fetchall(()))
+except Exception as err:
+  print(err)
 ```
 
 ---
@@ -706,16 +714,9 @@ The initial node will receive the user input and create the state.
 #| echo: true
 
 def execute(state: State) -> State:
-
-  response = litellm.completion(
-    model=model,
-    messages=messages,
-    response_format=SQLOutput,
-  )
-  output = SQLOutput.model_validate_json(response.choices[0].message.content)
-  print(output)
-  engine = create_engine(user_input["database"])
-  database = SQLDatabase(engine=engine)
+  with state.engine.connect() as con:
+    state.result = conn.execute(text(state.sql))
+  
   return State(
     question=user_input["question"], 
     database=database,
@@ -726,10 +727,10 @@ def execute(state: State) -> State:
 
 ## Graph creation
 
-```{.python}
+```{python}
 #| echo: true
 #| code-line-numbers: "1"
-#| output-location: slide
+
 from langgraph.graph import StateGraph, START, END
 
 graph_builder = StateGraph(State)
@@ -741,34 +742,27 @@ graph_builder.add_edge(START, "init")
 graph_builder.add_edge("init", "make_prompt")
 graph_builder.add_edge("make_prompt", "generate")
 graph_builder.add_edge("generate", "execute")
-display(graph_builder.compile())
+graph = graph_builder.compile()
 ```
 
 ---
 
-# Fix common errors
-## Adding a node for safety
-
-::: notes
-Usually done through LLMs in agentic workflows, we are going to take a
-more deterministic approach.
-:::
-
-## Let's go for Bobby tables {.center}
-
-![](./img/memes/exploits_of_a_mom.png)
-
-::: footer
-[`xkcd 327`](https://www.explainxkcd.com/wiki/index.php/327:_Exploits_of_a_Mom)
-::: 
-
----
-
-# Adding more information in the prompt
-
-## Acronyms
+## Visualizing the graph {{< bi diagram-3 >}} {.smaller}
 
 
+```{python}
+#| echo: true
+#| output-location: fragment
+
+from IPython.display import Image, display
+
+try:
+    display(Image(graph.get_graph().draw_mermaid_png()))
+except Exception as error:
+    print(error)
+    # This requires some extra dependencies and is optional
+    pass
+```
 
 ---
 
@@ -829,6 +823,16 @@ class CreateSQLNode:
 
 :::
 
+
+---
+
+## SQL validation
+
+- We can pass the SQL to SQLAlchemy engine to validate if the syntax is correct
+- SQLGlot `parse_one()` provides asn AST of the SQL for:
+  - Finding dangerous operations (DML)
+  - For any updates to the query, working on an AST is better than string substitution.
+
 ---
 
 ## Enhancing the context
@@ -855,9 +859,10 @@ class CreateSQLNode:
 
 ---
 
-## Extensibility through packages
+## Extensibility
 
 ::: {.sequential}
+- Offload node responsibilities into external services (e.g. DB execution) 
 - Pipelines defined as YAML.
 - Each node is registered in a collection of nodes, and each
   node in the pipeline accepts the `__init__` arguments.
@@ -867,8 +872,13 @@ class CreateSQLNode:
 
 ---
 
-# Questions
-
----
 
 # Thank you
+
+::: {.fragment}
+### Questions
+:::
+
+::: {.fragment}
+#### Contact
+:::
