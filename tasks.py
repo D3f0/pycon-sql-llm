@@ -31,11 +31,11 @@ def preview(
     if which("entr"):
         console.print("[bold]entr[/bold] found, hot reloading after crash enabled ✨")
         ctx.run(
-            f"echo {file_} | entr -c quarto preview /_ --render revealjs --port $PORT"
+            f"echo {file_} | entr -c direnv exec . quarto preview /_ --render revealjs --port $PORT"
         )
     else:
         ran = ctx.run(
-            f"quarto preview {file_} --render revealjs --port $PORT {args}",
+            f"direnv exec . quarto preview {file_} --render revealjs --port $PORT {args}",
             env={"PORT": port or os.getenv("PORT")},
             warn=True,
         )
