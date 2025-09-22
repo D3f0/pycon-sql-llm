@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-fced259a1985fd972ecb57c7cd45153f.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/quarto-contrib/reveal-logo-1.0.0/reveal-logo.js" defer="true"></script>
+<link href="site_libs/quarto-contrib/reveal-logo-1.0.0/reveal-logo.css" rel="stylesheet">
+<script src="site_libs/quarto-contrib/qrcodejs-v1.0.0/qrcode.js"></script>
+<link href="site_libs/quarto-contrib/bootstrap-icons-1.13.1/bootstrap-icons.css" rel="stylesheet"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.31">
+
+  <meta name="author" content="Nahuel Defossé  nahuel.defosse@ibm.com IBM Research Kenya Lab">
+  <meta name="dcterms.date" content="2025-09-01">
+  <title>LLMs for SQL generation – 💬  🤖 Asking questions to your database with LLMs</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #767676;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #767676;  padding-left: 4px; }
+    div.sourceCode
+      { color: #545454; background-color: #fefefe; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #545454; } /* Normal */
+    code span.al { color: #7928a1; } /* Alert */
+    code span.an { color: #696969; } /* Annotation */
+    code span.at { color: #a55a00; } /* Attribute */
+    code span.bn { color: #7928a1; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #d91e18; } /* ControlFlow */
+    code span.ch { color: #008000; } /* Char */
+    code span.cn { color: #d91e18; } /* Constant */
+    code span.co { color: #696969; } /* Comment */
+    code span.cv { color: #696969; font-style: italic; } /* CommentVar */
+    code span.do { color: #696969; font-style: italic; } /* Documentation */
+    code span.dt { color: #7928a1; } /* DataType */
+    code span.dv { color: #7928a1; } /* DecVal */
+    code span.er { color: #7928a1; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #a55a00; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #696969; } /* Information */
+    code span.kw { color: #d91e18; } /* Keyword */
+    code span.op { color: #00769e; } /* Operator */
+    code span.ot { color: #d91e18; } /* Other */
+    code span.pp { color: #7928a1; } /* Preprocessor */
+    code span.sc { color: #00769e; } /* SpecialChar */
+    code span.ss { color: #008000; } /* SpecialString */
+    code span.st { color: #008000; } /* String */
+    code span.va { color: #a55a00; } /* Variable */
+    code span.vs { color: #008000; } /* VerbatimString */
+    code span.wa { color: #696969; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-65ac04f979201c464a53e61075c5f7b0.css">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+  
+  <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">💬 <i class="bi-database " style="" role="img" aria-hidden="true"></i> 🤖 Asking questions to your database with LLMs</h1>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Nahuel Defossé <br><a href="mailto:nahuel.defosse@ibm.com">nahuel.defosse@ibm.com</a><br>IBM Research Kenya Lab 
+</div>
+</div>
+</div>
+
+  <p class="date">2025-09-01</p>
+</section>
+<section id="about-myself" class="slide level2 smaller">
+<h2>About myself</h2>
+<div class="columns">
+<div class="column" style="width:40%;">
+<p><img data-src="./img/memes/myself.gif" style="height:12em"></p>
+</div><div class="column" style="width:60%;">
+<ul>
+<li class="fragment">🐍 Pythonista with 18 years of experience.
+<ul>
+<li class="fragment">Co-organized SciPy Latin America</li>
+</ul></li>
+<li class="fragment">🚜 Worked as CTO in Hello Tractor</li>
+<li class="fragment">🧪 Software Engineer at IBM Research</li>
+<li class="fragment">🛰️ Worked in Foundational Models for Geospatial applications
+<ul>
+<li class="fragment"><a href="https://pycon-kenya-2025.sessionize.com/session/954933">There’s a workshop on Saturday 🤩</a></li>
+</ul></li>
+<li class="fragment">💬 Currently working on <a href="https://research.ibm.com/projects/flowpilot">Flowpilot <i class="bi-link-45deg " style="" role="img" aria-hidden="true"></i></a>, providing core features to different products and divisions.</li>
+</ul>
+</div></div>
+</section>
+<section id="follow-along-or-at" class="slide level2 center">
+<h2>Follow along (or at 🏡)</h2>
+<div id="" class="qrcode"></div>
+<script type="text/javascript">
+(function() {
+  var script = document.currentScript;
+  var qrcode = script.previousElementSibling;
+  qrcode.qrcode = new QRCode(qrcode, {"colorDark":"#000000","colorLight":"#ffffff","height":128,"text":"https://jmbuhr.de","width":128});
+  script.remove();
+})();
+</script>
+    
+</section>
+<section class="slide level2">
+
+</section>
+<section>
+<section id="intro" class="title-slide slide level1 center">
+<h1>Intro</h1>
+<p>In this talk we’re gonna show how to use Python to:</p>
+<ul>
+<li><i class="bi-database " style="" role="img" aria-hidden="true"></i> Connect to a database and execute the queries (🐦)</li>
+<li><i class="bi-filetype-sql " style="" role="img" aria-hidden="true"></i>Convert natural language questions into SQL</li>
+<li><i class="bi-diagram-3 " style="" role="img" aria-hidden="true"></i> Create a workflow</li>
+<li><i class="bi-bug-fill " style="" role="img" aria-hidden="true"></i>Fix common errors</li>
+<li><i class="bi-bookmark-check " style="" role="img" aria-hidden="true"></i>Lessons learned</li>
+</ul>
+<p>TODO: Put some drawing &amp; rephrase</p>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="connect-to-a-database-and-execute-the-queries" class="title-slide slide level1 center">
+<h1>Connect to a database and execute the queries</h1>
+
+</section>
+<section id="public-datasets-used-in-text-to-sql" class="slide level2">
+<h2>Public datasets used in text to SQL</h2>
+<div class="columns">
+<div class="column">
+<div class="fragment fade-right">
+
+</div>
+<div class="fragment fade-right">
+<ul>
+<li><a href="https://yale-lily.github.io/spider" target="_bank">🕷️ Spider</a></li>
+</ul>
+</div>
+<div class="fragment fade-right">
+<ul>
+<li><a href="https://spider2-sql.github.io/" target="_bank">🕷️ 🕷️ Spider 2</a></li>
+</ul>
+</div>
+<div class="fragment fade-right">
+<ul>
+<li>🐦 <a href="https://bird-bench.github.io/" target="_bank">BIRD</a></li>
+</ul>
+</div>
+<div class="fragment fade-right">
+<ul>
+<li><a href="https://sig4kg.github.io/archer-bench/" target="_bank">🏹 Archer</a></li>
+</ul>
+</div>
+</div><div class="column">
+<div class="fragment fade-left small_text">
+<p>These datasets define:</p>
+<ul>
+<li>❓ Natural language questions</li>
+<li>🫰 Expected SQL</li>
+<li>🏗️ Database schema &amp; content</li>
+<li>🔎 Evaluation metrics</li>
+<li>🥇 Leaderboard</li>
+</ul>
+</div>
+</div></div>
+<aside class="notes">
+
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="bird" class="slide level2">
+<h2>BIRD</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="./img/ibm-granite-leaderboard.png" height="400"></p>
+<figcaption><a href="https://research.ibm.com/blog/granite-LLM-text-to-SQL">IBM Research in the lederboard 2024-06-02</a></figcaption>
+</figure>
+</div>
+<aside class="notes">
+<p>We’re select BIRD dataset since we have some experience with it, we managed to get to the top of the leatherboard in 2024/6</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level2">
+
+<h3 id="bird-mini-dev">BIRD mini-dev</h3>
+<ul>
+<li>It consist of 500 queries classified as <strong>simple</strong>, <strong>moderate</strong> and <strong>challenging</strong> <a href="https://github.com/bird-bench/mini_dev"><i class="bi-box-arrow-up-right " style="" role="img" aria-hidden="true"></i></a></li>
+</ul>
+<div class="fragment fade-left">
+<div id="f47741f5" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset, DownloadConfig </span>
+<span id="cb1-2"><a></a></span>
+<span id="cb1-3"><a></a><span class="co"># Load the dataset</span></span>
+<span id="cb1-4"><a></a>dataset <span class="op">=</span> load_dataset(</span>
+<span id="cb1-5"><a></a>  <span class="st">"birdsql/bird_mini_dev"</span>, download_config<span class="op">=</span>DownloadConfig(disable_tqdm<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-6"><a></a>)</span>
+<span id="cb1-7"><a></a></span>
+<span id="cb1-8"><a></a><span class="co"># Contents</span></span>
+<span id="cb1-9"><a></a><span class="bu">print</span>(<span class="st">"Database types: "</span>, <span class="op">*</span>dataset.keys())</span>
+<span id="cb1-10"><a></a>sqlite_df <span class="op">=</span> dataset[<span class="st">"mini_dev_sqlite"</span>].to_pandas()</span>
+<span id="cb1-11"><a></a>sqlite_df <span class="op">=</span> sqlite_df.drop(columns<span class="op">=</span>[<span class="st">'question_id'</span>])</span>
+<span id="cb1-12"><a></a>display(sqlite_df.head(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+</div>
+</section>
+<section id="" class="slide level2 output-location-slide"><div class="cell output-location-slide" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Database types:  mini_dev_mysql mini_dev_pg mini_dev_sqlite
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">db_id</th>
+<th data-quarto-table-cell-role="th">question</th>
+<th data-quarto-table-cell-role="th">evidence</th>
+<th data-quarto-table-cell-role="th">SQL</th>
+<th data-quarto-table-cell-role="th">difficulty</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>debit_card_specializing</td>
+<td>What is the ratio of customers who pay in EUR ...</td>
+<td>ratio of customers who pay in EUR against cust...</td>
+<td>SELECT CAST(SUM(IIF(Currency = 'EUR', 1, 0)) A...</td>
+<td>simple</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>debit_card_specializing</td>
+<td>In 2012, who had the least consumption in LAM?</td>
+<td>Year 2012 can be presented as Between 201201 A...</td>
+<td>SELECT T1.CustomerID FROM customers AS T1 INNE...</td>
+<td>moderate</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div></section><section class="slide level2">
+
+<h3 id="downloading-bird-databases">Downloading BIRD databases</h3>
+<!-- - We will be using [`uvx`](https://docs.astral.sh/uv/concepts/tools/#tool-versions)[^uvx] with the `gdown` package as follows: -->
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource shell number-lines code-with-copy"><code class="sourceCode"><span id="cb2-1"><a></a>uvx gdown https://drive.google.com/file/d/13VLWIwpw5E3d5DUkMvzw7hvHE67a4XkG/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><img data-src="./img/download_minidev.png"> <!-- Or just download from the [   link](https://drive.google.com/file/d/13VLWIwpw5E3d5DUkMvzw7hvHE67a4XkG/view?usp=sharing)  --></p>
+<p>Extracting the archive (3.3GiB)</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource shell number-lines code-with-copy"><code class="sourceCode"><span id="cb3-1"><a></a>unzip minidev_703.zip</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<!-- [^uvx]: It comes as part of `uv`, it's a shorthand for `uv tool run` -->
+<div class="footer">
+
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="picking-the-example-database-california_schools">Picking the example database <code>california_schools</code></h3>
+<p>In <code>minidev/MINIDEV/dev_databases/california_schools/</code> we find the <i class="bi-database " style="" role="img" aria-hidden="true"></i> <i class="bi-file " style="" role="img" aria-hidden="true"></i></p>
+
+<img data-src="./img/california_school.png" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="creating-the-engine">Creating the <code>Engine</code></h3>
+<p>Creating an <code>Engine</code> instance connected to a SQLite database.</p>
+<div id="a87cac97" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python code-overflow-wrap number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb4-2"><a></a><span class="im">from</span> sqlalchemy <span class="im">import</span> create_engine</span>
+<span id="cb4-3"><a></a>base <span class="op">=</span> Path(<span class="st">'./minidev/MINIDEV/dev_databases/california_schools/'</span>)</span>
+<span id="cb4-4"><a></a>db_path <span class="op">=</span> base <span class="op">/</span> <span class="st">'california_schools.sqlite'</span></span>
+<span id="cb4-5"><a></a>engine <span class="op">=</span> create_engine(<span class="ss">f'sqlite:///</span><span class="sc">{</span>db_path<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb4-6"><a></a>engine</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-magenta-fg ansi-bold">Engine</span><span class="ansi-bold">(</span>sqlite:<span class="ansi-magenta-fg">/</span><span class="ansi-magenta-fg">/</span><span class="ansi-magenta-fg">/minidev/MINIDEV/dev_databases/california_schools/</span><span class="ansi-bright-magenta-fg">california_schools.sqlite</span><span class="ansi-bold">)</span></pre>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="grabbing-a-simple-question-and-its">Grabbing a simple question and its <i class="bi-database " style="" role="img" aria-hidden="true"></i></h3>
+<div id="7af83307" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a></a>california_schools_df <span class="op">=</span> sqlite_df[sqlite_df.db_id <span class="op">==</span> <span class="st">'california_schools'</span>]</span>
+<span id="cb5-2"><a></a>simple_queries_df <span class="op">=</span> california_schools_df[sqlite_df.difficulty <span class="op">==</span> <span class="st">'simple'</span>]</span>
+<span id="cb5-3"><a></a>simple_queries_df.head(<span class="dv">2</span>).set_index(<span class="st">"db_id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">question</th>
+<th data-quarto-table-cell-role="th">evidence</th>
+<th data-quarto-table-cell-role="th">SQL</th>
+<th data-quarto-table-cell-role="th">difficulty</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">db_id</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">california_schools</td>
+<td>How many schools with an average score in Math...</td>
+<td>Exclusively virtual refers to Virtual = 'F'</td>
+<td>SELECT COUNT(DISTINCT T2.School) FROM satscore...</td>
+<td>simple</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">california_schools</td>
+<td>Please list the codes of the schools with a to...</td>
+<td>Total enrollment can be represented by `Enroll...</td>
+<td>SELECT T2.CDSCode FROM schools AS T1 INNER JOI...</td>
+<td>simple</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<div id="3139e2f4" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb6-2"><a></a></span>
+<span id="cb6-3"><a></a>question_sql_df <span class="op">=</span> simple_queries_df[[<span class="st">"question"</span>,<span class="st">"SQL"</span>]].reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment fade-left">
+<p>Let’s take a look at the <code>question</code> and <code>SQL</code> column.</p>
+<div id="c43a7583" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a></a>question <span class="op">=</span> question_sql_df.loc[<span class="dv">0</span>, <span class="st">"question"</span>]</span>
+<span id="cb7-2"><a></a>query <span class="op">=</span> question_sql_df.loc[<span class="dv">0</span>, <span class="st">"SQL"</span>]</span>
+<span id="cb7-3"><a></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>question<span class="sc">!r}</span><span class="ss">"</span>)</span>
+<span id="cb7-4"><a></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>query<span class="sc">!r}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #008000; text-decoration-color: #008000">'How many schools with an average score in Math greater than 400 in the SAT</span>
+<span style="color: #008000; text-decoration-color: #008000">test are exclusively virtual?'</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #008000; text-decoration-color: #008000">"SELECT COUNT(DISTINCT T2.School) FROM satscores AS T1 INNER JOIN schools </span>
+<span style="color: #008000; text-decoration-color: #008000">AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = 'F' AND T1.AvgScrMath &gt; </span>
+<span style="color: #008000; text-decoration-color: #008000">400"</span>
+</pre>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 class="smaller" id="execute-the-queries">Execute the queries</h3>
+<div style="font-size: 60%;">
+<p>Now we run the <code>SQL</code> column captured in the variable <code>query</code> through SQLAlchemy and plot the results as a DataFrame.</p>
+</div>
+<div id="53de8dbb" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a></a><span class="im">from</span> sqlalchemy <span class="im">import</span> text</span>
+<span id="cb8-2"><a></a><span class="cf">with</span> engine.<span class="ex">connect</span>() <span class="im">as</span> conn:</span>
+<span id="cb8-3"><a></a>    result <span class="op">=</span> conn.execute(text(query))</span>
+<span id="cb8-4"><a></a>    res_df <span class="op">=</span> pd.DataFrame(result.fetchall()) <span class="co"># 🐼 ✨</span></span>
+<span id="cb8-5"><a></a>    <span class="bu">print</span>(</span>
+<span id="cb8-6"><a></a>        <span class="ss">f"[bold]Question:[/bold] </span><span class="sc">{</span>question<span class="sc">}</span><span class="ss">, "</span>,</span>
+<span id="cb8-7"><a></a>        <span class="ss">f"[bold]SQL:[/bold] </span><span class="sc">{</span>query<span class="sc">}</span><span class="ss">"</span>, </span>
+<span id="cb8-8"><a></a>        <span class="st">"[bold]Result[/bold]"</span>, sep<span class="op">=</span><span class="st">"</span><span class="ch">\n</span><span class="st">"</span></span>
+<span id="cb8-9"><a></a>    )</span>
+<span id="cb8-10"><a></a>    display(res_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">Question:</span> How many schools with an average score in Math greater than <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">400</span> 
+in the SAT test are exclusively virtual?, 
+<span style="font-weight: bold">SQL:</span> SELECT <span style="color: #800080; text-decoration-color: #800080; font-weight: bold">COUNT</span><span style="font-weight: bold">(</span>DISTINCT T2.School<span style="font-weight: bold">)</span> FROM satscores AS T1 INNER JOIN 
+schools AS T2 ON T1.cds = T2.CDSCode WHERE T2.Virtual = <span style="color: #008000; text-decoration-color: #008000">'F'</span> AND 
+T1.AvgScrMath &gt; <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">400</span>
+<span style="font-weight: bold">Result</span>
+</pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+
+<table class="dataframe caption-top" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header" style="text-align: right;">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">COUNT(DISTINCT T2.School)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="footer">
+
+</div>
+</section>
+<section class="slide level2">
+
+<h3 id="database-schema-with">Database schema with 🦜 ⛓️</h3>
+<p>LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information <sup>1</sup></p>
+<div id="ab94a383" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a></a><span class="op">!</span>uv pip install langchain<span class="op">-</span>community</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre>Audited <span style="font-weight:bold;opacity:0.7">1 package</span> in 21ms
+</pre>
+</div>
+</div>
+</div>
+<div id="1df74016" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a></a><span class="im">from</span> langchain_community.utilities <span class="im">import</span> SQLDatabase</span>
+<span id="cb10-2"><a></a>db <span class="op">=</span> SQLDatabase(engine<span class="op">=</span>engine)</span>
+<span id="cb10-3"><a></a></span>
+<span id="cb10-4"><a></a>display(db.get_usable_table_names())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-bold">[</span><span class="ansi-green-fg">'frpm'</span>, <span class="ansi-green-fg">'satscores'</span>, <span class="ansi-green-fg">'schools'</span><span class="ansi-bold">]</span></pre>
+</div>
+</div>
+</div>
+<div class="fragment slide-left">
+<p>As we can see, the table names may not be immediately understandable 🤔</p>
+</div>
+<aside class="notes">
+
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+<aside><ol class="aside-footnotes"><li id="fn1"><p><a href="https://python.langchain.com/docs/tutorials/sql_qa/#system-prompt" target="_blank">SQL Question Answering</a></p></li></ol></aside></section>
+<section class="slide level2">
+
+<h3 id="section"></h3>
+<div id="831cdc11" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python code-overflow-wrap number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a></a>db.get_table_info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-green-fg">'\nCREATE TABLE frpm </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">\n\t"CDSCode" TEXT NOT NULL, \n\t"Academic Year" TEXT, \n\t"County Code" TEXT, \n\t"District Code" INTEGER, \n\t"School Code" TEXT, \n\t"County Name" TEXT, \n\t"District Name" TEXT, \n\t"School Name" TEXT, \n\t"District Type" TEXT, \n\t"School Type" TEXT, \n\t"Educational Option Type" TEXT, \n\t"NSLP Provision Status" TEXT, \n\t"Charter School </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Y/N</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" INTEGER, \n\t"Charter School Number" TEXT, \n\t"Charter Funding Type" TEXT, \n\t"IRC" INTEGER, \n\t"Low Grade" TEXT, \n\t"High Grade" TEXT, \n\t"Enrollment </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"Free Meal Count </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"Percent </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">%</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> Eligible Free </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"FRPM Count </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"Percent </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">%</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> Eligible FRPM </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"Enrollment </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"Free Meal Count </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"Percent </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">%</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> Eligible Free </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"FRPM Count </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"Percent </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">%</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> Eligible FRPM </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">" REAL, \n\t"2013-14 CALPADS Fall 1 Certification Status" INTEGER, \n\tPRIMARY KEY </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">"CDSCode"</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">, \n\tFOREIGN KEY</span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">"CDSCode"</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> REFERENCES schools </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">"CDSCode"</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\n</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\n\n/*\n3 rows from frpm table:\nCDSCode\tAcademic Year\tCounty Code\tDistrict Code\tSchool Code\tCounty Name\tDistrict Name\tSchool Name\tDistrict Type\tSchool Type\tEducational Option Type\tNSLP Provision Status\tCharter School </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Y/N</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tCharter School Number\tCharter Funding Type\tIRC\tLow Grade\tHigh Grade\tEnrollment </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tFree Meal Count </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tPercent </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">%</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> Eligible Free </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tFRPM Count </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tPercent </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">%</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> Eligible FRPM </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">K-12</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tEnrollment </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tFree Meal Count </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tPercent </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">%</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> Eligible Free </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tFRPM Count </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tPercent </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">%</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> Eligible FRPM </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Ages 5-17</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\t2013-14 CALPADS Fall 1 Certification Status\n01100170109835\t2014-2015\t01\t10017\t0109835\tAlameda\tAlameda County Office of Education\tFAME Public Charter\tCounty Office of Education </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">COE</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tK-12 Schools </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Public</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tTraditional\tNone\t1\t0728\tDirectly funded\t1\tK\t12\t1087.0\t565.0\t0.519779208831647\t715.0\t0.657773689052438\t1070.0\t553.0\t0.516822429906542\t702.0\t0.65607476635514\t1\n01100170112607\t2014-2015\t01\t10017\t0112607\tAlameda\tAlameda County Office of Education\tEnvision Academy for Arts &amp; Technology\tCounty Office of Education </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">COE</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tHigh Schools </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Public</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tTraditional\tNone\t1\t0811\tDirectly funded\t1\t9\t12\t395.0\t186.0\t0.470886075949367\t186.0\t0.470886075949367\t376.0\t182.0\t0.484042553191489\t182.0\t0.484042553191489\t1\n01100170118489\t2014-2015\t01\t10017\t0118489\tAlameda\tAlameda County Office of Education\tAspire California College Preparatory Academy\tCounty Office of Education </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">COE</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tHigh Schools </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Public</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tTraditional\tNone\t1\t1049\tDirectly funded\t1\t9\t12\t244.0\t134.0\t0.549180327868853\t175.0\t0.717213114754098\t230.0\t128.0\t0.556521739130435\t168.0\t0.730434782608696\t1\n*/\n\n\nCREATE TABLE satscores </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">\n\tcds TEXT NOT NULL, \n\trtype TEXT NOT NULL, \n\tsname TEXT, \n\tdname TEXT, \n\tcname TEXT, \n\tenroll12 INTEGER NOT NULL, \n\t"NumTstTakr" INTEGER NOT NULL, \n\t"AvgScrRead" INTEGER, \n\t"AvgScrMath" INTEGER, \n\t"AvgScrWrite" INTEGER, \n\t"NumGE1500" INTEGER, \n\tPRIMARY KEY </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">cds</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">, \n\tFOREIGN KEY</span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">cds</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> REFERENCES schools </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">"CDSCode"</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\n</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\n\n/*\n3 rows from satscores table:\ncds\trtype\tsname\tdname\tcname\tenroll12\tNumTstTakr\tAvgScrRead\tAvgScrMath\tAvgScrWrite\tNumGE1500\n01100170000000\tD\tNone\tAlameda County Office of Education\tAlameda\t398\t88\t418\t418\t417\t14\n01100170109835\tS\tFAME Public Charter\tAlameda County Office of Education\tAlameda\t62\t17\t503\t546\t505\t9\n01100170112607\tS\tEnvision Academy for Arts &amp; Technology\tAlameda County Office of Education\tAlameda\t75\t71\t397\t387\t395\t5\n*/\n\n\nCREATE TABLE schools </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">\n\t"CDSCode" TEXT NOT NULL, \n\t"NCESDist" TEXT, \n\t"NCESSchool" TEXT, \n\t"StatusType" TEXT NOT NULL, \n\t"County" TEXT NOT NULL, \n\t"District" TEXT NOT NULL, \n\t"School" TEXT, \n\t"Street" TEXT, \n\t"StreetAbr" TEXT, \n\t"City" TEXT, \n\t"Zip" TEXT, \n\t"State" TEXT, \n\t"MailStreet" TEXT, \n\t"MailStrAbr" TEXT, \n\t"MailCity" TEXT, \n\t"MailZip" TEXT, \n\t"MailState" TEXT, \n\t"Phone" TEXT, \n\t"Ext" TEXT, \n\t"Website" TEXT, \n\t"OpenDate" DATE, \n\t"ClosedDate" DATE, \n\t"Charter" INTEGER, \n\t"CharterNum" TEXT, \n\t"FundingType" TEXT, \n\t"DOC" TEXT NOT NULL, \n\t"DOCType" TEXT NOT NULL, \n\t"SOC" TEXT, \n\t"SOCType" TEXT, \n\t"EdOpsCode" TEXT, \n\t"EdOpsName" TEXT, \n\t"EILCode" TEXT, \n\t"EILName" TEXT, \n\t"GSoffered" TEXT, \n\t"GSserved" TEXT, \n\t"Virtual" TEXT, \n\t"Magnet" INTEGER, \n\t"Latitude" REAL, \n\t"Longitude" REAL, \n\t"AdmFName1" TEXT, \n\t"AdmLName1" TEXT, \n\t"AdmEmail1" TEXT, \n\t"AdmFName2" TEXT, \n\t"AdmLName2" TEXT, \n\t"AdmEmail2" TEXT, \n\t"AdmFName3" TEXT, \n\t"AdmLName3" TEXT, \n\t"AdmEmail3" TEXT, \n\t"LastUpdate" DATE NOT NULL, \n\tPRIMARY KEY </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">"CDSCode"</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\n</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\n\n/*\n3 rows from schools table:\nCDSCode\tNCESDist\tNCESSchool\tStatusType\tCounty\tDistrict\tSchool\tStreet\tStreetAbr\tCity\tZip\tState\tMailStreet\tMailStrAbr\tMailCity\tMailZip\tMailState\tPhone\tExt\tWebsite\tOpenDate\tClosedDate\tCharter\tCharterNum\tFundingType\tDOC\tDOCType\tSOC\tSOCType\tEdOpsCode\tEdOpsName\tEILCode\tEILName\tGSoffered\tGSserved\tVirtual\tMagnet\tLatitude\tLongitude\tAdmFName1\tAdmLName1\tAdmEmail1\tAdmFName2\tAdmLName2\tAdmEmail2\tAdmFName3\tAdmLName3\tAdmEmail3\tLastUpdate\n01100170000000\t0691051\tNone\tActive\tAlameda\tAlameda County Office of Education\tNone\t313 West Winton Avenue\t313 West Winton Ave.\tHayward\t94544-1136\tCA\t313 West Winton Avenue\t313 West Winton Ave.\tHayward\t94544-1136\tCA\t</span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">510</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> 887-0152\tNone\twww.acoe.org\tNone\tNone\tNone\tNone\tNone\t00\tCounty Office of Education </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">COE</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tNone\tNone\tNone\tNone\tNone\tNone\tNone\tNone\tNone\tNone\t37.658212\t-122.09713\tL Karen\tMonroe\tlkmonroe@acoe.org\tNone\tNone\tNone\tNone\tNone\tNone\t2015-06-23\n01100170109835\t0691051\t10546\tClosed\tAlameda\tAlameda County Office of Education\tFAME Public Charter\t39899 Balentine Drive, Suite 335\t39899 Balentine Dr., Ste. 335\tNewark\t94560-5359\tCA\t39899 Balentine Drive, Suite 335\t39899 Balentine Dr., Ste. 335\tNewark\t94560-5359\tCA\tNone\tNone\tNone\t2005-08-29\t2015-07-31\t1\t0728\tDirectly funded\t00\tCounty Office of Education </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">COE</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\t65\tK-12 Schools </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Public</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tTRAD\tTraditional\tELEMHIGH\tElementary-High Combination\tK-12\tK-12\tP\t0\t37.521436\t-121.99391\tNone\tNone\tNone\tNone\tNone\tNone\tNone\tNone\tNone\t2015-09-01\n01100170112607\t0691051\t10947\tActive\tAlameda\tAlameda County Office of Education\tEnvision Academy for Arts &amp; Technology\t1515 Webster Street\t1515 Webster St.\tOakland\t94612-3355\tCA\t1515 Webster Street\t1515 Webster St.\tOakland\t94612\tCA\t</span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">510</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> 596-8901\tNone\twww.envisionacademy.org/\t2006-08-28\tNone\t1\t0811\tDirectly funded\t00\tCounty Office of Education </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">COE</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\t66\tHigh Schools </span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Public</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg">\tTRAD\tTraditional\tHS\tHigh School\t9-12\t9-12\tN\t0\t37.80452\t-122.26815\tLaura\tRobell\tlaura@envisionacademy.org\tNone\tNone\tNone\tNone\tNone\tNone\t2015-06-18\n*/'</span></pre>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="convert-natural-language-questions-into-sql" class="title-slide slide level1 smaller center">
+<h1>Convert natural language questions into SQL</h1>
+<div class="columns">
+<div class="column">
+<div class="fragment fade-left">
+<p>LLMs are quite capable of writing functional SQL queries, from the <code>code</code> or <code>coder</code> ones, to specific ones for SQL generation.</p>
+</div>
+</div><div class="column">
+<div class="fragment fade-left">
+<p>For example, some IBM trained models include:</p>
+<ul>
+<li>granite-20b-code-instruct</li>
+<li>granite-34b-code-instruct</li>
+<li>granite-20b-code-base-schema-linking</li>
+<li>granite-20b-code-base-sql-gen</li>
+</ul>
+<p><a href="https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-models-ibm.html?context=wx&amp;locale=en&amp;audience=wdp#granite-code-instruct-models">More info on these models <i class="bi-box-arrow-up-right " style="" role="img" aria-hidden="true"></i></a> <a href="https://huggingface.co/models?search=sql">And also in 🤗 <i class="bi-box-arrow-up-right " style="" role="img" aria-hidden="true"></i></a></p>
+</div>
+</div></div>
+<aside class="notes">
+<p>For those of us who have been writing code for some time and fell in love with ORMs when they were the <em>hot</em> new thing, LLMs can take us to the next level!</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="prompts-for-sql-generation" class="slide level2" data-transition="convex">
+<h2>Prompts for SQL generation</h2>
+<div class="fragment fade-in-then-semi-out">
+<p>LLMs don’t know the 🏗️ structure of our database, and may hallucinate about it, or create some flat out invalid SQL.</p>
+</div>
+<div class="fragment fade-in-then-semi-out">
+<p>We have to provide <strong>extra</strong> information about the structure in the instructions.</p>
+<p>For this we will use a <strong>prompt</strong> string with some palace-holders <i class="bi-braces " style="" role="img" aria-hidden="true"></i>.</p>
+</div>
+<div class="fragment fade-in-then-semi-out">
+<p>Some research papers from our team from our team:</p>
+<p><a href="https://arxiv.org/pdf/2312.02798"><i class="bi-filetype-pdf " style="" role="img" aria-hidden="true"></i> Weakly Supervised Detection of Hallucinations in LLMs</a></p>
+</div>
+<div class="fragment fade-in-then-semi-out">
+<p><a href="https://arxiv.org/pdf/2505.24539"><i class="bi-filetype-pdf " style="" role="img" aria-hidden="true"></i> Localizing Persona Representations In LLMs</a></p>
+</div>
+<aside class="notes">
+<p>In Flowpilot we created a framework inspired on LangGraph for this.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level2">
+
+<h3 class="smaller" id="prompts">Prompts</h3>
+<div id="3765ce3a" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb12" data-code-line-numbers="1-7|8-14|15-18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a></a>system_message <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb12-2"><a></a><span class="st">Given an input question, create a syntactically correct </span><span class="sc">{dialect}</span><span class="st"> query to</span></span>
+<span id="cb12-3"><a></a><span class="st">run to help find the answer. Unless the user specifies in his question a</span></span>
+<span id="cb12-4"><a></a><span class="st">specific number of examples they wish to obtain, always limit your query to</span></span>
+<span id="cb12-5"><a></a><span class="st">at most </span><span class="sc">{top_k}</span><span class="st"> results. You can order the results by a relevant column to</span></span>
+<span id="cb12-6"><a></a><span class="st">return the most interesting examples in the database.</span></span>
+<span id="cb12-7"><a></a></span>
+<span id="cb12-8"><a></a><span class="st">Never query for all the columns from a specific table, only ask for a the</span></span>
+<span id="cb12-9"><a></a><span class="st">few relevant columns given the question.</span></span>
+<span id="cb12-10"><a></a></span>
+<span id="cb12-11"><a></a><span class="st">Pay attention to use only the column names that you can see in the schema</span></span>
+<span id="cb12-12"><a></a><span class="st">description. Be careful to not query for columns that do not exist. Also,</span></span>
+<span id="cb12-13"><a></a><span class="st">pay attention to which column is in which table.</span></span>
+<span id="cb12-14"><a></a></span>
+<span id="cb12-15"><a></a><span class="st">Only use the following tables:</span></span>
+<span id="cb12-16"><a></a><span class="sc">{table_info}</span></span>
+<span id="cb12-17"><a></a><span class="st">"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="small_text">
+<p><a href="https://python.langchain.com/docs/tutorials/sql_qa/#convert-question-to-sql-query">source <i class="bi-box-arrow-up-right " style="" role="img" aria-hidden="true"></i></a></p>
+</div>
+</section>
+<section id="creating-a-prompt" class="slide level2 smaller">
+<h2>Creating a prompt</h2>
+<p>Now we construct a list of messages. These are <code>dicts</code> which have a key <code>user</code> or <code>system</code>, and a <code>content</code>.</p>
+<div id="43d85caa" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a></a><span class="kw">def</span> generate_messages(question, dialect<span class="op">=</span><span class="st">"SQL"</span>, top_k<span class="op">=</span><span class="dv">5</span>, table_info<span class="op">=</span><span class="st">""</span>):</span>
+<span id="cb13-2"><a></a>    <span class="co"># Create a ChatPromptTemplate</span></span>
+<span id="cb13-3"><a></a>    messages <span class="op">=</span> [</span>
+<span id="cb13-4"><a></a>      {<span class="st">"role"</span>: <span class="st">"system"</span>, </span>
+<span id="cb13-5"><a></a>      <span class="st">"content"</span>: system_message.<span class="bu">format</span>(</span>
+<span id="cb13-6"><a></a>        dialect<span class="op">=</span>dialect, </span>
+<span id="cb13-7"><a></a>        top_k<span class="op">=</span>top_k, </span>
+<span id="cb13-8"><a></a>        table_info<span class="op">=</span>table_info</span>
+<span id="cb13-9"><a></a>       )},</span>
+<span id="cb13-10"><a></a>      {</span>
+<span id="cb13-11"><a></a>        <span class="st">"role"</span>: <span class="st">"user"</span>, </span>
+<span id="cb13-12"><a></a>        <span class="st">"content"</span>: question</span>
+<span id="cb13-13"><a></a>      }</span>
+<span id="cb13-14"><a></a>    ]</span>
+<span id="cb13-15"><a></a>    </span>
+<span id="cb13-16"><a></a>    <span class="cf">return</span> messages</span>
+<span id="cb13-17"><a></a></span>
+<span id="cb13-18"><a></a>messages <span class="op">=</span> generate_messages(question<span class="op">=</span>question, dialect<span class="op">=</span>db.dialect, top_k<span class="op">=</span><span class="dv">10</span>, table_info<span class="op">=</span>db.get_table_info())</span>
+<span id="cb13-19"><a></a><span class="bu">print</span>(messages)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+</section>
+<section id="creating-a-prompt-output" class="slide level2 smaller output-location-slide"><h2>Creating a prompt</h2><div class="cell output-location-slide" data-execution_count="15">
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-weight: bold">[</span>
+    <span style="font-weight: bold">{</span>
+        <span style="color: #008000; text-decoration-color: #008000">'role'</span>: <span style="color: #008000; text-decoration-color: #008000">'system'</span>,
+        <span style="color: #008000; text-decoration-color: #008000">'content'</span>: <span style="color: #008000; text-decoration-color: #008000">'\nGiven an input question, create a syntactically </span>
+<span style="color: #008000; text-decoration-color: #008000">correct sqlite query to\nrun to help find the answer. Unless the user </span>
+<span style="color: #008000; text-decoration-color: #008000">specifies in his question a\nspecific number of examples they wish to </span>
+<span style="color: #008000; text-decoration-color: #008000">obtain, always limit your query to\nat most 10 results. You can order the </span>
+<span style="color: #008000; text-decoration-color: #008000">results by a relevant column to\nreturn the most interesting examples in </span>
+<span style="color: #008000; text-decoration-color: #008000">the database.\n\nNever query for all the columns from a specific table, </span>
+<span style="color: #008000; text-decoration-color: #008000">only ask for a the\nfew relevant columns given the question.\n\nPay </span>
+<span style="color: #008000; text-decoration-color: #008000">attention to use only the column names that you can see in the </span>
+<span style="color: #008000; text-decoration-color: #008000">schema\ndescription. Be careful to not query for columns that do not exist.</span>
+<span style="color: #008000; text-decoration-color: #008000">Also,\npay attention to which column is in which table.\n\nOnly use the </span>
+<span style="color: #008000; text-decoration-color: #008000">following tables:\n\nCREATE TABLE frpm (\n\t"CDSCode" TEXT NOT NULL, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"Academic Year" TEXT, \n\t"County Code" TEXT, \n\t"District Code" </span>
+<span style="color: #008000; text-decoration-color: #008000">INTEGER, \n\t"School Code" TEXT, \n\t"County Name" TEXT, \n\t"District </span>
+<span style="color: #008000; text-decoration-color: #008000">Name" TEXT, \n\t"School Name" TEXT, \n\t"District Type" TEXT, \n\t"School </span>
+<span style="color: #008000; text-decoration-color: #008000">Type" TEXT, \n\t"Educational Option Type" TEXT, \n\t"NSLP Provision Status"</span>
+<span style="color: #008000; text-decoration-color: #008000">TEXT, \n\t"Charter School (Y/N)" INTEGER, \n\t"Charter School Number" TEXT,</span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"Charter Funding Type" TEXT, \n\t"IRC" INTEGER, \n\t"Low Grade" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"High Grade" TEXT, \n\t"Enrollment (K-12)" REAL, \n\t"Free Meal Count </span>
+<span style="color: #008000; text-decoration-color: #008000">(K-12)" REAL, \n\t"Percent (%) Eligible Free (K-12)" REAL, \n\t"FRPM Count </span>
+<span style="color: #008000; text-decoration-color: #008000">(K-12)" REAL, \n\t"Percent (%) Eligible FRPM (K-12)" REAL, \n\t"Enrollment </span>
+<span style="color: #008000; text-decoration-color: #008000">(Ages 5-17)" REAL, \n\t"Free Meal Count (Ages 5-17)" REAL, \n\t"Percent (%)</span>
+<span style="color: #008000; text-decoration-color: #008000">Eligible Free (Ages 5-17)" REAL, \n\t"FRPM Count (Ages 5-17)" REAL, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"Percent (%) Eligible FRPM (Ages 5-17)" REAL, \n\t"2013-14 CALPADS Fall</span>
+<span style="color: #008000; text-decoration-color: #008000">1 Certification Status" INTEGER, \n\tPRIMARY KEY ("CDSCode"), \n\tFOREIGN </span>
+<span style="color: #008000; text-decoration-color: #008000">KEY("CDSCode") REFERENCES schools ("CDSCode")\n)\n\n/*\n3 rows from frpm </span>
+<span style="color: #008000; text-decoration-color: #008000">table:\nCDSCode\tAcademic Year\tCounty Code\tDistrict Code\tSchool </span>
+<span style="color: #008000; text-decoration-color: #008000">Code\tCounty Name\tDistrict Name\tSchool Name\tDistrict Type\tSchool </span>
+<span style="color: #008000; text-decoration-color: #008000">Type\tEducational Option Type\tNSLP Provision Status\tCharter School </span>
+<span style="color: #008000; text-decoration-color: #008000">(Y/N)\tCharter School Number\tCharter Funding Type\tIRC\tLow Grade\tHigh </span>
+<span style="color: #008000; text-decoration-color: #008000">Grade\tEnrollment (K-12)\tFree Meal Count (K-12)\tPercent (%) Eligible Free</span>
+<span style="color: #008000; text-decoration-color: #008000">(K-12)\tFRPM Count (K-12)\tPercent (%) Eligible FRPM (K-12)\tEnrollment </span>
+<span style="color: #008000; text-decoration-color: #008000">(Ages 5-17)\tFree Meal Count (Ages 5-17)\tPercent (%) Eligible Free (Ages </span>
+<span style="color: #008000; text-decoration-color: #008000">5-17)\tFRPM Count (Ages 5-17)\tPercent (%) Eligible FRPM (Ages </span>
+<span style="color: #008000; text-decoration-color: #008000">5-17)\t2013-14 CALPADS Fall 1 Certification </span>
+<span style="color: #008000; text-decoration-color: #008000">Status\n01100170109835\t2014-2015\t01\t10017\t0109835\tAlameda\tAlameda </span>
+<span style="color: #008000; text-decoration-color: #008000">County Office of Education\tFAME Public Charter\tCounty Office of Education</span>
+<span style="color: #008000; text-decoration-color: #008000">(COE)\tK-12 Schools (Public)\tTraditional\tNone\t1\t0728\tDirectly </span>
+<span style="color: #008000; text-decoration-color: #008000">funded\t1\tK\t12\t1087.0\t565.0\t0.519779208831647\t715.0\t0.65777368905243</span>
+<span style="color: #008000; text-decoration-color: #008000">8\t1070.0\t553.0\t0.516822429906542\t702.0\t0.65607476635514\t1\n0110017011</span>
+<span style="color: #008000; text-decoration-color: #008000">2607\t2014-2015\t01\t10017\t0112607\tAlameda\tAlameda County Office of </span>
+<span style="color: #008000; text-decoration-color: #008000">Education\tEnvision Academy for Arts &amp; Technology\tCounty Office of </span>
+<span style="color: #008000; text-decoration-color: #008000">Education (COE)\tHigh Schools </span>
+<span style="color: #008000; text-decoration-color: #008000">(Public)\tTraditional\tNone\t1\t0811\tDirectly </span>
+<span style="color: #008000; text-decoration-color: #008000">funded\t1\t9\t12\t395.0\t186.0\t0.470886075949367\t186.0\t0.470886075949367</span>
+<span style="color: #008000; text-decoration-color: #008000">\t376.0\t182.0\t0.484042553191489\t182.0\t0.484042553191489\t1\n01100170118</span>
+<span style="color: #008000; text-decoration-color: #008000">489\t2014-2015\t01\t10017\t0118489\tAlameda\tAlameda County Office of </span>
+<span style="color: #008000; text-decoration-color: #008000">Education\tAspire California College Preparatory Academy\tCounty Office of </span>
+<span style="color: #008000; text-decoration-color: #008000">Education (COE)\tHigh Schools </span>
+<span style="color: #008000; text-decoration-color: #008000">(Public)\tTraditional\tNone\t1\t1049\tDirectly </span>
+<span style="color: #008000; text-decoration-color: #008000">funded\t1\t9\t12\t244.0\t134.0\t0.549180327868853\t175.0\t0.717213114754098</span>
+<span style="color: #008000; text-decoration-color: #008000">\t230.0\t128.0\t0.556521739130435\t168.0\t0.730434782608696\t1\n*/\n\n\nCRE</span>
+<span style="color: #008000; text-decoration-color: #008000">ATE TABLE satscores (\n\tcds TEXT NOT NULL, \n\trtype TEXT NOT NULL, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\tsname TEXT, \n\tdname TEXT, \n\tcname TEXT, \n\tenroll12 INTEGER NOT </span>
+<span style="color: #008000; text-decoration-color: #008000">NULL, \n\t"NumTstTakr" INTEGER NOT NULL, \n\t"AvgScrRead" INTEGER, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"AvgScrMath" INTEGER, \n\t"AvgScrWrite" INTEGER, \n\t"NumGE1500" </span>
+<span style="color: #008000; text-decoration-color: #008000">INTEGER, \n\tPRIMARY KEY (cds), \n\tFOREIGN KEY(cds) REFERENCES schools </span>
+<span style="color: #008000; text-decoration-color: #008000">("CDSCode")\n)\n\n/*\n3 rows from satscores </span>
+<span style="color: #008000; text-decoration-color: #008000">table:\ncds\trtype\tsname\tdname\tcname\tenroll12\tNumTstTakr\tAvgScrRead\t</span>
+<span style="color: #008000; text-decoration-color: #008000">AvgScrMath\tAvgScrWrite\tNumGE1500\n01100170000000\tD\tNone\tAlameda County</span>
+<span style="color: #008000; text-decoration-color: #008000">Office of </span>
+<span style="color: #008000; text-decoration-color: #008000">Education\tAlameda\t398\t88\t418\t418\t417\t14\n01100170109835\tS\tFAME </span>
+<span style="color: #008000; text-decoration-color: #008000">Public Charter\tAlameda County Office of </span>
+<span style="color: #008000; text-decoration-color: #008000">Education\tAlameda\t62\t17\t503\t546\t505\t9\n01100170112607\tS\tEnvision </span>
+<span style="color: #008000; text-decoration-color: #008000">Academy for Arts &amp; Technology\tAlameda County Office of </span>
+<span style="color: #008000; text-decoration-color: #008000">Education\tAlameda\t75\t71\t397\t387\t395\t5\n*/\n\n\nCREATE TABLE schools </span>
+<span style="color: #008000; text-decoration-color: #008000">(\n\t"CDSCode" TEXT NOT NULL, \n\t"NCESDist" TEXT, \n\t"NCESSchool" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"StatusType" TEXT NOT NULL, \n\t"County" TEXT NOT NULL, \n\t"District" </span>
+<span style="color: #008000; text-decoration-color: #008000">TEXT NOT NULL, \n\t"School" TEXT, \n\t"Street" TEXT, \n\t"StreetAbr" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"City" TEXT, \n\t"Zip" TEXT, \n\t"State" TEXT, \n\t"MailStreet" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"MailStrAbr" TEXT, \n\t"MailCity" TEXT, \n\t"MailZip" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"MailState" TEXT, \n\t"Phone" TEXT, \n\t"Ext" TEXT, \n\t"Website" TEXT,</span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"OpenDate" DATE, \n\t"ClosedDate" DATE, \n\t"Charter" INTEGER, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"CharterNum" TEXT, \n\t"FundingType" TEXT, \n\t"DOC" TEXT NOT NULL, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"DOCType" TEXT NOT NULL, \n\t"SOC" TEXT, \n\t"SOCType" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"EdOpsCode" TEXT, \n\t"EdOpsName" TEXT, \n\t"EILCode" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"EILName" TEXT, \n\t"GSoffered" TEXT, \n\t"GSserved" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"Virtual" TEXT, \n\t"Magnet" INTEGER, \n\t"Latitude" REAL, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"Longitude" REAL, \n\t"AdmFName1" TEXT, \n\t"AdmLName1" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"AdmEmail1" TEXT, \n\t"AdmFName2" TEXT, \n\t"AdmLName2" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"AdmEmail2" TEXT, \n\t"AdmFName3" TEXT, \n\t"AdmLName3" TEXT, </span>
+<span style="color: #008000; text-decoration-color: #008000">\n\t"AdmEmail3" TEXT, \n\t"LastUpdate" DATE NOT NULL, \n\tPRIMARY KEY </span>
+<span style="color: #008000; text-decoration-color: #008000">("CDSCode")\n)\n\n/*\n3 rows from schools </span>
+<span style="color: #008000; text-decoration-color: #008000">table:\nCDSCode\tNCESDist\tNCESSchool\tStatusType\tCounty\tDistrict\tSchool</span>
+<span style="color: #008000; text-decoration-color: #008000">\tStreet\tStreetAbr\tCity\tZip\tState\tMailStreet\tMailStrAbr\tMailCity\tMa</span>
+<span style="color: #008000; text-decoration-color: #008000">ilZip\tMailState\tPhone\tExt\tWebsite\tOpenDate\tClosedDate\tCharter\tChart</span>
+<span style="color: #008000; text-decoration-color: #008000">erNum\tFundingType\tDOC\tDOCType\tSOC\tSOCType\tEdOpsCode\tEdOpsName\tEILCo</span>
+<span style="color: #008000; text-decoration-color: #008000">de\tEILName\tGSoffered\tGSserved\tVirtual\tMagnet\tLatitude\tLongitude\tAdm</span>
+<span style="color: #008000; text-decoration-color: #008000">FName1\tAdmLName1\tAdmEmail1\tAdmFName2\tAdmLName2\tAdmEmail2\tAdmFName3\tA</span>
+<span style="color: #008000; text-decoration-color: #008000">dmLName3\tAdmEmail3\tLastUpdate\n01100170000000\t0691051\tNone\tActive\tAla</span>
+<span style="color: #008000; text-decoration-color: #008000">meda\tAlameda County Office of Education\tNone\t313 West Winton Avenue\t313</span>
+<span style="color: #008000; text-decoration-color: #008000">West Winton Ave.\tHayward\t94544-1136\tCA\t313 West Winton Avenue\t313 West</span>
+<span style="color: #008000; text-decoration-color: #008000">Winton Ave.\tHayward\t94544-1136\tCA\t(510) </span>
+<span style="color: #008000; text-decoration-color: #008000">887-0152\tNone\twww.acoe.org\tNone\tNone\tNone\tNone\tNone\t00\tCounty </span>
+<span style="color: #008000; text-decoration-color: #008000">Office of Education </span>
+<span style="color: #008000; text-decoration-color: #008000">(COE)\tNone\tNone\tNone\tNone\tNone\tNone\tNone\tNone\tNone\tNone\t37.65821</span>
+<span style="color: #008000; text-decoration-color: #008000">2\t-122.09713\tL </span>
+<span style="color: #008000; text-decoration-color: #008000">Karen\tMonroe\tlkmonroe@acoe.org\tNone\tNone\tNone\tNone\tNone\tNone\t2015-</span>
+<span style="color: #008000; text-decoration-color: #008000">06-23\n01100170109835\t0691051\t10546\tClosed\tAlameda\tAlameda County </span>
+<span style="color: #008000; text-decoration-color: #008000">Office of Education\tFAME Public Charter\t39899 Balentine Drive, Suite </span>
+<span style="color: #008000; text-decoration-color: #008000">335\t39899 Balentine Dr., Ste. 335\tNewark\t94560-5359\tCA\t39899 Balentine</span>
+<span style="color: #008000; text-decoration-color: #008000">Drive, Suite 335\t39899 Balentine Dr., Ste. </span>
+<span style="color: #008000; text-decoration-color: #008000">335\tNewark\t94560-5359\tCA\tNone\tNone\tNone\t2005-08-29\t2015-07-31\t1\t0</span>
+<span style="color: #008000; text-decoration-color: #008000">728\tDirectly funded\t00\tCounty Office of Education (COE)\t65\tK-12 </span>
+<span style="color: #008000; text-decoration-color: #008000">Schools (Public)\tTRAD\tTraditional\tELEMHIGH\tElementary-High </span>
+<span style="color: #008000; text-decoration-color: #008000">Combination\tK-12\tK-12\tP\t0\t37.521436\t-121.99391\tNone\tNone\tNone\tNon</span>
+<span style="color: #008000; text-decoration-color: #008000">e\tNone\tNone\tNone\tNone\tNone\t2015-09-01\n01100170112607\t0691051\t10947</span>
+<span style="color: #008000; text-decoration-color: #008000">\tActive\tAlameda\tAlameda County Office of Education\tEnvision Academy for</span>
+<span style="color: #008000; text-decoration-color: #008000">Arts &amp; Technology\t1515 Webster Street\t1515 Webster </span>
+<span style="color: #008000; text-decoration-color: #008000">St.\tOakland\t94612-3355\tCA\t1515 Webster Street\t1515 Webster </span>
+<span style="color: #008000; text-decoration-color: #008000">St.\tOakland\t94612\tCA\t(510) </span>
+<span style="color: #008000; text-decoration-color: #008000">596-8901\tNone\twww.envisionacademy.org/\t2006-08-28\tNone\t1\t0811\tDirect</span>
+<span style="color: #008000; text-decoration-color: #008000">ly funded\t00\tCounty Office of Education (COE)\t66\tHigh Schools </span>
+<span style="color: #008000; text-decoration-color: #008000">(Public)\tTRAD\tTraditional\tHS\tHigh </span>
+<span style="color: #008000; text-decoration-color: #008000">School\t9-12\t9-12\tN\t0\t37.80452\t-122.26815\tLaura\tRobell\tlaura@envisi</span>
+<span style="color: #008000; text-decoration-color: #008000">onacademy.org\tNone\tNone\tNone\tNone\tNone\tNone\t2015-06-18\n*/\n'</span>
+    <span style="font-weight: bold">}</span>,
+    <span style="font-weight: bold">{</span>
+        <span style="color: #008000; text-decoration-color: #008000">'role'</span>: <span style="color: #008000; text-decoration-color: #008000">'user'</span>,
+        <span style="color: #008000; text-decoration-color: #008000">'content'</span>: <span style="color: #008000; text-decoration-color: #008000">'How many schools with an average score in Math greater </span>
+<span style="color: #008000; text-decoration-color: #008000">than 400 in the SAT test are exclusively virtual?'</span>
+    <span style="font-weight: bold">}</span>
+<span style="font-weight: bold">]</span>
+</pre>
+</div>
+</div></section><section class="slide level2">
+
+<h3 id="inspecting-the-system-message">Inspecting the <code>system</code> message</h3>
+<div id="4e1a8d84" class="cell scrollable" data-execution_count="17">
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Given an input question, create a syntactically correct sqlite query to
+run to help find the answer. Unless the user specifies in his question a
+specific number of examples they wish to obtain, always limit your query to
+at most <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span> results. You can order the results by a relevant column to
+return the most interesting examples in the database.
+
+Never query for all the columns from a specific table, only ask for a the
+few relevant columns given the question.
+
+Pay attention to use only the column names that you can see in the schema
+description. Be careful to not query for columns that do not exist. Also,
+pay attention to which column is in which table.
+
+Only use the following tables:
+
+CREATE TABLE frpm <span style="font-weight: bold">(</span>
+        <span style="color: #008000; text-decoration-color: #008000">"CDSCode"</span> TEXT NOT NULL, 
+        <span style="color: #008000; text-decoration-color: #008000">"Academic Year"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"County Code"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"District Code"</span> INTEGER, 
+        <span style="color: #008000; text-decoration-color: #008000">"School Code"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"County Name"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"District Name"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"School Name"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"District Type"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"School Type"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Educational Option Type"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"NSLP Provision Status"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Charter School (Y/N)"</span> INTEGER, 
+        <span style="color: #008000; text-decoration-color: #008000">"Charter School Number"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Charter Funding Type"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"IRC"</span> INTEGER, 
+        <span style="color: #008000; text-decoration-color: #008000">"Low Grade"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"High Grade"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Enrollment (K-12)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"Free Meal Count (K-12)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"Percent (%) Eligible Free (K-12)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"FRPM Count (K-12)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"Percent (%) Eligible FRPM (K-12)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"Enrollment (Ages 5-17)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"Free Meal Count (Ages 5-17)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"Percent (%) Eligible Free (Ages 5-17)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"FRPM Count (Ages 5-17)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"Percent (%) Eligible FRPM (Ages 5-17)"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"2013-14 CALPADS Fall 1 Certification Status"</span> INTEGER, 
+        PRIMARY KEY <span style="font-weight: bold">(</span><span style="color: #008000; text-decoration-color: #008000">"CDSCode"</span><span style="font-weight: bold">)</span>, 
+        FOREIGN <span style="color: #800080; text-decoration-color: #800080; font-weight: bold">KEY</span><span style="font-weight: bold">(</span><span style="color: #008000; text-decoration-color: #008000">"CDSCode"</span><span style="font-weight: bold">)</span> REFERENCES schools <span style="font-weight: bold">(</span><span style="color: #008000; text-decoration-color: #008000">"CDSCode"</span><span style="font-weight: bold">)</span>
+<span style="font-weight: bold">)</span>
+
+<span style="color: #800080; text-decoration-color: #800080">/</span>*
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> rows from frpm table:
+CDSCode Academic Year   County Code     District Code   School Code     
+County Name     District Name   School Name     District Type   School Type
+Educational Option Type NSLP Provision Status   Charter School <span style="font-weight: bold">(</span>Y/N<span style="font-weight: bold">)</span>    
+Charter School Number   Charter Funding Type    IRC     Low Grade       
+High Grade      Enrollment <span style="font-weight: bold">(</span>K-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span><span style="font-weight: bold">)</span>       Free Meal Count <span style="font-weight: bold">(</span>K-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span><span style="font-weight: bold">)</span>  Percent <span style="font-weight: bold">(</span>%<span style="font-weight: bold">)</span>
+Eligible Free <span style="font-weight: bold">(</span>K-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span><span style="font-weight: bold">)</span>        FRPM Count <span style="font-weight: bold">(</span>K-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span><span style="font-weight: bold">)</span>       Percent <span style="font-weight: bold">(</span>%<span style="font-weight: bold">)</span> Eligible 
+FRPM <span style="font-weight: bold">(</span>K-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span><span style="font-weight: bold">)</span>        Enrollment <span style="font-weight: bold">(</span>Ages <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17</span><span style="font-weight: bold">)</span>  Free Meal Count <span style="font-weight: bold">(</span>Ages <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17</span><span style="font-weight: bold">)</span>     
+Percent <span style="font-weight: bold">(</span>%<span style="font-weight: bold">)</span> Eligible Free <span style="font-weight: bold">(</span>Ages <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17</span><span style="font-weight: bold">)</span>   FRPM Count <span style="font-weight: bold">(</span>Ages <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17</span><span style="font-weight: bold">)</span>  Percent <span style="font-weight: bold">(</span>%<span style="font-weight: bold">)</span>
+Eligible FRPM <span style="font-weight: bold">(</span>Ages <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17</span><span style="font-weight: bold">)</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2013</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">14</span> CALPADS Fall <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> Certification Status
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01100170109835</span>  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2014</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2015</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10017</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0109835</span> Alameda Alameda 
+County Office of Education      FAME Public Charter     County Office of 
+Education <span style="font-weight: bold">(</span>COE<span style="font-weight: bold">)</span>        K-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span> Schools <span style="font-weight: bold">(</span>Public<span style="font-weight: bold">)</span>   Traditional     <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>   
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0728</span>    Directly funded <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>       K       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1087.0</span>  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">565.0</span>   
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.519779208831647</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">715.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.657773689052438</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1070.0</span>  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">553.0</span>   
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.516822429906542</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">702.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.65607476635514</span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01100170112607</span>  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2014</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2015</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10017</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0112607</span> Alameda Alameda 
+County Office of Education      Envision Academy for Arts &amp; Technology  
+County Office of Education <span style="font-weight: bold">(</span>COE<span style="font-weight: bold">)</span>        High Schools <span style="font-weight: bold">(</span>Public<span style="font-weight: bold">)</span>   Traditional
+<span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0811</span>    Directly funded <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">395.0</span>   
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">186.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.470886075949367</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">186.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.470886075949367</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">376.0</span>   
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">182.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.484042553191489</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">182.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.484042553191489</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01100170118489</span>  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2014</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2015</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10017</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0118489</span> Alameda Alameda 
+County Office of Education      Aspire California College Preparatory 
+Academy   County Office of Education <span style="font-weight: bold">(</span>COE<span style="font-weight: bold">)</span>        High Schools <span style="font-weight: bold">(</span>Public<span style="font-weight: bold">)</span>   
+Traditional     <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1049</span>    Directly funded <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span> 
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">244.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">134.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.549180327868853</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">175.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.717213114754098</span>       
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">230.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">128.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.556521739130435</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">168.0</span>   <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.730434782608696</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>
+*<span style="color: #800080; text-decoration-color: #800080">/</span>
+
+
+CREATE TABLE satscores <span style="font-weight: bold">(</span>
+        cds TEXT NOT NULL, 
+        rtype TEXT NOT NULL, 
+        sname TEXT, 
+        dname TEXT, 
+        cname TEXT, 
+        enroll12 INTEGER NOT NULL, 
+        <span style="color: #008000; text-decoration-color: #008000">"NumTstTakr"</span> INTEGER NOT NULL, 
+        <span style="color: #008000; text-decoration-color: #008000">"AvgScrRead"</span> INTEGER, 
+        <span style="color: #008000; text-decoration-color: #008000">"AvgScrMath"</span> INTEGER, 
+        <span style="color: #008000; text-decoration-color: #008000">"AvgScrWrite"</span> INTEGER, 
+        <span style="color: #008000; text-decoration-color: #008000">"NumGE1500"</span> INTEGER, 
+        PRIMARY KEY <span style="font-weight: bold">(</span>cds<span style="font-weight: bold">)</span>, 
+        FOREIGN <span style="color: #800080; text-decoration-color: #800080; font-weight: bold">KEY</span><span style="font-weight: bold">(</span>cds<span style="font-weight: bold">)</span> REFERENCES schools <span style="font-weight: bold">(</span><span style="color: #008000; text-decoration-color: #008000">"CDSCode"</span><span style="font-weight: bold">)</span>
+<span style="font-weight: bold">)</span>
+
+<span style="color: #800080; text-decoration-color: #800080">/</span>*
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> rows from satscores table:
+cds     rtype   sname   dname   cname   enroll12        NumTstTakr      
+AvgScrRead      AvgScrMath      AvgScrWrite     NumGE1500
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01100170000000</span>  D       <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    Alameda County Office of Education      
+Alameda <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">398</span>     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">88</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">418</span>     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">418</span>     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">417</span>     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">14</span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01100170109835</span>  S       FAME Public Charter     Alameda County Office of 
+Education      Alameda <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">62</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">503</span>     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">546</span>     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">505</span>     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01100170112607</span>  S       Envision Academy for Arts &amp; Technology  Alameda 
+County Office of Education      Alameda <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">75</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">71</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">397</span>     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">387</span>     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">395</span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span>
+*<span style="color: #800080; text-decoration-color: #800080">/</span>
+
+
+CREATE TABLE schools <span style="font-weight: bold">(</span>
+        <span style="color: #008000; text-decoration-color: #008000">"CDSCode"</span> TEXT NOT NULL, 
+        <span style="color: #008000; text-decoration-color: #008000">"NCESDist"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"NCESSchool"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"StatusType"</span> TEXT NOT NULL, 
+        <span style="color: #008000; text-decoration-color: #008000">"County"</span> TEXT NOT NULL, 
+        <span style="color: #008000; text-decoration-color: #008000">"District"</span> TEXT NOT NULL, 
+        <span style="color: #008000; text-decoration-color: #008000">"School"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Street"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"StreetAbr"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"City"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Zip"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"State"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"MailStreet"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"MailStrAbr"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"MailCity"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"MailZip"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"MailState"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Phone"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Ext"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Website"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"OpenDate"</span> DATE, 
+        <span style="color: #008000; text-decoration-color: #008000">"ClosedDate"</span> DATE, 
+        <span style="color: #008000; text-decoration-color: #008000">"Charter"</span> INTEGER, 
+        <span style="color: #008000; text-decoration-color: #008000">"CharterNum"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"FundingType"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"DOC"</span> TEXT NOT NULL, 
+        <span style="color: #008000; text-decoration-color: #008000">"DOCType"</span> TEXT NOT NULL, 
+        <span style="color: #008000; text-decoration-color: #008000">"SOC"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"SOCType"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"EdOpsCode"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"EdOpsName"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"EILCode"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"EILName"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"GSoffered"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"GSserved"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Virtual"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"Magnet"</span> INTEGER, 
+        <span style="color: #008000; text-decoration-color: #008000">"Latitude"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"Longitude"</span> REAL, 
+        <span style="color: #008000; text-decoration-color: #008000">"AdmFName1"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"AdmLName1"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"AdmEmail1"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"AdmFName2"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"AdmLName2"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"AdmEmail2"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"AdmFName3"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"AdmLName3"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"AdmEmail3"</span> TEXT, 
+        <span style="color: #008000; text-decoration-color: #008000">"LastUpdate"</span> DATE NOT NULL, 
+        PRIMARY KEY <span style="font-weight: bold">(</span><span style="color: #008000; text-decoration-color: #008000">"CDSCode"</span><span style="font-weight: bold">)</span>
+<span style="font-weight: bold">)</span>
+
+<span style="color: #800080; text-decoration-color: #800080">/</span>*
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> rows from schools table:
+CDSCode NCESDist        NCESSchool      StatusType      County  District   
+School  Street  StreetAbr       City    Zip     State   MailStreet      
+MailStrAbr      MailCity        MailZip MailState       Phone   Ext     
+Website OpenDate        ClosedDate      Charter CharterNum      FundingType
+DOC     DOCType SOC     SOCType EdOpsCode       EdOpsName       EILCode 
+EILName GSoffered       GSserved        Virtual Magnet  Latitude        
+Longitude       AdmFName1       AdmLName1       AdmEmail1       AdmFName2  
+AdmLName2       AdmEmail2       AdmFName3       AdmLName3       AdmEmail3  
+LastUpdate
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01100170000000</span>  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0691051</span> <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    Active  Alameda Alameda County Office of 
+Education      <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">313</span> West Winton Avenue  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">313</span> West Winton Ave.    
+Hayward <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">94544</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1136</span>      CA      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">313</span> West Winton Avenue  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">313</span> West Winton 
+Ave.    Hayward <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">94544</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1136</span>      CA      <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">510</span><span style="font-weight: bold">)</span> <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">887</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0152</span>  <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    
+www.acoe.org    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">00</span>      County 
+Office of Education <span style="font-weight: bold">(</span>COE<span style="font-weight: bold">)</span>        <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    
+<span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">37.658212</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-122.09713</span>      L 
+Karen Monroe  lkmonroe@acoe.org       <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span> 
+<span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2015</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">06</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">23</span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01100170109835</span>  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0691051</span> <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10546</span>   Closed  Alameda Alameda County Office of 
+Education      FAME Public Charter     <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">39899</span> Balentine Drive, Suite <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">335</span>    
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">39899</span> Balentine Dr., Ste. <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">335</span>   Newark  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">94560</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5359</span>      CA      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">39899</span> 
+Balentine Drive, Suite <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">335</span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">39899</span> Balentine Dr., Ste. <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">335</span>   Newark  
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">94560</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5359</span>      CA      <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2005</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">08</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">29</span>      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2015</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">07</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">31</span> 
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0728</span>    Directly funded <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">00</span>      County Office of Education <span style="font-weight: bold">(</span>COE<span style="font-weight: bold">)</span>   
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">65</span>      K-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span> Schools <span style="font-weight: bold">(</span>Public<span style="font-weight: bold">)</span>   TRAD    Traditional     ELEMHIGH        
+Elementary-High Combination     K-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span>    K-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span>    P       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">37.521436</span>  
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-121.99391</span>      <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    
+<span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2015</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">09</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01</span>
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">01100170112607</span>  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0691051</span> <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10947</span>   Active  Alameda Alameda County Office of 
+Education      Envision Academy for Arts &amp; Technology  <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1515</span> Webster Street 
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1515</span> Webster St.        Oakland <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">94612</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3355</span>      CA      <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1515</span> Webster Street
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1515</span> Webster St.        Oakland <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">94612</span>   CA      <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">510</span><span style="font-weight: bold">)</span> <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">596</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8901</span>  <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    
+www.envisionacademy.org/        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2006</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">08</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">28</span>      <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0811</span>    
+Directly funded <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">00</span>      County Office of Education <span style="font-weight: bold">(</span>COE<span style="font-weight: bold">)</span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">66</span>      
+High Schools <span style="font-weight: bold">(</span>Public<span style="font-weight: bold">)</span>   TRAD    Traditional     HS      High School     
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">12</span>    N       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span>       <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">37.80452</span>        <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">-122.26815</span>      Laura   
+Robell  laura@envisionacademy.org       <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    
+<span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #800080; text-decoration-color: #800080; font-style: italic">None</span>    <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2015</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">06</span>-<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">18</span>
+*<span style="color: #800080; text-decoration-color: #800080">/</span>
+
+</pre>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<h3 class="smaller" id="calling-the-llm-with-the-prompt">Calling the LLM with the prompt</h3>
+<div class="fragment fade-in-then-semi-out">
+<p><code>litellm</code> is a client for multiple LLM providers <a href="https://docs.litellm.ai/docs/providers"><i class="bi-info-circle " style="" role="img" aria-hidden="true"></i> <code>model</code> list</a></p>
+<div id="36356db5" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a></a><span class="op">!</span>uv add litellm <span class="op">--</span>quiet   <span class="co"># it can be be added with uv </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<!-- [^extras]:   
+  `caching` , `extra-proxy` , `mlflow` , `proxy` , `semantic-router`, `utils` -->
+<div class="fragment fade-in">
+<p>To run inference, we just call the <a href="https://docs.litellm.ai/docs/completion/input"><code>completions</code></a> module function:</p>
+<!-- Enable disk cachesq -->
+<div id="72729625" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a></a><span class="im">import</span> litellm</span>
+<span id="cb15-2"><a></a></span>
+<span id="cb15-3"><a></a><span class="co"># model = "ollama_chat/granite-code:20b"</span></span>
+<span id="cb15-4"><a></a>model <span class="op">=</span> <span class="st">"watsonx/ibm/granite-3-2-8b-instruct"</span></span>
+<span id="cb15-5"><a></a></span>
+<span id="cb15-6"><a></a>response <span class="op">=</span> litellm.completion(</span>
+<span id="cb15-7"><a></a>  model<span class="op">=</span>model,</span>
+<span id="cb15-8"><a></a>  messages<span class="op">=</span>messages,</span>
+<span id="cb15-9"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<aside class="notes">
+<p>There are some reasonably good LLMs under the coder and instruct in Hugging Face. Some of these can be run locally with some inference server like <code>Ollama</code>, <code>llama.cpp</code> or <code>LMStudio</code>, and also use pubic ones.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level2">
+
+<div id="a11ef85e" class="cell scrollable" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a></a>response</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-magenta-fg ansi-bold">ModelResponse</span><span class="ansi-bold">(</span>
+    <span class="ansi-yellow-fg">id</span>=<span class="ansi-green-fg">'chatcmpl-f79a3df0-2506-4e7e-aa2b-b65d21f5d680---5976a0e7cf57f032504389f213b02431---e4f953c6-f9cd-4161-bccf-1f1fd819ea7b'</span>,
+    <span class="ansi-yellow-fg">created</span>=<span class="ansi-cyan-fg ansi-bold">1758486227</span>,
+    <span class="ansi-yellow-fg">model</span>=<span class="ansi-green-fg">'watsonx/ibm/granite-3-2-8b-instruct'</span>,
+    <span class="ansi-yellow-fg">object</span>=<span class="ansi-green-fg">'chat.completion'</span>,
+    <span class="ansi-yellow-fg">system_fingerprint</span>=<span style="font-style:italic" class="ansi-magenta-fg">None</span>,
+    <span class="ansi-yellow-fg">choices</span>=<span class="ansi-bold">[</span>
+        <span class="ansi-magenta-fg ansi-bold">Choices</span><span class="ansi-bold">(</span>
+            <span class="ansi-yellow-fg">finish_reason</span>=<span class="ansi-green-fg">'stop'</span>,
+            <span class="ansi-yellow-fg">index</span>=<span class="ansi-cyan-fg ansi-bold">0</span>,
+            <span class="ansi-yellow-fg">message</span>=<span class="ansi-magenta-fg ansi-bold">Message</span><span class="ansi-bold">(</span>
+                <span class="ansi-yellow-fg">content</span>=<span class="ansi-green-fg">'SELECT COUNT</span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">*</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> FROM schools\nINNER JOIN frpm ON schools.CDSCode = frpm.CDSCode\nINNER JOIN satscores ON schools.CDSCode = satscores.cds\nWHERE satscores."AvgScrMath" &gt; 400\nAND schools.Virtual = \'Y\'\nAND schools.Magnet = 0\nAND frpm.CharterSchool</span><span class="ansi-green-fg">(</span><span class="ansi-green-fg">Y/N</span><span class="ansi-green-fg">)</span><span class="ansi-green-fg"> = 0\nLIMIT 10;'</span>,
+                <span class="ansi-yellow-fg">role</span>=<span class="ansi-green-fg">'assistant'</span>,
+                <span class="ansi-yellow-fg">tool_calls</span>=<span style="font-style:italic" class="ansi-magenta-fg">None</span>,
+                <span class="ansi-yellow-fg">function_call</span>=<span style="font-style:italic" class="ansi-magenta-fg">None</span>,
+                <span class="ansi-yellow-fg">provider_specific_fields</span>=<span style="font-style:italic" class="ansi-magenta-fg">None</span>
+            <span class="ansi-bold">)</span>
+        <span class="ansi-bold">)</span>
+    <span class="ansi-bold">]</span>,
+    <span class="ansi-yellow-fg">usage</span>=<span class="ansi-magenta-fg ansi-bold">Usage</span><span class="ansi-bold">(</span>
+        <span class="ansi-yellow-fg">completion_tokens</span>=<span class="ansi-cyan-fg ansi-bold">102</span>,
+        <span class="ansi-yellow-fg">prompt_tokens</span>=<span class="ansi-cyan-fg ansi-bold">3259</span>,
+        <span class="ansi-yellow-fg">total_tokens</span>=<span class="ansi-cyan-fg ansi-bold">3361</span>,
+        <span class="ansi-yellow-fg">completion_tokens_details</span>=<span style="font-style:italic" class="ansi-magenta-fg">None</span>,
+        <span class="ansi-yellow-fg">prompt_tokens_details</span>=<span style="font-style:italic" class="ansi-magenta-fg">None</span>
+    <span class="ansi-bold">)</span>,
+    <span class="ansi-yellow-fg">model_id</span>=<span class="ansi-green-fg">'ibm/granite-3-2-8b-instruct'</span>,
+    <span class="ansi-yellow-fg">model_version</span>=<span class="ansi-green-fg">'1.0.0'</span>,
+    <span class="ansi-yellow-fg">created_at</span>=<span class="ansi-green-fg">'2025-09-21T20:23:48.449Z'</span>,
+    <span class="ansi-yellow-fg">system</span>=<span class="ansi-bold">{</span>
+        <span class="ansi-green-fg">'warnings'</span>: <span class="ansi-bold">[</span>
+            <span class="ansi-bold">{</span>
+                <span class="ansi-green-fg">'message'</span>: <span class="ansi-green-fg">"The value of 'max_completion_tokens' for this model was set to value 1024"</span>,
+                <span class="ansi-green-fg">'id'</span>: <span class="ansi-green-fg">'unspecified_max_completion_tokens'</span>,
+                <span class="ansi-green-fg">'additional_properties'</span>: <span class="ansi-bold">{</span>
+                    <span class="ansi-green-fg">'limit'</span>: <span class="ansi-cyan-fg ansi-bold">0</span>,
+                    <span class="ansi-green-fg">'new_value'</span>: <span class="ansi-cyan-fg ansi-bold">1024</span>,
+                    <span class="ansi-green-fg">'parameter'</span>: <span class="ansi-green-fg">'max_completion_tokens'</span>,
+                    <span class="ansi-green-fg">'value'</span>: <span class="ansi-cyan-fg ansi-bold">0</span>
+                <span class="ansi-bold">}</span>
+            <span class="ansi-bold">}</span>
+        <span class="ansi-bold">]</span>
+    <span class="ansi-bold">}</span>
+<span class="ansi-bold">)</span></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="structured-output" class="slide level2">
+<h2>Structured output</h2>
+<div class="fragment">
+<p>Now that we get the SQL, we’re going to ask the LLM to return the response as JSON using a Pydantic model.</p>
+</div>
+<div class="fragment">
+<div id="5bfab9d2" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb17" data-code-line-numbers="1|2-5|9-13|14-15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel, Field</span>
+<span id="cb17-2"><a></a><span class="kw">class</span> SQLOutput(BaseModel):</span>
+<span id="cb17-3"><a></a>    sql: <span class="bu">str</span> <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"The SQL query"</span>)</span>
+<span id="cb17-4"><a></a>    explanation: <span class="bu">str</span> <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"The reasoning for the query construction"</span>)</span>
+<span id="cb17-5"><a></a></span>
+<span id="cb17-6"><a></a><span class="co"># Optional </span></span>
+<span id="cb17-7"><a></a><span class="co"># litellm.enable_json_schema_validation = True</span></span>
+<span id="cb17-8"><a></a></span>
+<span id="cb17-9"><a></a>response <span class="op">=</span> litellm.completion(</span>
+<span id="cb17-10"><a></a>  model<span class="op">=</span>model,</span>
+<span id="cb17-11"><a></a>  messages<span class="op">=</span>messages,</span>
+<span id="cb17-12"><a></a>  response_format<span class="op">=</span>SQLOutput,</span>
+<span id="cb17-13"><a></a>)</span>
+<span id="cb17-14"><a></a>output <span class="op">=</span> SQLOutput.model_validate_json(response.choices[<span class="dv">0</span>].message.content)</span>
+<span id="cb17-15"><a></a><span class="bu">print</span>(output)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+</div>
+</section>
+<section id="structured-output-output" class="slide level2 output-location-slide"><h2>Structured output</h2><div class="cell output-location-slide" data-execution_count="22">
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">SQLOutput</span><span style="font-weight: bold">(</span>
+    <span style="color: #808000; text-decoration-color: #808000">sql</span>=<span style="color: #008000; text-decoration-color: #008000">"SELECT COUNT(*) FROM schools INNER JOIN satscores ON </span>
+<span style="color: #008000; text-decoration-color: #008000">schools.CDSCode = satscores.cds WHERE schools.Virtual = 'Y' AND </span>
+<span style="color: #008000; text-decoration-color: #008000">satscores.AvgScrMath &gt; 400;"</span>,
+    <span style="color: #808000; text-decoration-color: #808000">explanation</span>=<span style="color: #008000; text-decoration-color: #008000">"The query selects the count of virtual schools from the </span>
+<span style="color: #008000; text-decoration-color: #008000">'schools' table that have a 'Virtual' column value of 'Y' and an </span>
+<span style="color: #008000; text-decoration-color: #008000">'AvgScrMath' (average score in Math) in the 'satscores' table greater than </span>
+<span style="color: #008000; text-decoration-color: #008000">400. It uses a JOIN to combine data from both tables based on the common </span>
+<span style="color: #008000; text-decoration-color: #008000">'CDSCode' column."</span>
+<span style="font-weight: bold">)</span>
+</pre>
+</div>
+</div></section><section class="slide level2">
+
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a></a><span class="cf">with</span> engine.<span class="ex">connect</span>() <span class="im">as</span> c:</span>
+<span id="cb18-2"><a></a>  response <span class="op">=</span> c.execute(text(output.sql))</span>
+<span id="cb18-3"><a></a>  <span class="bu">print</span>(response.fetchall(()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="create-a-workflow" class="title-slide slide level1 center">
+<h1>Create a workflow</h1>
+<aside class="notes">
+
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="chaining-generation-and-execution" class="title-slide slide level1 center">
+<h1>Chaining generation and execution</h1>
+<div class="fragment fade-in-then-semi-out">
+<p>When our code starts to become larger than a script can handle 🏋🏾‍♀️, <code>LangGraph</code> is a great tool to provide some reusable organization. We can add it with <code>uv add langgraph</code>.</p>
+</div>
+<div class="fragment fade-in-then-semi-out">
+<p>We will build a small pipeline where to run SQL generation and execution.</p>
+</div>
+<div class="fragment fade-in-then-semi-out">
+<p>Each node in the pipeline will be a function that received a state object and returns another state object.</p>
+</div>
+</section>
+<section id="state-for-sql-workflow" class="slide level2">
+<h2>State for SQL workflow</h2>
+<p>LangGraph uses state that is propagated through nodes.</p>
+<p>This state can be defined with a TypedDict or a Pydantic BaseModel.</p>
+<div id="2ef6ef9a" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a></a><span class="im">from</span> typing <span class="im">import</span> Optional, Dict, List</span>
+<span id="cb19-2"><a></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass, field</span>
+<span id="cb19-3"><a></a><span class="im">from</span> sqlalchemy <span class="im">import</span> Engine</span>
+<span id="cb19-4"><a></a></span>
+<span id="cb19-5"><a></a><span class="at">@dataclass</span></span>
+<span id="cb19-6"><a></a><span class="kw">class</span> State:</span>
+<span id="cb19-7"><a></a>    question: <span class="bu">str</span> <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb19-8"><a></a>    engine: Optional[Engine] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb19-9"><a></a>    database: Optional[SQLDatabase] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb19-10"><a></a>    messages: List[Dict[<span class="bu">str</span>, <span class="bu">str</span>]] <span class="op">=</span> field(default_factory<span class="op">=</span><span class="bu">list</span>)</span>
+<span id="cb19-11"><a></a>    sql: Optional[<span class="bu">str</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb19-12"><a></a>    results: Optional[<span class="bu">str</span>] <span class="op">=</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="creating-nodes" class="slide level2">
+<h2>Creating Nodes</h2>
+<p>The initial node will receive the user input and create the state.</p>
+<div id="7da900cc" class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a></a><span class="kw">def</span> init(user_input: Dict[<span class="bu">str</span>, <span class="bu">str</span>]) <span class="op">-&gt;</span> State:</span>
+<span id="cb20-2"><a></a>  engine <span class="op">=</span> create_engine(user_input[<span class="st">"database"</span>])</span>
+<span id="cb20-3"><a></a>  database <span class="op">=</span> SQLDatabase(engine<span class="op">=</span>engine)</span>
+<span id="cb20-4"><a></a>  <span class="cf">return</span> State(</span>
+<span id="cb20-5"><a></a>    question<span class="op">=</span>user_input[<span class="st">"question"</span>], </span>
+<span id="cb20-6"><a></a>    database<span class="op">=</span>database,</span>
+<span id="cb20-7"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="generating-the-prompt" class="slide level2">
+<h2>Generating the prompt</h2>
+<div id="cf03b455" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a></a><span class="kw">def</span> make_prompt(state: State) <span class="op">-&gt;</span> State:</span>
+<span id="cb21-2"><a></a>    messages <span class="op">=</span> [</span>
+<span id="cb21-3"><a></a>      {</span>
+<span id="cb21-4"><a></a>        <span class="st">"role"</span>: <span class="st">"system"</span>, </span>
+<span id="cb21-5"><a></a>        <span class="st">"content"</span>: system_message.<span class="bu">format</span>(</span>
+<span id="cb21-6"><a></a>          dialect<span class="op">=</span>state.database.dialect, </span>
+<span id="cb21-7"><a></a>          top_k<span class="op">=</span>top_k,</span>
+<span id="cb21-8"><a></a>          table_info<span class="op">=</span>state.database.get_table_info()</span>
+<span id="cb21-9"><a></a>        )},</span>
+<span id="cb21-10"><a></a>      {</span>
+<span id="cb21-11"><a></a>        <span class="st">"role"</span>: <span class="st">"user"</span>, </span>
+<span id="cb21-12"><a></a>        <span class="st">"content"</span>: state.question,</span>
+<span id="cb21-13"><a></a>      }</span>
+<span id="cb21-14"><a></a>    ]</span>
+<span id="cb21-15"><a></a>    <span class="cf">return</span> state</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="calling-the-llm" class="slide level2">
+<h2>Calling the LLM</h2>
+<p>The initial node will receive the user input and create the state.</p>
+<div id="6f84a0c6" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a></a><span class="kw">def</span> generate(state: State) <span class="op">-&gt;</span> State:</span>
+<span id="cb22-2"><a></a></span>
+<span id="cb22-3"><a></a>  response <span class="op">=</span> litellm.completion(</span>
+<span id="cb22-4"><a></a>    model<span class="op">=</span>model,</span>
+<span id="cb22-5"><a></a>    messages<span class="op">=</span>messages,</span>
+<span id="cb22-6"><a></a>    response_format<span class="op">=</span>SQLOutput,</span>
+<span id="cb22-7"><a></a>  )</span>
+<span id="cb22-8"><a></a>  output <span class="op">=</span> SQLOutput.model_validate_json(response.choices[<span class="dv">0</span>].message.content)</span>
+<span id="cb22-9"><a></a>  <span class="bu">print</span>(output)</span>
+<span id="cb22-10"><a></a>  engine <span class="op">=</span> create_engine(user_input[<span class="st">"database"</span>])</span>
+<span id="cb22-11"><a></a>  database <span class="op">=</span> SQLDatabase(engine<span class="op">=</span>engine)</span>
+<span id="cb22-12"><a></a>  <span class="cf">return</span> State(</span>
+<span id="cb22-13"><a></a>    question<span class="op">=</span>user_input[<span class="st">"question"</span>], </span>
+<span id="cb22-14"><a></a>    database<span class="op">=</span>database,</span>
+<span id="cb22-15"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="graph-creation" class="slide level2">
+<h2>Graph creation</h2>
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a></a><span class="co">#| echo: true</span></span>
+<span id="cb23-2"><a></a><span class="co">#| code-line-numbers: "1"</span></span>
+<span id="cb23-3"><a></a><span class="co">#| output-location: slide</span></span>
+<span id="cb23-4"><a></a><span class="im">from</span> langgraph.graph <span class="im">import</span> StateGraph, START, END</span>
+<span id="cb23-5"><a></a></span>
+<span id="cb23-6"><a></a>graph_builder <span class="op">=</span> StateGraph(State)</span>
+<span id="cb23-7"><a></a>graph_builder.add_node(<span class="st">"init"</span>, init)</span>
+<span id="cb23-8"><a></a>graph_builder.add_node(<span class="st">"make_prompt"</span>, make_prompt)</span>
+<span id="cb23-9"><a></a>graph_builder.add_node(<span class="st">"generate"</span>, generate)</span>
+<span id="cb23-10"><a></a>graph_builder.add_node(<span class="st">"execute"</span>, execute)</span>
+<span id="cb23-11"><a></a>graph_builder.add_edge(START, <span class="st">"init"</span>)</span>
+<span id="cb23-12"><a></a>graph_builder.add_edge(<span class="st">"init"</span>, <span class="st">"make_prompt"</span>)</span>
+<span id="cb23-13"><a></a>graph_builder.add_edge(<span class="st">"lambda_2"</span>, END)</span>
+<span id="cb23-14"><a></a>display(graph_builder.<span class="bu">compile</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="fix-common-errors" class="title-slide slide level1 center">
+<h1>Fix common errors</h1>
+
+</section>
+<section id="adding-a-node-for-safety" class="slide level2">
+<h2>Adding a node for safety</h2>
+<aside class="notes">
+<p>Usually done through LLMs in agentic workflows, we are going to take a more deterministic approach.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="lets-go-for-bobby-tables" class="slide level2 center">
+<h2>Let’s go for Bobby tables</h2>
+
+<img data-src="./img/memes/exploits_of_a_mom.png" class="r-stretch"><div class="footer">
+<p><a href="https://www.explainxkcd.com/wiki/index.php/327:_Exploits_of_a_Mom"><code>xkcd 327</code></a></p>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="adding-more-information-in-the-prompt" class="title-slide slide level1 center">
+<h1>Adding more information in the prompt</h1>
+
+</section>
+<section id="acronyms" class="slide level2">
+<h2>Acronyms</h2>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="lessons-learned" class="title-slide slide level1 center">
+<h1>Lessons learned</h1>
+
+</section>
+<section id="move-from-function-to-classes" class="slide level2">
+<h2>Move from function to classes</h2>
+<div style="font-size: 80%;">
+<div class="fragment">
+<ul>
+<li>The workflow state can be a <code>dict</code> or <code>TypedDict</code>, but <code>dataclass</code> or a <code>BaseModel</code> is more convenient.</li>
+</ul>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a></a><span class="kw">class</span> State(TypedDict):</span>
+<span id="cb24-2"><a></a>  connection: ...</span>
+<span id="cb24-3"><a></a>  messages: ...</span>
+<span id="cb24-4"><a></a>  schema: ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="columns">
+<div class="column" style="width:48%;">
+<div class="fragment">
+<ul>
+<li>A simple function that works with the state.</li>
+</ul>
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a></a><span class="kw">def</span> create_sql(state: State) <span class="op">-&gt;</span> State:</span>
+<span id="cb25-2"><a></a>  <span class="co"># Do something</span></span>
+<span id="cb25-3"><a></a>  <span class="cf">return</span> State(...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div><div class="column" style="width:4%;">
+<!-- Gap -->
+</div><div class="column" style="width:48%;">
+<div class="fragment">
+<ul>
+<li>This can also be a class if we want to pass more information.</li>
+</ul>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a></a><span class="kw">class</span> CreateSQLNode:</span>
+<span id="cb26-2"><a></a>  <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config: ...) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb26-3"><a></a>    <span class="va">self</span>.config <span class="op">=</span> config</span>
+<span id="cb26-4"><a></a>  </span>
+<span id="cb26-5"><a></a>  <span class="kw">def</span> <span class="fu">__call__</span>(</span>
+<span id="cb26-6"><a></a>    <span class="va">self</span>, state: State</span>
+<span id="cb26-7"><a></a>  ) <span class="op">-&gt;</span> State:</span>
+<span id="cb26-8"><a></a>    <span class="co"># do something</span></span>
+<span id="cb26-9"><a></a>    <span class="cf">return</span> State(...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div></div>
+</div>
+</div>
+</section>
+<section id="reducing-the-schema-for-simpler-queries" class="slide level2">
+<h2>Reducing the schema for simpler queries</h2>
+<p>TBD</p>
+</section>
+<section id="metadata-about-the-columns" class="slide level2">
+<h2>Metadata about the columns</h2>
+<p>TBD reducing the involved columns</p>
+</section>
+<section id="dynamic-context" class="slide level2">
+<h2>Dynamic context</h2>
+<ul>
+<li>Date related acronyms, like Q1, Q2, etc.</li>
+<li>Function nodes
+<ul>
+<li>WASM?</li>
+</ul></li>
+</ul>
+</section></section>
+<section>
+<section id="questions" class="title-slide slide level1 center">
+<h1>Questions</h1>
+
+</section>
+<section class="slide level2">
+
+</section></section>
+<section id="thank-you" class="title-slide slide level1 center">
+<h1>Thank you</h1>
+
+
+<div class="reveal-header">
+<div class="header-logo-left">
+
+</div>
+<div class="header-logo-right">
+<a href="https://pycon-kenya-2025.sessionize.com/"><img data-src="./img/pynbo.png" style="height:2em;max-width:none;"></a>
+</div>
+</div>
+</section>
+
+
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+<p><em>Asking question to <i class="bi-database " style="" role="img" aria-hidden="true"></i> with LLMs</em> - 🐍 PyCon 🇰🇪 2025</p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': true,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'slide',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+            const codeEl = trigger.previousElementSibling.cloneNode(true);
+            for (const childEl of codeEl.children) {
+              if (isCodeAnnotation(childEl)) {
+                childEl.remove();
+              }
+            }
+            return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
