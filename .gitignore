@@ -13,3 +13,9 @@ minidev*
 __MACOS*
 # Debugging (pre langchain)
 messages.json
+ipynb/*
+*.aux
+_quarto_internal_scss_error.scss
+slides.quarto_ipynb
+TODO.md
+slides.tex

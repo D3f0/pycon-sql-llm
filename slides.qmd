@@ -1,7 +1,7 @@
 ---
 title: '💬 {{< bi database >}} 🤖 Asking questions to your database with LLMs '
-author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Africa
-date: September, 2025
+author: Nahuel Defossé {{< bi envelope >}} [nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Africa
+#date: September, 2025
 embed-resources: false
 footer: '*Asking question to {{< bi database >}} with LLMs* - 🐍 PyCon 🇰🇪 2025'
 execute:
@@ -19,16 +19,39 @@ format:
     theme:
       - solarized
       - custom.scss
-    header-logo-right: ./img/pynbo.png
-    header-logo-right-url: https://pycon-kenya-2025.sessionize.com/
-    header-logo-right-height: 2em
+    # header-logo-right: ./img/pynbo.png
+    # header-logo-right-url: https://pycon-kenya-2025.sessionize.com/
+    # header-logo-right-height: 2em
     preview-links: auto
 filters:
   - reveal-logo
+  # - inline-svg
 jupyter: python3
+
+# Remove logo
+# include-after: |
+#   <script type="text/javascript">
+#     Reveal.on('ready', event => {
+#       if (event.indexh === 0) {
+#         document.querySelector("div.has-logo > img.slide-logo").style.display = "none";
+#       }
+#     });
+#     Reveal.addEventListener('slidechanged', (event) => {
+#       if (event.indexh === 0) {
+#         Reveal.configure({ slideNumber: null });
+#         document.querySelector("div.has-logo > img.slide-logo").style.display = "none";
+#       }
+#       if (event.indexh === 1) { 
+#         Reveal.configure({ slideNumber: 'c' });
+#         document.querySelector("div.has-logo > img.slide-logo").style.display = null;
+#       }
+#     });
+#   </script>
 ---
 ```{python}
-%load_ext rich
+import os
+os.environ["JUPYTER_COLUMNS"] = "60"
+# %load_ext rich
 ```
 ## About myself {.smaller}
 
@@ -56,10 +79,13 @@ jupyter: python3
 
 ---
 
+::: {.content-visible when-format="html"}
+
 ## Follow along (or at 🏡) {.center}
 
 {{< qrcode https://ibm.com >}}
 
+:::
 
 ---
 
@@ -68,10 +94,10 @@ jupyter: python3
 In this talk we're gonna show how to use Python to:
 
   - {{< bi database >}} Connect to a database and execute the queries (🐦)
-  - {{< bi filetype-sql >}}Convert natural language questions into SQL 
-  - {{< bi diagram-3 >}} Create a workflow 
-  - {{< bi bug-fill >}}Fix common errors
-  - {{< bi bookmark-check >}}Lessons learned
+  - {{< bi filetype-sql >}} Convert natural language questions into SQL
+  - {{< bi diagram-3 >}} Create a workflow
+  - {{< bi bug-fill >}} More advanced nodes
+  - {{< bi bookmark-check >}} Lessons learned
   
 TODO: Put some drawing & rephrase
 
@@ -85,10 +111,21 @@ TODO: Put some drawing & rephrase
 ## Public datasets used in text to SQL
 
 :::: {.columns}
-::: {.column}
-::: {.fragment .fade-right}
 
+
+::: {.column}
+::: {.fragment .fade-left .small_text}
+These datasets define:
+
+- ❓ Natural language questions
+- 🫰 Expected SQL
+- 🏗️ Database schema & content
+- 🔎 Evaluation metrics 
+- 🥇 Leaderboard
 :::
+:::
+
+::: {.column}
 
 ::: {.fragment .fade-right}
 - [🕷️ Spider](https://yale-lily.github.io/spider){target="_bank"}
@@ -103,17 +140,7 @@ TODO: Put some drawing & rephrase
 - [🏹 Archer](https://sig4kg.github.io/archer-bench/){target="_bank"}
 :::
 :::
-::: {.column}
-::: {.fragment .fade-left .small_text}
-These datasets define:
 
-- ❓ Natural language questions
-- 🫰 Expected SQL
-- 🏗️ Database schema & content
-- 🔎 Evaluation metrics 
-- 🥇 Leaderboard
-:::
-:::
 ::::
 
 
@@ -139,11 +166,16 @@ to get to the top of the leatherboard in 2024/6
 
 ::: {.fragment .fade-left}
 
+<!-- Setup cell without output with imports -->
 ```{python}
 from rich.console import Console
-_c = Console(width=75)
+_c = Console(width=45)
 # Ensure print are contained within the range
 print = _c.print
+
+
+from IPython.display import display, Image
+
 ```
 
 ```{python}
@@ -161,7 +193,7 @@ dataset = load_dataset(
 print("Database types: ", *dataset.keys())
 sqlite_df = dataset["mini_dev_sqlite"].to_pandas()
 sqlite_df = sqlite_df.drop(columns=['question_id'])
-display(sqlite_df.head(2))
+display(sqlite_df.head(5))
 ```
 
 :::
@@ -195,6 +227,12 @@ In `minidev/MINIDEV/dev_databases/california_schools/` we find the {{< bi databa
 
 ![](./img/california_school.png)
 
+```{python}
+#| echo: true
+#| code-overflow: wrap
+from pathlib import Path
+base = Path('./minidev/MINIDEV/dev_databases/california_schools/')
+```
 
 ---
 
@@ -204,26 +242,44 @@ Creating an `Engine` instance connected to a SQLite database.
 ```{python}
 #| echo: true
 #| code-overflow: wrap
-from pathlib import Path
+
 from sqlalchemy import create_engine
-base = Path('./minidev/MINIDEV/dev_databases/california_schools/')
 db_path = base / 'california_schools.sqlite'
-engine = create_engine(f'sqlite:///{db_path}')
+db_url = f"sqlite:///{db_path}"
+engine = create_engine(db_url)
 engine
 ```
 
 ---
 
-### Grabbing a simple question and its  {{< bi database >}} 
+## ER
+
+```{python}
+#from eralchemy import render_er
+#render_er(db_url, './img/output/erd_from_sqlite.svg')
+
+```
+![](./img/er-california-schools.png){.lightbox}
+
+::: footer
+:::
+
+---
+
+### Getting one simple question 
 
 ```{python}
 #| echo: true
-california_schools_df = sqlite_df[sqlite_df.db_id == 'california_schools']
-simple_queries_df = california_schools_df[sqlite_df.difficulty == 'simple']
+simple_queries_df = (sqlite_df
+  .pipe(lambda df: df[df.db_id == 'california_schools'])
+  .pipe(lambda df: df[df.difficulty == 'simple']))
+
 simple_queries_df.head(2).set_index("db_id")
 ```
 
 ---
+
+### Getting one simple question 
 
 ```{python}
 #| echo: false
@@ -233,9 +289,11 @@ pd.set_option('display.max_colwidth', 0)
 
 ```{python}
 #| echo: true
-import pandas as pd
 
-question_sql_df = simple_queries_df[["question","SQL"]].reset_index()
+
+question_sql_df = (simple_queries_df
+  .pipe(lambda df: df[["question", "SQL"]])
+  .reset_index())
 ```
 
 ::: {.fragment .fade-left}
@@ -244,10 +302,10 @@ Let's take a look at the `question` and `SQL` column.
 ```{python}
 #| echo: true
 
-question = question_sql_df.loc[0, "question"]
-query = question_sql_df.loc[0, "SQL"]
-print(f"{question!r}")
-print(f"{query!r}")
+question, query = question_sql_df.loc[
+  0, 
+  ["question", "SQL"]]
+display(question, query)
 ```
 
 :::
@@ -436,16 +494,17 @@ Now we construct a list of messages. These are `dicts` which have a key
 ```{python}
 #| echo: true
 #| output-location: slide
-
+#| code-line-numbers: "4-10|11-14|19-23"
 def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
     # Create a ChatPromptTemplate
     messages = [
-      {"role": "system", 
-      "content": system_message.format(
-        dialect=dialect, 
-        top_k=top_k, 
-        table_info=table_info
-       )},
+      {
+        "role": "system", 
+        "content": system_message.format(
+          dialect=dialect, 
+          top_k=top_k, 
+          table_info=table_info
+        )},
       {
         "role": "user", 
         "content": question
@@ -454,8 +513,11 @@ def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
     
     return messages
 
-messages = generate_messages(question=question, dialect=db.dialect, top_k=10, table_info=db.get_table_info())
-print(messages)
+messages = generate_messages(
+  question=question, 
+  dialect=db.dialect, top_k=10, 
+  table_info=db.get_table_info())
+messages
 ```
 
 ```{python}
@@ -467,7 +529,7 @@ with open("messages.json", "w") as fp:
 
 --- 
 
-### Inspecting the `system` message
+### 🔎 the `system` message
 
 ```{python}
 #| echo: false
@@ -475,6 +537,9 @@ with open("messages.json", "w") as fp:
 #| classes: scrollable 
 print(messages[0]['content'])
 ```
+
+::: footer
+:::
 
 ---
 
@@ -543,11 +608,11 @@ ones.
 ```{python}
 #| echo: true
 #| classes: scrollable
-response
+print(response)
 ```
 ---
 
-## Structured output
+## Structured output {.smaller}
 
 ::: {.fragment}
 Now that we get the SQL, we're going to ask the LLM to return
@@ -558,12 +623,13 @@ the response as JSON using a Pydantic model.
 ```{python}
 #| echo: true
 #| output-location: slide
-#| code-line-numbers: "1|2-5|9-13|14-15"
+#| code-line-numbers: "1|2-5|9-13|14-17"
 
 from pydantic import BaseModel, Field
 class SQLOutput(BaseModel):
     sql: str = Field(description="The SQL query")
-    explanation: str = Field(description="The reasoning for the query construction")
+    explanation: str = Field(
+      description="The reasoning for the query construction")
 
 # Optional 
 # litellm.enable_json_schema_validation = True
@@ -573,11 +639,29 @@ response = litellm.completion(
   messages=messages,
   response_format=SQLOutput,
 )
-output = SQLOutput.model_validate_json(response.choices[0].message.content)
-print(output)
+output = SQLOutput.model_validate_json(
+  response.choices[0].message.content)
+output
 ```
 
 :::
+---
+
+::: {.fragment}
+Now we can use the LLM like we were getting an API:
+```{python}
+#| echo: true
+output.sql
+```
+:::
+::: {.fragment}
+
+```{python}
+#| echo: true
+output.explanation
+```
+:::
+
 
 ---
 
@@ -602,7 +686,7 @@ except Exception as err:
 # Chaining generation and execution
 
 ::: {.fragment .fade-in-then-semi-out}
-When our code starts to become larger than a script can handle 🏋🏾‍♀️, `LangGraph` is a great
+<img src="./img/langgraph.svg"/> When our code starts to become larger than a script can handle 🏋🏾‍♀️, `LangGraph` is a great
 tool to provide some reusable organization. We can add it with `uv add langgraph`.
 :::
 
@@ -751,18 +835,14 @@ graph = graph_builder.compile()
 
 
 ```{python}
-#| echo: true
-#| output-location: fragment
+#| echo: false
+#| output: true
 
-from IPython.display import Image, display
+from IPython.display import display, Markdown
 
-try:
-    display(Image(graph.get_graph().draw_mermaid_png()))
-except Exception as error:
-    print(error)
-    # This requires some extra dependencies and is optional
-    pass
+Markdown("```{mermaid}\n%s\n```" % graph.get_graph().draw_mermaid())
 ```
+
 
 ---
 

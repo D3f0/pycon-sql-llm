@@ -59,7 +59,7 @@
   overflow-y: auto;
 }
 
-.cell-output-display pre {
-  max-height: 90%;
-  overflow-y: auto;
+// https://github.com/quarto-dev/quarto-cli/discussions/557
+.reveal .slide-number > a[href*='title-slide'] {
+  display: none;
 }
