@@ -260,6 +260,8 @@ engine = create_engine(db_url)
 engine
 ```
 
+
+
 ---
 
 ## ER of `california_schools` {{< bi database >}}
@@ -430,7 +432,9 @@ Now we're gonna see what we're put in the prompt, for starters the schema
 
 LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information [^qa_lc].
 
+::: {.small}
 It implements the best practices as specified in: [{{< bi filetype-pdf >}} Rajkumar et al, 2022](https://arxiv.org/abs/2204.00498)
+:::
 
 ```{python}
 #| echo: true
