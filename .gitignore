@@ -19,3 +19,5 @@ _quarto_internal_scss_error.scss
 slides.quarto_ipynb
 TODO.md
 slides.tex
+# non HTML exports
+exports/*

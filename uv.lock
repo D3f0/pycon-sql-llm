@@ -486,6 +486,15 @@ wheels = [
 ]
 
 [[package]]
+name = "cheap-repr"
+version = "0.5.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/30/f0e9d5bfe80b8287ea8a9263eb3c71c5fdf44b6f7a781a7c96f83172ccad/cheap_repr-0.5.2.tar.gz", hash = "sha256:001a5cf8adb0305c7ad3152c5f776040ac2a559d97f85770cebcb28c6ca5a30f", size = 20232, upload-time = "2024-08-10T14:08:07.314Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ec/52/fec0262af470a157a557e46be1d52ecdaf1695cefd80bb62bb6a07cc4ea9/cheap_repr-0.5.2-py2.py3-none-any.whl", hash = "sha256:537ec1991bfee885c13c6d473afd110a408e039cde26882e95bf92761556ab6e", size = 12228, upload-time = "2024-08-10T14:08:05.965Z" },
+]
+
+[[package]]
 name = "click"
 version = "8.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3255,6 +3264,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
+    { name = "cheap-repr" },
     { name = "datasets" },
     { name = "diskcache" },
     { name = "fsspec", extra = ["http", "libarchive", "tqdm"] },
@@ -3285,6 +3295,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.12.15" },
+    { name = "cheap-repr", specifier = ">=0.5.2" },
     { name = "datasets", specifier = ">=4.1.1" },
     { name = "diskcache", specifier = ">=5.6.3" },
     { name = "fsspec", extras = ["http", "libarchive", "tqdm"], specifier = ">=2025.9.0" },

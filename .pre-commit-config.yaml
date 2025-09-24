@@ -47,6 +47,8 @@ repos:
     -   id: end-of-file-fixer
         exclude_types:
           - svg
+          - css
+          - yaml
     -   id: debug-statements
     # TODO: Fix this
     # -   id: name-tests-test

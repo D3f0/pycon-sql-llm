@@ -50,14 +50,16 @@ jupyter: python3
 ---
 ```{python}
 import os
-os.environ["JUPYTER_COLUMNS"] = "60"
+os.environ["JUPYTER_COLUMNS"] = "80"
 # %load_ext rich
 ```
 ## About myself {.smaller}
 
 :::: {.columns}
 ::: {.column width="40%"}
+:::: {.content-visible when-format="html"}
 ![](./img/memes/myself.gif){height="12em"}
+::::
 :::
 
 ::: {.column width="60%"}
@@ -65,10 +67,10 @@ os.environ["JUPYTER_COLUMNS"] = "60"
 ::: {.incremental}
 - 🐍 Pythonista with 18 years of experience.
   - Co-organized SciPy Latin America
+  - PyCon Argentina and EuroPython speaker
 - 🚜 Worked as CTO in  Hello Tractor 
 - 🧪 Software Engineer at IBM Research 
 - 🛰️ Worked in Foundational Models for Geospatial applications
-  - [There's a workshop on Saturday 🤩](https://pycon-kenya-2025.sessionize.com/session/954933)
 - 💬 Currently working on [Flowpilot {{< bi link-45deg >}}](https://research.ibm.com/projects/flowpilot), providing core features to 
   different products and divisions.
 ::: 
@@ -76,6 +78,28 @@ os.environ["JUPYTER_COLUMNS"] = "60"
 :::
 ::::
 
+---
+
+::: {.content-visible when-format="html"}
+
+## Tomorrow {.center}
+
+::: {.columns}
+::: {.column width="30%"}
+![](./img/promo/wanjiru.jpg)
+:::
+::: {.column width="30%"}
+![](./img/promo/beldine.jpg)
+:::
+::: {.column width="30%"}
+![](./img/promo/reggie.png)
+:::
+::: 
+
+Learn about [Multimodal Geospatial Foundation Models with Terratorch](https://pycon-kenya-2025.sessionize.com/session/954933){target="_blank"}
+ by Wanjiru, Beldine and Reggie.
+
+:::
 
 ---
 
@@ -89,29 +113,33 @@ os.environ["JUPYTER_COLUMNS"] = "60"
 
 ---
 
-# Intro
+# Agenda
 
 In this talk we're gonna show how to use Python to:
 
-  - {{< bi database >}} Connect to a database and execute the queries (🐦)
+  - {{< bi database >}} Connect to a database and execute the queries
   - {{< bi filetype-sql >}} Convert natural language questions into SQL
   - {{< bi diagram-3 >}} Create a workflow
   - {{< bi bug-fill >}} More advanced nodes
   - {{< bi bookmark-check >}} Lessons learned
-  
-TODO: Put some drawing & rephrase
+
+---
+
+## High level diagram
+
+![](./img/LLMsSQL.svg)
+
+
 
 ---
 
 # Connect to a database and execute the queries
-
 
 ---
 
 ## Public datasets used in text to SQL
 
 :::: {.columns}
-
 
 ::: {.column}
 ::: {.fragment .fade-left .small_text}
@@ -151,7 +179,8 @@ These datasets define:
 
 ## BIRD 
 
-![[IBM Research in the lederboard 2024-06-02](https://research.ibm.com/blog/granite-LLM-text-to-SQL)](./img/ibm-granite-leaderboard.png){height="400px" fig-align="center"}
+![[IBM Research in the leaderboard last year](https://research.ibm.com/blog/granite-LLM-text-to-SQL)](./img/ibm-granite-leaderboard.png){height="400px" fig-align="center"}
+
 
 ::: notes
 We're select BIRD dataset since we have some experience with it, we managed
@@ -189,10 +218,10 @@ dataset = load_dataset(
   download_config=DownloadConfig(disable_tqdm=True)
 )
 
-# Contents
-print("Database types: ", *dataset.keys())
-sqlite_df = dataset["mini_dev_sqlite"].to_pandas()
-sqlite_df = sqlite_df.drop(columns=['question_id'])
+# Only SQLite (there's Postgres and MySQL in the same dataset)
+sqlite_df = (dataset["mini_dev_sqlite"]
+  .to_pandas()
+  .pipe(lambda df: df.drop(columns=['question_id'])))
 display(sqlite_df.head(5))
 ```
 
@@ -252,7 +281,7 @@ engine
 
 ---
 
-## ER
+## ER of `california_schools` {{< bi database >}}
 
 ```{python}
 #from eralchemy import render_er
@@ -301,6 +330,7 @@ Let's take a look at the `question` and `SQL` column.
 
 ```{python}
 #| echo: true
+#| output-location: fragment
 
 question, query = question_sql_df.loc[
   0, 
@@ -308,6 +338,13 @@ question, query = question_sql_df.loc[
 display(question, query)
 ```
 
+:::
+
+::: notes
+This is one of the valid SQL queries for this question.
+There may be other. When we're comparing performance, 
+in situations where we have multiple rows and there
+are no aggregations we need to decide wether the order is important or not.
 :::
 
 ---
@@ -321,6 +358,7 @@ plot the results as a DataFrame.
 
 ```{python}
 #| echo: true
+#| output-location: fragment
 
 from sqlalchemy import text
 with engine.connect() as conn:
@@ -330,59 +368,11 @@ with engine.connect() as conn:
 ```
 
 
-```{python}
-print(f"[bold]Question:[/bold] {question}")
-print(f"[bold]SQL:[/bold] {query}")
-```
+
 
 ::: footer
 :::
 
----
-
-### Database schema with 🦜 ⛓️
-
-LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information [^qa_lc]
-
-```{python}
-#| echo: true
-!uv pip install langchain-community
-```
-
-```{python}
-#| echo: true
-
-from langchain_community.utilities import SQLDatabase
-db = SQLDatabase(engine=engine)
-
-display(db.get_usable_table_names())
-```
-
-::: {.fragment .slide-left}
-As we can see, the table names may not be immediately understandable 🤔
-:::
-[^qa_lc]: [SQL Question Answering](https://python.langchain.com/docs/tutorials/sql_qa/#system-prompt){target="_blank"}
-
-::: notes
-
-:::
-
----
-
-###
-
-```{python}
-#| echo: true
-#| code-overflow: wrap
-#| 
-print(db.get_table_info())
-
-
-```
-
-<!-- Disable footer -->
-::: footer
-:::
 
 ---
 
@@ -422,6 +412,7 @@ fell in love with ORMs when they were the *hot* new thing, LLMs
 can take us to the next level!
 :::
 
+---
 
 ## Prompts for SQL generation {transition="convex"}
 
@@ -448,8 +439,55 @@ Some research papers from our team from our team:
 :::
 
 ::: notes
-In Flowpilot we created a framework inspired on LangGraph for this.
+Now we're gonna see what we're put in the prompt, for starters the schema
 :::
+
+---
+
+
+### Getting the schema for the prompt
+
+LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information [^qa_lc]
+
+```{python}
+#| echo: true
+!uv pip install langchain-community
+```
+
+```{python}
+#| echo: true
+
+from langchain_community.utilities import SQLDatabase
+db = SQLDatabase(engine=engine)
+
+display(db.get_usable_table_names())
+```
+
+[^qa_lc]: [SQL Question Answering](https://python.langchain.com/docs/tutorials/sql_qa/#system-prompt){target="_blank"}
+
+::: notes
+As we can see, the table names may not be immediately understandable 🤔
+:::
+
+
+
+---
+
+###
+
+```{python}
+#| echo: true
+#| code-overflow: wrap
+#| 
+print(db.get_table_info())
+
+
+```
+
+<!-- Disable footer -->
+::: footer
+:::
+
 
 ---
 
@@ -486,7 +524,7 @@ Only use the following tables:
 
 --- 
 
-## Creating a prompt {.smaller}
+## The messages that constitute the prompt {.smaller}
 
 Now we construct a list of messages. These are `dicts` which have a key
 `user` or `system`, and a `content`.
@@ -543,13 +581,30 @@ print(messages[0]['content'])
 
 ---
 
-### Calling the LLM with the prompt {.smaller}
+## Calling the LLM with the prompt {.smaller}
 
+`litellm` is a Open Source Python library (and also a Proxy) that can be
+used to run inference and compute embeddings with a vast number
+of providers (new models added weekly).
+
+Among the provider lists we have:
+
+::: {.incremental}
+
+- Ollama / LMStudio / llama.cpp
+- IBM WatsonX.ai
+- Anthropic
+- OpenAI
+- AWS Sagemaker
+- OpenRouter
+- [and more {{< bi info-circle >}}](https://docs.litellm.ai/docs/providers)
+:::
+
+---
+
+### Using litellm
 
 ::: {.fragment .fade-in-then-semi-out}
-
-`litellm` is a client for multiple LLM providers [{{< bi info-circle >}} `model` list](https://docs.litellm.ai/docs/providers)
-
 ```{python}
 #| echo: true
 !uv add litellm --quiet
@@ -615,8 +670,11 @@ print(response)
 ## Structured output {.smaller}
 
 ::: {.fragment}
-Now that we get the SQL, we're going to ask the LLM to return
-the response as JSON using a Pydantic model.
+Although it looks we have the SQL, LLMs currently support structured output.
+Also known as `JSON Schema`.
+
+A Python library that generates JSON Schema from classes automatically 
+is called Pydantic. Let's see how we can ask 2 things from the LLM.
 :::
 
 ::: {.fragment}
@@ -641,14 +699,19 @@ response = litellm.completion(
 )
 output = SQLOutput.model_validate_json(
   response.choices[0].message.content)
-output
 ```
 
 :::
 ---
 
 ::: {.fragment}
-Now we can use the LLM like we were getting an API:
+
+```{python}
+print(output)
+```
+:::
+
+::: {.fragment}
 ```{python}
 #| echo: true
 output.sql
@@ -669,9 +732,23 @@ output.explanation
 try:
   with engine.connect() as c:
     response = c.execute(text(output.sql))
-    print(response.fetchall(()))
+    print(response.fetchall())
 except Exception as err:
   print(err)
+```
+
+```{python}
+#| echo: true
+display(query)
+display(output.sql)
+```
+
+---
+
+```{python}
+#| echo: true
+from cheap_repr import cheap_repr
+cheap_repr(messages)
 ```
 
 ---
@@ -935,7 +1012,6 @@ class CreateSQLNode:
 
 - Function nodes, when we want to modify the query another approach
   is to create
-  - WASM?
 
 ---
 
