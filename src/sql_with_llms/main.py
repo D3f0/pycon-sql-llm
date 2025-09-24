@@ -14,6 +14,7 @@ from rich.traceback import install
 install()
 
 
+# start snippet state
 class Message(TypedDict):
     role: Literal["user", "system"]
     content: str
@@ -26,6 +27,10 @@ class State:
     sql: Optional[str] = None
 
 
+# end snippet state
+
+
+# start snippet input
 @dataclass
 class Input:
     """User provides the connection details and the question"""
@@ -33,6 +38,10 @@ class Input:
     question: str
 
 
+# end snippet input
+
+
+# start snippet output
 @dataclass
 class Output:
     """User provides the connection details and the question"""
@@ -41,6 +50,10 @@ class Output:
     result: str
 
 
+# end snippet output
+
+
+# start snippet cfg
 class SQLGenConfig(BaseModel):
     db_url: str = Field(description="DB connection string")
     engine: Engine = Field(description="DB connection")
@@ -51,6 +64,7 @@ class SQLGenConfig(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
     )
+    # end snippet cfg
 
     @classmethod
     def from_yaml(cls, path: str, **overrides: Any) -> "SQLGenConfig":
@@ -69,6 +83,9 @@ class SQLGenConfig(BaseModel):
             )
 
 
+# start snippet init_
+
+
 def init(
     initial: Input,
 ) -> State:
@@ -79,11 +96,16 @@ def init(
     )
 
 
+# end snippet init_
+
+
+# start snippet prompt_gen
 def prompt_gen(state: State, sql_gen_config: SQLGenConfig):
     """Formats the prompt"""
     system_message_content = sql_gen_config.system_message_tpl.format(
         dialect=sql_gen_config.db.dialect,
         top_k=10,
+        # table_info=sql_gen_config.db.get_table_info(),
         table_info=sql_gen_config.db.get_table_info(),
     )
     state.messages.extend(
@@ -95,11 +117,15 @@ def prompt_gen(state: State, sql_gen_config: SQLGenConfig):
     return state
 
 
+# end snippet prompt_gen
+
+
 class SQLOutput(BaseModel):
     sql: str = Field(description="The SQL query")
     explanation: str = Field(description="The explanation of the query")
 
 
+# start snippet call_llm
 def call_llm(state: State, sql_gen_config: SQLGenConfig) -> State:
     response = litellm.completion(
         model=sql_gen_config.llm["model"],
@@ -111,6 +137,10 @@ def call_llm(state: State, sql_gen_config: SQLGenConfig) -> State:
     return state
 
 
+# end snippet call_llm
+
+
+# start snippet exec_sql
 def exec_sql(state: State, sql_gen_config: SQLGenConfig) -> Output:
     with sql_gen_config.engine.connect() as conn:
         result = conn.execute(text(state.sql))
@@ -123,12 +153,12 @@ def exec_sql(state: State, sql_gen_config: SQLGenConfig) -> Output:
     return Output(sql=state.sql, result=results)
 
 
-class ConfigAwareStateGraph(StateGraph):
-    """StateGraph extension that supports config injection using functools.partial."""
+# end snippet exec_sql
 
-    def __init__(
-        self, *args, sql_gen_config: Optional[BaseModel] = None, **kwargs: Any
-    ):
+
+# start snippet ext_lg
+class ConfigAwareStateGraph(StateGraph):
+    def __init__(self, *args, sql_gen_config: BaseModel, **kwargs: Any):
         super().__init__(**kwargs)
         self.sql_gen_config = sql_gen_config
 
@@ -141,29 +171,36 @@ class ConfigAwareStateGraph(StateGraph):
         super().add_node(key, node, **kwargs)
 
 
-sql_gen_config: SQLGenConfig = SQLGenConfig.from_yaml("./config.yaml")
-graph_builder = ConfigAwareStateGraph(
-    input_schema=Input,
-    state_schema=State,
-    output_schema=Output,
-    sql_gen_config=sql_gen_config,
-)
+# end snippet ext_lg
 
-#
-# Nodes
-graph_builder.add_node("init", init)
-graph_builder.add_node("prompt_gen", prompt_gen)
-graph_builder.add_node("call_llm", call_llm)
-graph_builder.add_node("exec_sql", exec_sql)
-# Edges
-graph_builder.add_edge(START, "init")
-graph_builder.add_edge("init", "prompt_gen")
-graph_builder.add_edge("prompt_gen", "call_llm")
-graph_builder.add_edge("call_llm", "exec_sql")
-graph_builder.add_edge("exec_sql", END)
-graph = graph_builder.compile()
+
+def create_graph(config: str = "./config.yaml"):
+    sql_gen_config: SQLGenConfig = SQLGenConfig.from_yaml(config)
+    graph_builder = ConfigAwareStateGraph(
+        input_schema=Input,
+        state_schema=State,
+        output_schema=Output,
+        sql_gen_config=sql_gen_config,
+    )
+
+    # start snippet graph
+    graph_builder.add_node("init", init)
+    graph_builder.add_node("prompt_gen", prompt_gen)
+    graph_builder.add_node("call_llm", call_llm)
+    graph_builder.add_node("exec_sql", exec_sql)
+
+    graph_builder.add_edge(START, "init")
+    graph_builder.add_edge("init", "prompt_gen")
+    graph_builder.add_edge("prompt_gen", "call_llm")
+    graph_builder.add_edge("call_llm", "exec_sql")
+    graph_builder.add_edge("exec_sql", END)
+    graph = graph_builder.compile()
+    # end snippet graph
+    return graph
+
 
 if __name__ == "__main__":
+    graph = create_graph()
     result = graph.invoke(
         Input(
             question="How many schools with an average score in Math greater than 400 in the SAT test are exclusively virtual?",

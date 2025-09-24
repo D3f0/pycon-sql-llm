@@ -43,12 +43,6 @@ def preview(
             console.print("😞 quarto preview crashed, please launch again")
 
 
-@task()
-def publish(ctx: Context):
-    """Publish slides"""
-    ctx.run("quarto publish gh-pages --no-prompt")
-
-
 @task(aliases=["c"])
 def checkpoint(ctx: Context):
     """Checkpoint in git"""
@@ -108,9 +102,21 @@ def slide_code_debug_in_ipython(ctx: Context, file="slides.qmd", exec_=True):
         ctx.run("quarto convert slides.qmd --output ipynb/slides.ipynb")
         cmd = "direnv exec . uv run ipython --pdb --ext rich ipynb/slides.ipynb"
         if not exec_:
-            ctx.run(cmd, pty=True)
+            ctx.run(
+                cmd,
+                pty=True,
+            )
         else:
             argv = shlex.split(cmd)
             cmd = argv[0]
             os.chdir(git_top_level)
             os.execvp(cmd, argv)
+
+
+@task()
+def publish(ctx: Context):
+    """Publish to GH pages"""
+    ctx.run(
+        "yes y | quarto publish gh-pages --no-prompt",
+        env={"PRE_COMMIT_ALLOW_NO_CONFIG": "1"},
+    )

@@ -25,28 +25,9 @@ format:
     preview-links: auto
 filters:
   - reveal-logo
-  # - inline-svg
+  - include-code-files
 jupyter: python3
 
-# Remove logo
-# include-after: |
-#   <script type="text/javascript">
-#     Reveal.on('ready', event => {
-#       if (event.indexh === 0) {
-#         document.querySelector("div.has-logo > img.slide-logo").style.display = "none";
-#       }
-#     });
-#     Reveal.addEventListener('slidechanged', (event) => {
-#       if (event.indexh === 0) {
-#         Reveal.configure({ slideNumber: null });
-#         document.querySelector("div.has-logo > img.slide-logo").style.display = "none";
-#       }
-#       if (event.indexh === 1) { 
-#         Reveal.configure({ slideNumber: 'c' });
-#         document.querySelector("div.has-logo > img.slide-logo").style.display = null;
-#       }
-#     });
-#   </script>
 ---
 ```{python}
 import os
@@ -120,7 +101,7 @@ In this talk we're gonna show how to use Python to:
   - {{< bi database >}} Connect to a database and execute the queries
   - {{< bi filetype-sql >}} Convert natural language questions into SQL
   - {{< bi diagram-3 >}} Create a workflow
-  - {{< bi bug-fill >}} More advanced nodes
+  - {{< bi database-gear >}} Managing configuration
   - {{< bi bookmark-check >}} Lessons learned
 
 ---
@@ -428,13 +409,13 @@ We have to  provide __extra__ information about the structure in the instruction
 For this we will use a **prompt** string with some palace-holders {{< bi braces >}}.
 :::
 
-::: {.fragment .fade-in-then-semi-out}
+::: {.fragment .fade-in-then-semi-out .small}
 Some research papers from our team from our team:
 
 [{{< bi filetype-pdf >}} Weakly Supervised Detection of Hallucinations in LLMs](https://arxiv.org/pdf/2312.02798)
 :::
 
-::: {.fragment .fade-in-then-semi-out}
+::: {.fragment .fade-in-then-semi-out .small}
 [{{< bi filetype-pdf >}} Localizing Persona Representations In LLMs](https://arxiv.org/pdf/2505.24539)
 :::
 
@@ -447,7 +428,9 @@ Now we're gonna see what we're put in the prompt, for starters the schema
 
 ### Getting the schema for the prompt
 
-LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information [^qa_lc]
+LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information [^qa_lc].
+
+It implements the best practices as specified in: [{{< bi filetype-pdf >}} Rajkumar et al, 2022](https://arxiv.org/abs/2204.00498)
 
 ```{python}
 #| echo: true
@@ -671,7 +654,7 @@ print(response)
 
 ::: {.fragment}
 Although it looks we have the SQL, LLMs currently support structured output.
-Also known as `JSON Schema`.
+Also known as `JSON Schema`, this allows us to also retrieve some explanation.
 
 A Python library that generates JSON Schema from classes automatically 
 is called Pydantic. Let's see how we can ask 2 things from the LLM.
@@ -680,7 +663,6 @@ is called Pydantic. Let's see how we can ask 2 things from the LLM.
 ::: {.fragment}
 ```{python}
 #| echo: true
-#| output-location: slide
 #| code-line-numbers: "1|2-5|9-13|14-17"
 
 from pydantic import BaseModel, Field
@@ -704,19 +686,14 @@ output = SQLOutput.model_validate_json(
 :::
 ---
 
-::: {.fragment}
+### Attributes of `output` object
 
-```{python}
-print(output)
-```
-:::
 
-::: {.fragment}
 ```{python}
 #| echo: true
 output.sql
 ```
-:::
+
 ::: {.fragment}
 
 ```{python}
@@ -726,7 +703,17 @@ output.explanation
 :::
 
 
----
+
+--- 
+
+### LLM generated SQL vs dataset query
+```{python}
+#| echo: true
+display(query)
+display(output.sql)
+```
+
+Execution result: 
 
 ```{python}
 try:
@@ -737,18 +724,23 @@ except Exception as err:
   print(err)
 ```
 
-```{python}
-#| echo: true
-display(query)
-display(output.sql)
-```
-
 ---
 
+## Improving the Generation with more context
+
+The BIRD mini has some CSV files that help understanding
+the tables values and relationships.
+
+Let's pass this to the prompt generation system message...
+
+#### TODO
 ```{python}
-#| echo: true
-from cheap_repr import cheap_repr
-cheap_repr(messages)
+#| echo: false
+# from cheap_repr import cheap_repr
+# messages.insert(1, {
+#   "role": ""
+# })
+# cheap_repr(messages)
 ```
 
 ---
@@ -758,168 +750,140 @@ cheap_repr(messages)
 ::: notes
 
 :::
+
 ---
 
 # Chaining generation and execution
 
 ::: {.fragment .fade-in-then-semi-out}
-<img src="./img/langgraph.svg"/> When our code starts to become larger than a script can handle 🏋🏾‍♀️, `LangGraph` is a great
-tool to provide some reusable organization. We can add it with `uv add langgraph`.
+<img src="./img/langgraph.svg" height="40px" style="float: left; padding-top: .5em; padding-right: .25em"/> 
+<p>`LangGraph` allows us to create state machines around LLM calls, using
+functions as nodes.</p>
 :::
 
 ::: {.fragment .fade-in-then-semi-out}
-We will build a small pipeline where to run SQL generation and execution.
+We will now put the code we saw into node functions.
 :::
 
 ::: {.fragment .fade-in-then-semi-out}
-Each node in the pipeline will be a function that received a state object
-and returns another state object.
+We will have a `Input`, and `Output` a shared `State` and some global configuration, 
+instead of global variables.
 :::
 
 ---
 
-## State for SQL workflow
-
-LangGraph uses state that is propagated through nodes.
-
-This state can be defined with a TypedDict or a Pydantic BaseModel.
-
-```{python}
-#| echo: true
-from typing import Optional, Dict, List
-from dataclasses import dataclass, field
-from sqlalchemy import Engine
-
-@dataclass
-class State:
-    question: str = ""
-    engine: Optional[Engine] = None
-    database: Optional[SQLDatabase] = None
-    messages: List[Dict[str, str]] = field(default_factory=list)
-    sql: Optional[str] = None
-    results: Optional[str] = None
-```
-
----
-
-## Creating Nodes
-
-The initial node will receive the user input and create the state.
-```{python}
-#| echo: true
-
-def init(user_input: Dict[str, str]) -> State:
-  engine = create_engine(user_input["database"])
-  database = SQLDatabase(engine=engine)
-  return State(
-    question=user_input["question"], 
-    database=database,
-  )
-```
-
----
-
-## Generating the prompt
-
-```{python}
-#| echo: true
-
-def make_prompt(state: State) -> State:
-    messages = [
-      {
-        "role": "system", 
-        "content": system_message.format(
-          dialect=state.database.dialect, 
-          top_k=top_k,
-          table_info=state.database.get_table_info()
-        )},
-      {
-        "role": "user", 
-        "content": state.question,
-      }
-    ]
-    return state
-
-```
-
-
----
-
-## Calling the LLM
-
-The initial node will receive the user input and create the state.
-```{python}
-#| echo: true
-
-def generate(state: State) -> State:
-
-  response = litellm.completion(
-    model=model,
-    messages=messages,
-    response_format=SQLOutput,
-  )
-  output = SQLOutput.model_validate_json(response.choices[0].message.content)
-  print(output)
-  engine = create_engine(user_input["database"])
-  database = SQLDatabase(engine=engine)
-  return State(
-    question=user_input["question"], 
-    database=database,
-  )
-```
-
-## Executing the SQL 
-
-The initial node will receive the user input and create the state.
-```{python}
-#| echo: true
-
-def execute(state: State) -> State:
-  with state.engine.connect() as con:
-    state.result = conn.execute(text(state.sql))
-  
-  return State(
-    question=user_input["question"], 
-    database=database,
-  )
-```
+![](./img/LLMsSQL-inject.svg)
 
 ---
 
 ## Graph creation
 
-```{python}
-#| echo: true
-#| code-line-numbers: "1"
-
-from langgraph.graph import StateGraph, START, END
-
-graph_builder = StateGraph(State)
-graph_builder.add_node("init", init)
-graph_builder.add_node("make_prompt", make_prompt)
-graph_builder.add_node("generate", generate)
-graph_builder.add_node("execute", execute)
-graph_builder.add_edge(START, "init")
-graph_builder.add_edge("init", "make_prompt")
-graph_builder.add_edge("make_prompt", "generate")
-graph_builder.add_edge("generate", "execute")
-graph = graph_builder.compile()
+```{.python include="src/sql_with_llms/main.py" snippet="graph" dedent="4" code-line-numbers="false"}
 ```
 
+::: {.fragment}
+Let's take a look at how we define those function and the data types
+they receive and return.
+:::
+
+
+::: notes
+1. In Langraph the node functions must be defined before, but we're presenting this
+   before for clarity
+:::
 ---
-
-## Visualizing the graph {{< bi diagram-3 >}} {.smaller}
-
 
 ```{python}
 #| echo: false
 #| output: true
 
-from IPython.display import display, Markdown
-
-Markdown("```{mermaid}\n%s\n```" % graph.get_graph().draw_mermaid())
+from  sql_with_llms.main import create_graph
+from IPython.display import Markdown
+graph = create_graph()
+display(Markdown("```{mermaid}\n%s\n```" % graph.get_graph().draw_mermaid()))
 ```
 
+---
+
+## Input class
+
+This is what we expect to be passed to our state machine.
+
+
+```{.python include="src/sql_with_llms/main.py" snippet="input"}
+```
+
+---
+
+## State class
+
+This is what the state machine will pass to the nodes (functions)
+and expect from them (except the first and last node which use `Input`/`Output`)
+
+```{.python include="src/sql_with_llms/main.py" snippet="state" code-line-numbers="false"}
+```
+
+---
+
+## Output class
+
+This is the response back to the user, we will use it in the *last* node.
+
+```{.python include="src/sql_with_llms/main.py" snippet="output" code-line-numbers="false"}
+```
+
+---
+
+## The init node function
+
+This node consumes the input converting the something of shape `Input` into
+a `State`. The next node will be prompt generation, so we will be save the
+`question`.
+
+```{.python include="src/sql_with_llms/main.py" snippet="init" code-line-numbers="false"}
+```
+
+---
+
+## Global configuration class
+
+The nodes beyond the initial one will require to have a bit more information
+that won't change (not considered state), for this we will define a global 
+```{.python include="src/sql_with_llms/main.py" snippet="cfg" code-line-numbers="false"}
+```
+
+---
+
+## Prompt generation function node
+
+```{.python include="src/sql_with_llms/main.py" snippet="prompt_gen" code-line-numbers="false"}
+```
+
+---
+
+
+![](./img/LLMsSQL-workflow.svg)
+
+---
+
+## Accommodating global configuration
+
+```{.python include="src/sql_with_llms/main.py" snippet="ext_lg" code-line-numbers="false"}
+```
+
+---
+
+## LLM calling function node
+
+
+```{.python include="src/sql_with_llms/main.py" snippet="call_llm" code-line-numbers="false"}
+```
+
+
+## SQL Execution function node
+
+```{.python include="src/sql_with_llms/main.py" snippet="exec_sql" code-line-numbers="false"}
+```
 
 ---
 
@@ -944,6 +908,7 @@ class State(TypedDict):
 :::: {.columns}
 ::: {.column width="48%"}
 ::::: {.fragment}
+
 - A simple function that works with the state.
 ```{.python}
 def create_sql(state: State) -> State:

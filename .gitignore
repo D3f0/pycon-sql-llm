@@ -23,3 +23,5 @@ slides.tex
 exports/*
 TODO.*
 **/*.*ipynb
+
+/.luarc.json
