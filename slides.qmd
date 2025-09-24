@@ -46,14 +46,14 @@ os.environ["JUPYTER_COLUMNS"] = "80"
 ::: {.column width="60%"}
 
 ::: {.incremental}
-- 🐍 Pythonista with 18 years of experience.
+- 🐍 Pythonista with 18 years of experience
   - Co-organized SciPy Latin America
   - PyCon Argentina and EuroPython speaker
 - 🚜 Worked as CTO in  Hello Tractor 
 - 🧪 Software Engineer at IBM Research 
 - 🛰️ Worked in Foundational Models for Geospatial applications
 - 💬 Currently working on [Flowpilot {{< bi link-45deg >}}](https://research.ibm.com/projects/flowpilot), providing core features to 
-  different products and divisions.
+  different products and divisions
 ::: 
 
 :::
@@ -78,7 +78,7 @@ os.environ["JUPYTER_COLUMNS"] = "80"
 ::: 
 
 Learn about [Multimodal Geospatial Foundation Models with Terratorch](https://pycon-kenya-2025.sessionize.com/session/954933){target="_blank"}
- by Wanjiru, Beldine and Reggie.
+ by Wanjiru, Beldine and Reggie
 
 :::
 
@@ -248,7 +248,7 @@ base = Path('./minidev/MINIDEV/dev_databases/california_schools/')
 
 ### Creating the `Engine`
 
-Creating an `Engine` instance connected to a SQLite database.
+Creating an `Engine` instance connected to a SQLite database
 ```{python}
 #| echo: true
 #| code-overflow: wrap
@@ -307,7 +307,7 @@ question_sql_df = (simple_queries_df
 ```
 
 ::: {.fragment .fade-left}
-Let's take a look at the `question` and `SQL` column.
+Let's take a look at the `question` and `SQL` column
 
 ```{python}
 #| echo: true
@@ -322,10 +322,10 @@ display(question, query)
 :::
 
 ::: notes
-This is one of the valid SQL queries for this question.
+This is one of the valid SQL queries for this question
 There may be other. When we're comparing performance, 
 in situations where we have multiple rows and there
-are no aggregations we need to decide wether the order is important or not.
+are no aggregations we need to decide wether the order is important or not
 :::
 
 ---
@@ -334,7 +334,7 @@ are no aggregations we need to decide wether the order is important or not.
 
 ::: {style="font-size: 60%;"}
 Now we run the `SQL` column captured in the variable `query` through SQLAlchemy and
-plot the results as a DataFrame.
+plot the results as a DataFrame
 :::
 
 ```{python}
@@ -363,7 +363,7 @@ with engine.connect() as conn:
 ::: {.column}
 ::: {.fragment .fade-left}
 LLMs are quite capable of writing functional SQL queries, from the `code` or `coder`
-ones, to specific ones for SQL generation.
+ones, to specific ones for SQL generation
 :::
 
 :::
@@ -400,11 +400,11 @@ can take us to the next level!
 
 ::: {.fragment .fade-in-then-semi-out}
 LLMs don't know the  🏗️ structure of our database, and may hallucinate 
-about it, or create some flat out invalid SQL.
+about it, or create some flat out invalid SQL
 :::
 
 ::: {.fragment .fade-in-then-semi-out}
-We have to  provide __extra__ information about the structure in the instructions.
+We have to  provide __extra__ information about the structure in the instructions
 
 For this we will use a **prompt** string with some palace-holders {{< bi braces >}}.
 :::
@@ -634,10 +634,10 @@ response = litellm.completion(
 
 ::: notes
 
-There are some reasonably good LLMs under the coder and instruct in Hugging Face.
+There are some reasonably good LLMs under the coder and instruct in Hugging Face
 Some of these can be run locally with some inference server like `Ollama`, 
 `llama.cpp` or `LMStudio`, and also use pubic 
-ones.
+ones
 
 :::
 
@@ -653,11 +653,11 @@ print(response)
 ## Structured output {.smaller}
 
 ::: {.fragment}
-Although it looks we have the SQL, LLMs currently support structured output.
-Also known as `JSON Schema`, this allows us to also retrieve some explanation.
+Although it looks we have the SQL, LLMs currently support structured output
+Also known as `JSON Schema`, this allows us to also retrieve some explanation
 
 A Python library that generates JSON Schema from classes automatically 
-is called Pydantic. Let's see how we can ask 2 things from the LLM.
+is called Pydantic. Let's see how we can ask 2 things from the LLM
 :::
 
 ::: {.fragment}
@@ -729,7 +729,7 @@ except Exception as err:
 ## Improving the Generation with more context
 
 The BIRD mini has some CSV files that help understanding
-the tables values and relationships.
+the tables values and relationships
 
 Let's pass this to the prompt generation system message...
 
@@ -762,12 +762,12 @@ functions as nodes.</p>
 :::
 
 ::: {.fragment .fade-in-then-semi-out}
-We will now put the code we saw into node functions.
+We will now put the code we saw into node functions
 :::
 
 ::: {.fragment .fade-in-then-semi-out}
 We will have a `Input`, and `Output` a shared `State` and some global configuration, 
-instead of global variables.
+instead of global variables
 :::
 
 ---
@@ -783,7 +783,7 @@ instead of global variables.
 
 ::: {.fragment}
 Let's take a look at how we define those function and the data types
-they receive and return.
+they receive and return
 :::
 
 
@@ -807,8 +807,7 @@ display(Markdown("```{mermaid}\n%s\n```" % graph.get_graph().draw_mermaid()))
 
 ## Input class
 
-This is what we expect to be passed to our state machine.
-
+This is what we expect to be passed to our state machine 
 
 ```{.python include="src/sql_with_llms/main.py" snippet="input"}
 ```
@@ -827,8 +826,7 @@ and expect from them (except the first and last node which use `Input`/`Output`)
 
 ## Output class
 
-This is the response back to the user, we will use it in the *last* node.
-
+This is the response back to the user, we will use it in the *last* node 
 ```{.python include="src/sql_with_llms/main.py" snippet="output" code-line-numbers="false"}
 ```
 
@@ -896,7 +894,7 @@ that won't change (not considered state), for this we will define a global
 ::: {style="font-size: 80%;"}
 ::::: {.fragment}
 - The workflow state can be a `dict` or `TypedDict`, but `dataclass` or a `BaseModel` is 
-  more convenient.
+  more convenient
 ```{.python}
 class State(TypedDict):
   connection: ...
@@ -909,7 +907,7 @@ class State(TypedDict):
 ::: {.column width="48%"}
 ::::: {.fragment}
 
-- A simple function that works with the state.
+- A simple function that works with the state
 ```{.python}
 def create_sql(state: State) -> State:
   # Do something
@@ -924,7 +922,7 @@ def create_sql(state: State) -> State:
 ::: {.column width="48%"}
 
 ::::: {.fragment}
-- This can also be a class if we want to pass more information.
+- This can also be a class if we want to pass more information
 
 ```{.python}
 class CreateSQLNode:
@@ -953,7 +951,7 @@ class CreateSQLNode:
 - We can pass the SQL to SQLAlchemy engine to validate if the syntax is correct
 - SQLGlot `parse_one()` provides asn AST of the SQL for:
   - Finding dangerous operations (DML)
-  - For any updates to the query, working on an AST is better than string substitution.
+  - For any updates to the query, working on an AST is better than string substitution
 
 ---
 
@@ -963,17 +961,17 @@ class CreateSQLNode:
   - RAG at the column level is a common technique to improve efficiency and accuracy
 - Retrieving the values from the DB can help the LLM produce better queries
 - Providing some examples in the context with the `question` and `SQL` pairs
-  also improves efficiency.
+  also improves efficiency
 
 ---
 
 ## Dynamic context
 
 - Other types of examples of well understood terms may require 
-  some mapping.
+  some mapping
   
   - For example, the term Q1 can mean, *quarter one*, but it should
-    be supplied dynamically.
+    be supplied dynamically
 
 - Function nodes, when we want to modify the query another approach
   is to create
@@ -984,10 +982,10 @@ class CreateSQLNode:
 
 ::: {.sequential}
 - Offload node responsibilities into external services (e.g. DB execution) 
-- Pipelines defined as YAML.
+- Pipelines defined as YAML
 - Each node is registered in a collection of nodes, and each
-  node in the pipeline accepts the `__init__` arguments.
-- Use Python's built in `entry-point` system to *install* nodes.
+  node in the pipeline accepts the `__init__` arguments
+- Use Python's built in `entry-point` system to *install* nodes
   This is a good approach to separate production from 
 :::
 
