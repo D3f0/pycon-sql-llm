@@ -8,3 +8,6 @@ website:
       - href: slides.qmd
         text: Home
       # - about.qmd
+
+render:
+  - slides.qmd
