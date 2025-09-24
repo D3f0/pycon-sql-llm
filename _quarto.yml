@@ -7,7 +7,11 @@ website:
     left:
       - href: slides.qmd
         text: Home
-      # - about.qmd
+  drafts: 
+    - "*.qmd"
+    - "**/*.ipynb"
 
 render:
   - slides.qmd
+  - "!*.qmd"
+  - "**/*.ipynb"

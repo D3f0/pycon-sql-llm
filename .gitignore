@@ -21,3 +21,5 @@ TODO.md
 slides.tex
 # non HTML exports
 exports/*
+TODO.*
+**/*.*ipynb

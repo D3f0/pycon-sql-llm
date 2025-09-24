@@ -1,13 +1,17 @@
+from dataclasses import dataclass, field
 from functools import partial
 from inspect import signature
-from typing import Any, Callable, Literal, Optional, TypedDict, Dict, Union
-from langgraph.graph import StateGraph, START, END
-from pydantic import BaseModel, Field, ConfigDict
-from dataclasses import dataclass, field
-from langchain_community.utilities import SQLDatabase
-from sqlalchemy import Engine, create_engine, text
-import yaml
+from typing import Any, Callable, Dict, Literal, Optional, TypedDict, Union
+
 import litellm
+import yaml
+from langchain_community.utilities import SQLDatabase
+from langgraph.graph import END, START, StateGraph
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import Engine, create_engine, text
+from rich.traceback import install
+
+install()
 
 
 class Message(TypedDict):
@@ -141,9 +145,11 @@ sql_gen_config: SQLGenConfig = SQLGenConfig.from_yaml("./config.yaml")
 graph_builder = ConfigAwareStateGraph(
     input_schema=Input,
     state_schema=State,
+    output_schema=Output,
     sql_gen_config=sql_gen_config,
 )
 
+#
 # Nodes
 graph_builder.add_node("init", init)
 graph_builder.add_node("prompt_gen", prompt_gen)
@@ -157,13 +163,11 @@ graph_builder.add_edge("call_llm", "exec_sql")
 graph_builder.add_edge("exec_sql", END)
 graph = graph_builder.compile()
 
-
-result = graph.invoke(
-    Input(
-        question="How many schools with an average score in Math greater than 400 in the SAT test are exclusively virtual?",
+if __name__ == "__main__":
+    result = graph.invoke(
+        Input(
+            question="How many schools with an average score in Math greater than 400 in the SAT test are exclusively virtual?",
+        )
     )
-)
 
-
-print(__name__)
-print(result)
+    print(f"Answer: {result}")
