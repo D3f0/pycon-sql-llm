@@ -19,9 +19,13 @@ format:
     theme:
       - solarized
       - custom.scss
-    # header-logo-right: ./img/pynbo.png
+    # https://github.com/shafayetShafee/reveal-header
+    # header: test
+    # header-logo: ./img/logo.svg
+    # https://www.royfrancis.com/quarto-reveal-logo/
     # header-logo-right-url: https://pycon-kenya-2025.sessionize.com/
-    # header-logo-right-height: 2em
+    header-logo-right: ./img/logo.svg
+    header-logo-right-size: .5em
     preview-links: auto
 filters:
   - reveal-logo
@@ -46,13 +50,13 @@ os.environ["JUPYTER_COLUMNS"] = "80"
 ::: {.column width="60%"}
 
 ::: {.incremental}
-- 🐍 Pythonista with 18 years of experience
+- 🐍 Pythonista with 18 years of experience 🇦🇷 🧉
   - Co-organized SciPy Latin America
   - PyCon Argentina and EuroPython speaker
 - 🚜 Worked as CTO in  Hello Tractor 
 - 🧪 Software Engineer at IBM Research 
-- 🛰️ Worked in Foundational Models for Geospatial applications
-- 💬 Currently working on [Flowpilot {{< bi link-45deg >}}](https://research.ibm.com/projects/flowpilot), providing core features to 
+- 🛰️ Worked in [Foundational Models for Geospatial applications {{< bi link >}}](https://www.earthdata.nasa.gov/news/nasa-ibm-openly-release-geospatial-ai-foundation-model-nasa-earth-observation-data)
+- 💬 Currently working on [Flowpilot {{< bi link >}}](https://research.ibm.com/projects/flowpilot), providing core features to 
   different products and divisions
 ::: 
 
@@ -88,8 +92,26 @@ Learn about [Multimodal Geospatial Foundation Models with Terratorch](https://py
 
 ## Follow along (or at 🏡) {.center}
 
-{{< qrcode https://ibm.com >}}
+::: {.columns}
+::: {.column}
+::: {style="text-align: center;"}
+<a href="https://d3f0.github.io/pycon-sql-llm/slides.html#/title-slide" target="_blank">
 
+{{< qrcode https://d3f0.github.io/pycon-sql-llm/slides.html#/title-slide qr1 width=400 height=400 colorDark='#0011bb' >}}
+
+</a>
+
+Get the slides {{< bi arrow-up-circle >}}
+:::
+
+:::
+::: {.column}
+::: {style="font-size: .67em"}
+Get the code {{< bi arrow-down-circle >}}
+
+[{{< bi github >}} https://github.com/D3f0/pycon-sql-llm](https://github.com/D3f0/pycon-sql-llm)
+:::
+:::
 :::
 
 ---
@@ -106,7 +128,7 @@ In this talk we're gonna show how to use Python to:
 
 ---
 
-## High level diagram
+## Pipeline Overview
 
 ![](./img/LLMsSQL.svg)
 
@@ -114,11 +136,12 @@ In this talk we're gonna show how to use Python to:
 
 ---
 
-# Connect to a database and execute the queries
+# DB Inspection
+<!-- ## Connect to a database and execute the queries -->
 
 ---
 
-## Public datasets used in text to SQL
+### Public datasets used in text to SQL
 
 :::: {.columns}
 
@@ -127,7 +150,7 @@ In this talk we're gonna show how to use Python to:
 These datasets define:
 
 - ❓ Natural language questions
-- 🫰 Expected SQL
+- 🤞🏽 Expected SQL
 - 🏗️ Database schema & content
 - 🔎 Evaluation metrics 
 - 🥇 Leaderboard
@@ -154,6 +177,8 @@ These datasets define:
 
 
 ::: notes
+There are various academic datasets that are used for advancing the field
+of text2sql.
 :::
 
 ---
@@ -203,7 +228,7 @@ dataset = load_dataset(
 sqlite_df = (dataset["mini_dev_sqlite"]
   .to_pandas()
   .pipe(lambda df: df.drop(columns=['question_id'])))
-display(sqlite_df.head(5))
+display(sqlite_df.sample(5, random_state=17))
 ```
 
 :::
@@ -228,6 +253,8 @@ unzip minidev_703.zip
 <!-- [^uvx]: It comes as part of `uv`, it's a shorthand for `uv tool run` -->
 
 ::: footer
+The dataset doesn't contain the SQL flies, these are shared separately as zipfiles. 
+In this case it's located in Google Drive.
 :::
 ---
 
@@ -246,24 +273,6 @@ base = Path('./minidev/MINIDEV/dev_databases/california_schools/')
 
 ---
 
-### Creating the `Engine`
-
-Creating an `Engine` instance connected to a SQLite database
-```{python}
-#| echo: true
-#| code-overflow: wrap
-
-from sqlalchemy import create_engine
-db_path = base / 'california_schools.sqlite'
-db_url = f"sqlite:///{db_path}"
-engine = create_engine(db_url)
-engine
-```
-
-
-
----
-
 ## ER of `california_schools` {{< bi database >}}
 
 ```{python}
@@ -275,6 +284,28 @@ engine
 
 ::: footer
 :::
+
+---
+
+
+### Creating the `Engine`
+
+Creating an `Engine` instance connected to a SQLite database to run our queries.
+```{python}
+#| echo: true
+#| code-overflow: wrap
+
+from sqlalchemy import create_engine
+db_path = base / 'california_schools.sqlite'
+db_url = f"sqlite:///{db_path}"
+engine = create_engine(db_url)
+engine
+```
+
+::: notes
+This allows us to execute, manage transactions and do database introspection.
+:::
+
 
 ---
 
@@ -291,7 +322,7 @@ simple_queries_df.head(2).set_index("db_id")
 
 ---
 
-### Getting one simple question 
+### Getting a `simple` question and query
 
 ```{python}
 #| echo: false
@@ -332,7 +363,7 @@ are no aggregations we need to decide wether the order is important or not
 
 ---
 
-### Execute the queries {.smaller}
+### Execute the query {.smaller}
 
 ::: {style="font-size: 60%;"}
 Now we run the `SQL` column captured in the variable `query` through SQLAlchemy and
@@ -349,9 +380,6 @@ with engine.connect() as conn:
     res_df = pd.DataFrame(result.fetchall()) # 🐼 ✨
     display(res_df)
 ```
-
-
-
 
 ::: footer
 :::
@@ -375,12 +403,12 @@ ones, to specific ones for SQL generation
 ::: {.fragment .fade-left}
 For example, some IBM trained models include:
 
-- granite-20b-code-instruct
+- granite-3-2-8b-instruct
 - granite-34b-code-instruct
 - granite-20b-code-base-schema-linking
 - granite-20b-code-base-sql-gen
 
-[More info on these models {{< bi box-arrow-up-right >}}](https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-models-ibm.html?context=wx&locale=en&audience=wdp#granite-code-instruct-models)
+[More info on these models {{< bi box-arrow-up-right >}}](https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-models-ibm.html?context=wx&locale=en&audience=wdp#granite-code-instruct-models) | 
 [And also in 🤗 {{< bi box-arrow-up-right >}}](https://huggingface.co/models?search=sql)
 
 :::
@@ -430,7 +458,8 @@ Now we're gonna see what we're put in the prompt, for starters the schema
 
 ### Getting the schema for the prompt
 
-LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information [^qa_lc].
+LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information
+[SQL Question Answering](https://python.langchain.com/docs/tutorials/sql_qa/#system-prompt){target="_blank"}
 
 ::: {.small}
 It implements the best practices as specified in: [{{< bi filetype-pdf >}} Rajkumar et al, 2022](https://arxiv.org/abs/2204.00498)
@@ -450,7 +479,7 @@ db = SQLDatabase(engine=engine)
 display(db.get_usable_table_names())
 ```
 
-[^qa_lc]: [SQL Question Answering](https://python.langchain.com/docs/tutorials/sql_qa/#system-prompt){target="_blank"}
+
 
 ::: notes
 As we can see, the table names may not be immediately understandable 🤔
@@ -623,7 +652,7 @@ litellm.suppress_debug_info = True
 
 import litellm
 
-# model = "ollama_chat/granite-code:20b"
+# provider/model (if not local, ensure you have API 🔑 )
 model = "watsonx/ibm/granite-3-2-8b-instruct"
 
 response = litellm.completion(
@@ -657,11 +686,10 @@ print(response)
 ## Structured output {.smaller}
 
 ::: {.fragment}
-Although it looks we have the SQL, LLMs currently support structured output
-Also known as `JSON Schema`, this allows us to also retrieve some explanation
+LLM outputs are text, SQL for our use case.
 
-A Python library that generates JSON Schema from classes automatically 
-is called Pydantic. Let's see how we can ask 2 things from the LLM
+It's a good UX to give some explanation to the user about the LLM output. 
+We will use `JSON Schema` output to have both output without any string manipulation ✨
 :::
 
 ::: {.fragment}
@@ -738,14 +766,10 @@ the tables values and relationships
 Let's pass this to the prompt generation system message...
 
 #### TODO
-```{python}
-#| echo: false
-# from cheap_repr import cheap_repr
-# messages.insert(1, {
-#   "role": ""
-# })
-# cheap_repr(messages)
-```
+
+::: footer
+To be completed for tomorrow
+:::
 
 ---
 
@@ -762,7 +786,7 @@ Let's pass this to the prompt generation system message...
 ::: {.fragment .fade-in-then-semi-out}
 <img src="./img/langgraph.svg" height="40px" style="float: left; padding-top: .5em; padding-right: .25em"/> 
 <p>`LangGraph` allows us to create state machines around LLM calls, using
-functions as nodes.</p>
+functions as nodes. The full can be checked out [`src/sql_with_llms/main.py`](https://github.com/D3f0/pycon-sql-llm/blob/main/src/sql_with_llms/main.py)</p>
 :::
 
 ::: {.fragment .fade-in-then-semi-out}
@@ -771,12 +795,14 @@ We will now put the code we saw into node functions
 
 ::: {.fragment .fade-in-then-semi-out}
 We will have a `Input`, and `Output` a shared `State` and some global configuration, 
-instead of global variables
+instead of global variables.
 :::
 
 ---
 
-![](./img/LLMsSQL-inject.svg)
+![](./img/LLMsSQL.svg)
+
+TODO highlight
 
 ---
 
@@ -795,19 +821,19 @@ they receive and return
 1. In Langraph the node functions must be defined before, but we're presenting this
    before for clarity
 :::
+
 ---
 
-```{python}
-#| echo: false
-#| output: true
-
-from  sql_with_llms.main import create_graph
-from IPython.display import Markdown
-graph = create_graph()
-display(Markdown("```{mermaid}\n%s\n```" % graph.get_graph().draw_mermaid()))
+```{.python}
+from sql_with_llms.main import create_graph
+g.get_graph().draw_png()
 ```
 
+![](./img/langraph_graph.png)
+
 ---
+
+
 
 ## Input class
 
@@ -853,6 +879,7 @@ The nodes beyond the initial one will require to have a bit more information
 that won't change (not considered state), for this we will define a global 
 ```{.python include="src/sql_with_llms/main.py" snippet="cfg" code-line-numbers="false"}
 ```
+We will pass it to the function nodes with `functools.partial(..., conf=conf)` 
 
 ---
 
@@ -864,14 +891,8 @@ that won't change (not considered state), for this we will define a global
 ---
 
 
-![](./img/LLMsSQL-workflow.svg)
+![](./img/LLMsSQL.svg)
 
----
-
-## Accommodating global configuration
-
-```{.python include="src/sql_with_llms/main.py" snippet="ext_lg" code-line-numbers="false"}
-```
 
 ---
 
@@ -893,115 +914,82 @@ that won't change (not considered state), for this we will define a global
 
 ---
 
-## Move from function to classes
+### Lessons learned 
 
-::: {style="font-size: 80%;"}
-::::: {.fragment}
-- The workflow state can be a `dict` or `TypedDict`, but `dataclass` or a `BaseModel` is 
-  more convenient
-```{.python}
-class State(TypedDict):
-  connection: ...
-  messages: ...
-  schema: ...
-```
-:::::
-::::: {.fragment}
-:::: {.columns}
-::: {.column width="48%"}
-::::: {.fragment}
-
-- A simple function that works with the state
-```{.python}
-def create_sql(state: State) -> State:
-  # Do something
-  return State(...)
-```
-:::::
-:::
-
-::: {.column width="4%"}
-<!-- Gap -->
-:::
-::: {.column width="48%"}
-
-::::: {.fragment}
-- This can also be a class if we want to pass more information
-
-```{.python}
-class CreateSQLNode:
-  def __init__(self, config: ...) -> None:
-    self.config = config
-  
-  def __call__(
-    self, state: State
-  ) -> State:
-    # do something
-    return State(...)
-```
-:::::
-
-:::
-::::
-:::::
-
-:::
-
-
----
-
-## SQL validation
-
-- We can pass the SQL to SQLAlchemy engine to validate if the syntax is correct
-- SQLGlot `parse_one()` provides asn AST of the SQL for:
-  - Finding dangerous operations (DML)
-  - For any updates to the query, working on an AST is better than string substitution
-
----
-
-## Enhancing the context
-
+::: {.fragment}
 - Tables with a high number of columns can make the context larger
-  - RAG at the column level is a common technique to improve efficiency and accuracy
-- Retrieving the values from the DB can help the LLM produce better queries
-- Providing some examples in the context with the `question` and `SQL` pairs
-  also improves efficiency
+  - RAG at the column level is a common technique to improve efficiency and accuracy.
+:::
+::: {.fragment}
+- SQL manipulation at the abstract syntax tree level (`sqlglot`)
+  - Finding dangerous operations (DML)
+  - Value substitution 
+:::
+
+
+::: notes
+Also we can pass the SQL to SQLAlchemy engine to validate if the syntax is correct
+:::
 
 ---
 
-## Dynamic context
+### Lessons learned  (cont.)
 
-- Other types of examples of well understood terms may require 
-  some mapping
-  
-  - For example, the term Q1 can mean, *quarter one*, but it should
+::: {.fragment}
+- Please more context!
+  - Adding examples, but not too many, or only the relevant ones 🤔
+:::
+
+::: {.fragment}
+- Dynamic context
+
+  - date based
+  - external resources
+  - AI tools
+:::
+
+
+::: footer
+For example, the term Q1 can mean, *quarter one*, but it should
     be supplied dynamically
-
-- Function nodes, when we want to modify the query another approach
-  is to create
-
+:::
 ---
 
-## Extensibility
+### Lessons learned (cont.)
 
-::: {.sequential}
+::: {.fragment}
+- Function nodes
+  - Custom modifications 
+:::
+
+::: {.fragment}
+- [Agentics](https://pypi.org/project/agentics-py/) is an OSS frameworks for writing agents created at IBM Research
+  - Example of text2sql [use case](https://github.com/IBM/Agentics/tree/main/applications/text2sql)
+:::
+
+::: notes
+
+## Extensibilit
 - Offload node responsibilities into external services (e.g. DB execution) 
 - Pipelines defined as YAML
-- Each node is registered in a collection of nodes, and each
-  node in the pipeline accepts the `__init__` arguments
 - Use Python's built in `entry-point` system to *install* nodes
   This is a good approach to separate production from 
 :::
-
 ---
 
 
-# Thank you
+## Thank you & Questions{.center}
 
-::: {.fragment}
-### Questions
+::: {.columns }
+::: {.column width="36%"}
+:::
+::: {.column width="30%"}
+{{< qrcode https://d3f0.github.io/pycon-sql-llm/slides.html#/title-slide qr2 width=400 height=400 colorDark='#0011bb' >}}
+:::
+::: {.column width="30%"}
+:::
 :::
 
-::: {.fragment}
-#### Contact
+::: {style="text-align: center; "}
+{{< bi envelope >}} [nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)
 :::

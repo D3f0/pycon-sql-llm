@@ -49,6 +49,8 @@ repos:
           - svg
           - css
           - yaml
+          - javascript
+        
     -   id: debug-statements
     # TODO: Fix this
     # -   id: name-tests-test

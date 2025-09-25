@@ -176,7 +176,7 @@ class ConfigAwareStateGraph(StateGraph):
 
 def create_graph(config: str = "./config.yaml"):
     sql_gen_config: SQLGenConfig = SQLGenConfig.from_yaml(config)
-    graph_builder = ConfigAwareStateGraph(
+    graph_builder = StateGraph(
         input_schema=Input,
         state_schema=State,
         output_schema=Output,
@@ -185,9 +185,12 @@ def create_graph(config: str = "./config.yaml"):
 
     # start snippet graph
     graph_builder.add_node("init", init)
-    graph_builder.add_node("prompt_gen", prompt_gen)
-    graph_builder.add_node("call_llm", call_llm)
-    graph_builder.add_node("exec_sql", exec_sql)
+
+    graph_builder.add_node(
+        "prompt_gen", partial(prompt_gen, sql_gen_config=sql_gen_config)
+    )
+    graph_builder.add_node("call_llm", partial(call_llm, sql_gen_config=sql_gen_config))
+    graph_builder.add_node("exec_sql", partial(exec_sql, sql_gen_config=sql_gen_config))
 
     graph_builder.add_edge(START, "init")
     graph_builder.add_edge("init", "prompt_gen")

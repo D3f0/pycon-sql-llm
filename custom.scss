@@ -67,3 +67,22 @@
 .reveal .slide .small {
   font-size: .75em;
 }
+
+
+// Header logo
+.reveal-header .header-logo {
+  width: 20%; height: auto;
+}
+
+
+.qrcode {
+  size: 8em;
+}
+
+
+#qr2 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}

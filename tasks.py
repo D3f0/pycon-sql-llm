@@ -117,6 +117,12 @@ def slide_code_debug_in_ipython(ctx: Context, file="slides.qmd", exec_=True):
 def publish(ctx: Context):
     """Publish to GH pages"""
     ctx.run(
-        "yes y | quarto publish gh-pages --no-prompt",
+        "quarto publish gh-pages --no-prompt",
         env={"PRE_COMMIT_ALLOW_NO_CONFIG": "1"},
     )
+
+
+@task(aliases=["j"])
+def jupyter(ctx: Context):
+    with ctx.cd(git_top_level):
+        ctx.run("uv run jupyter lab ", pty=True)
