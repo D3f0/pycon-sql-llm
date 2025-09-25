@@ -81,15 +81,9 @@ class SQLGenConfig(BaseModel):
     system_message_tpl: str = Field(
         description=r"Templated sys msg {}", repr=False
     )
-    llm: Dict[
-        str, Union[str, Dict[str, str], int, BaseModel]
-    ]
-    structured: bool = Field(
-        description="Enable/disable JSON Schema"
-    )
-    extra_context: Dict[str, str] = Field(
-        default_factory=dict
-    )
+    llm: Dict[str, Union[str, Dict[str, str], int, BaseModel]]
+    structured: bool = Field(description="Enable/disable JSON Schema")
+    extra_context: Dict[str, str] = Field(default_factory=dict)
     # ...
     # end snippet cfg
 
@@ -98,9 +92,7 @@ class SQLGenConfig(BaseModel):
     )
 
     @classmethod
-    def from_yaml(
-        cls, path: str, **overrides: Any
-    ) -> "SQLGenConfig":
+    def from_yaml(cls, path: str, **overrides: Any) -> "SQLGenConfig":
         """Read config from YAML file"""
         with open(path, "r", encoding="utf-8") as fp:
             config: Dict[str, Any] = yaml.safe_load(fp)
@@ -140,13 +132,11 @@ def init(
 # start snippet prompt_gen
 def prompt_gen(state: State, sql_gen_config: SQLGenConfig):
     """Formats the prompt"""
-    system_message_content = (
-        sql_gen_config.system_message_tpl.format(
-            dialect=sql_gen_config.db.dialect,
-            top_k=10,
-            table_info=sql_gen_config.db.get_table_info(),
-            extra_context=sql_gen_config.extra_context,
-        )
+    system_message_content = sql_gen_config.system_message_tpl.format(
+        dialect=sql_gen_config.db.dialect,
+        top_k=10,
+        table_info=sql_gen_config.db.get_table_info(),
+        extra_context=sql_gen_config.extra_context,
     )
     state.messages.extend(
         [
@@ -171,17 +161,14 @@ class SQLOutput(BaseModel):
 
 
 # start snippet call_llm
-def call_llm(
-    state: State, sql_gen_config: SQLGenConfig
-) -> State:
+def call_llm(state: State, sql_gen_config: SQLGenConfig) -> State:
+    response_format = SQLOutput if sql_gen_config.structured else None
     response = litellm.completion(
         messages=state.messages,
-        response_format=SQLOutput
-        if sql_gen_config.structured
-        else None,
+        response_format=response_format,
         **sql_gen_config.llm,  # model here
     )
-    if sql_gen_config.structured:
+    if response_format is not None:
         state.sql = SQLOutput.model_validate_json(
             response.choices[0].message.content
         ).sql
@@ -197,9 +184,7 @@ def call_llm(
 
 
 # start snippet exec_sql
-def exec_sql(
-    state: State, sql_gen_config: SQLGenConfig
-) -> Output:
+def exec_sql(state: State, sql_gen_config: SQLGenConfig) -> Output:
     logger.info(f"Executing SQL {state=}")
     with sql_gen_config.engine.connect() as conn:
         result = conn.execute(text(state.sql))
@@ -216,27 +201,20 @@ def exec_sql(
 
 
 def create_graph(sql_gen_config: SQLGenConfig):
+    def with_config(func):
+        return partial(func, sql_gen_config=sql_gen_config)
+
+    # start snippet graph
     graph_builder = StateGraph(
         input_schema=Input,
         state_schema=State,
         output_schema=Output,
     )
-
-    # start snippet graph
     graph_builder.add_node("init", init)
 
-    graph_builder.add_node(
-        "prompt_gen",
-        partial(prompt_gen, sql_gen_config=sql_gen_config),
-    )
-    graph_builder.add_node(
-        "call_llm",
-        partial(call_llm, sql_gen_config=sql_gen_config),
-    )
-    graph_builder.add_node(
-        "exec_sql",
-        partial(exec_sql, sql_gen_config=sql_gen_config),
-    )
+    graph_builder.add_node("prompt_gen", with_config(prompt_gen))
+    graph_builder.add_node("call_llm", with_config(call_llm))
+    graph_builder.add_node("exec_sql", with_config(exec_sql))
 
     graph_builder.add_edge(START, "init")
     graph_builder.add_edge("init", "prompt_gen")
@@ -257,9 +235,7 @@ def parse_key_value_with_literal_eval(ctx, param, values):
     for value in values:
         try:
             if "=" not in value:
-                ctx.fail(
-                    f"Expected format 'key=value', got: {value}"
-                )
+                ctx.fail(f"Expected format 'key=value', got: {value}")
 
             key, val = value.split("=", 1)
 
@@ -315,12 +291,8 @@ def main(
     )
     logger.info(sql_gen_config)
     if use_cache:
-        logger.info(
-            f"Enabling cache (disk_cache_dir={cache_dir})"
-        )
-        litellm.cache = Cache(
-            type="disk", disk_cache_dir=cache_dir
-        )
+        logger.info(f"Enabling cache (disk_cache_dir={cache_dir})")
+        litellm.cache = Cache(type="disk", disk_cache_dir=cache_dir)
 
     graph = create_graph(sql_gen_config=sql_gen_config)
     result = graph.invoke(
