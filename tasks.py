@@ -18,18 +18,27 @@ from subprocess import check_output
 console = Console()
 
 git_top_level = (
-    check_output("git rev-parse --show-toplevel", shell=True).decode().strip()
+    check_output(
+        "git rev-parse --show-toplevel", shell=True
+    )
+    .decode()
+    .strip()
 )
 
 
 @task(aliases=["p"])
 def preview(
-    ctx: Context, port: str = "", args_: list[str] = [], file_: str = "slides.qmd"
+    ctx: Context,
+    port: str = "",
+    args_: list[str] = [],
+    file_: str = "slides.qmd",
 ):
     """Preview slides in revealjs format"""
     args = " ".join(args_)
     if which("entr"):
-        console.print("[bold]entr[/bold] found, hot reloading after crash enabled ✨")
+        console.print(
+            "[bold]entr[/bold] found, hot reloading after crash enabled ✨"
+        )
         ctx.run(
             f"echo {file_} | entr -c direnv exec . quarto preview /_ --render revealjs --port $PORT"
         )
@@ -40,7 +49,9 @@ def preview(
             warn=True,
         )
         if not ran.ok:
-            console.print("😞 quarto preview crashed, please launch again")
+            console.print(
+                "😞 quarto preview crashed, please launch again"
+            )
 
 
 @task(aliases=["c"])
@@ -65,7 +76,10 @@ def litellm_model_ollama(ctx: Context):
     def f():
         import ollama
 
-        model_names = [f"ollama/{m.model}" for m in ollama.list()["models"]]
+        model_names = [
+            f"ollama/{m.model}"
+            for m in ollama.list()["models"]
+        ]
         print(*model_names, sep="\n")
 
     code_lines = inspect.getsource(f).splitlines()[1:]
@@ -96,10 +110,14 @@ def ipython(ctx: Context):
 
 
 @task(aliases=["d"])
-def slide_code_debug_in_ipython(ctx: Context, file="slides.qmd", exec_=True):
+def slide_code_debug_in_ipython(
+    ctx: Context, file="slides.qmd", exec_=True
+):
     """QMD -> IPYNB ; ipython --pdb ..."""
     with ctx.cd(git_top_level):
-        ctx.run("quarto convert slides.qmd --output ipynb/slides.ipynb")
+        ctx.run(
+            "quarto convert slides.qmd --output ipynb/slides.ipynb"
+        )
         cmd = "direnv exec . uv run ipython --pdb --ext rich ipynb/slides.ipynb"
         if not exec_:
             ctx.run(
@@ -117,7 +135,11 @@ def slide_code_debug_in_ipython(ctx: Context, file="slides.qmd", exec_=True):
 def publish(ctx: Context):
     """Publish to GH pages"""
     ctx.run(
-        "quarto publish gh-pages --no-prompt",
+        """
+        quarto render slides.qmd --to revealjs;
+        rm -rf _site/minidev*;
+        quarto publish gh-pages --no-prompt --no-render
+        """,
         env={"PRE_COMMIT_ALLOW_NO_CONFIG": "1"},
     )
 
