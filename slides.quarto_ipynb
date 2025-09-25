@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "raw",
-   "id": "30a6c7ba",
+   "id": "99a81304",
    "metadata": {},
    "source": [
     "---\n",
@@ -49,7 +49,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "41e3bc87",
+   "id": "d48fc1ea",
    "metadata": {},
    "source": [
     "## About myself {.smaller}\n",
@@ -361,7 +361,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "f4341bf1",
+   "id": "ed4522ee",
    "metadata": {},
    "source": [
     ":::\n",
@@ -413,7 +413,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "d7dd1d47",
+   "id": "e01b7f85",
    "metadata": {},
    "source": [
     "---\n",
@@ -434,7 +434,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "f084a33c",
+   "id": "86b9f7ec",
    "metadata": {},
    "source": [
     "![](./img/er-california-schools.png){.lightbox}\n",
@@ -480,7 +480,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "c05eba29",
+   "id": "4f26c4c7",
    "metadata": {},
    "source": [
     "::: notes\n",
@@ -590,7 +590,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "dee0be3e",
+   "id": "cb27f171",
    "metadata": {},
    "source": [
     "---\n",
@@ -627,7 +627,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "bfe2f69f",
+   "id": "12380f6f",
    "metadata": {},
    "source": [
     "::: {.fragment .fade-left}\n",
@@ -672,7 +672,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "b4fe5178",
+   "id": "c4f8629b",
    "metadata": {},
    "source": [
     ":::\n",
@@ -756,7 +756,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "59638950",
+   "id": "2b324053",
    "metadata": {},
    "source": [
     "::: footer\n",
@@ -778,8 +778,7 @@
     ":::: {.columns}\n",
     "::: {.column}\n",
     "::: {.fragment .fade-left}\n",
-    "LLMs are quite capable of writing functional SQL queries, from the named `code`/`coder`\n",
-    "to specific ones for (`sql`) generation.\n",
+    "Pretrained LLMs are quite capable of writing functional SQL queries, finetuned ones show better performance for specific SQL dialects.\n",
     ":::\n",
     "\n",
     ":::\n",
@@ -791,7 +790,6 @@
     "\n",
     "- granite-3-2-8b-instruct\n",
     "- granite-34b-code-instruct\n",
-    "- granite-20b-code-base-schema-linking\n",
     "- granite-20b-code-base-sql-gen\n",
     "\n",
     "[More info on these models {{< bi box-arrow-up-right >}}](https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-models-ibm.html?context=wx&locale=en&audience=wdp#granite-code-instruct-models) | \n",
@@ -898,7 +896,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "7ec82915",
+   "id": "4b24eb7f",
    "metadata": {},
    "source": [
     "::: notes\n",
@@ -1427,7 +1425,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "3e0bb115",
+   "id": "8e660ba1",
    "metadata": {},
    "source": [
     "<!-- Disable footer -->\n",
@@ -1471,7 +1469,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "a3a9145c",
+   "id": "f91295eb",
    "metadata": {},
    "source": [
     "::: {.small_text}\n",
@@ -1553,7 +1551,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "32ce66d5",
+   "id": "f4137c96",
    "metadata": {},
    "source": [
     "--- \n",
@@ -2127,11 +2125,15 @@
   },
   {
    "cell_type": "markdown",
-   "id": "098b67e5",
+   "id": "4c7bdd02",
    "metadata": {},
    "source": [
     "::: footer\n",
     ":::\n",
+    "\n",
+    "---\n",
+    "\n",
+    "![](./img/LLMsSQL.svg)\n",
     "\n",
     "---\n",
     "\n",
@@ -2174,7 +2176,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "fe9e0666",
+   "id": "d318cafd",
    "metadata": {},
    "source": [
     ":::\n",
@@ -2228,7 +2230,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "887b0e17",
+   "id": "1589acf5",
    "metadata": {},
    "source": [
     ":::\n",
@@ -2388,7 +2390,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "92cd7616",
+   "id": "c0ee0b8b",
    "metadata": {},
    "source": [
     "---\n",
@@ -2435,10 +2437,16 @@
   },
   {
    "cell_type": "markdown",
-   "id": "1ed620b9",
+   "id": "4d4b8006",
    "metadata": {},
    "source": [
     ":::\n",
+    "\n",
+    "::: {.fragment}\n",
+    "This methods is known as grammar constraint decoding, not all\n",
+    "models are capable of it.\n",
+    ":::\n",
+    "\n",
     "---\n",
     "\n",
     "### Attributes of `output` object\n"
@@ -2468,7 +2476,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "51b3e8d7",
+   "id": "8769754e",
    "metadata": {},
    "source": [
     "::: {.fragment}"
@@ -2498,7 +2506,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "8123af20",
+   "id": "38295e75",
    "metadata": {},
    "source": [
     ":::\n",
@@ -2507,7 +2515,8 @@
     "\n",
     "--- \n",
     "\n",
-    "### LLM generated SQL vs dataset query"
+    "### LLM generated SQL vs dataset query\n",
+    "::: {.fragment}"
    ]
   },
   {
@@ -2543,9 +2552,12 @@
   },
   {
    "cell_type": "markdown",
-   "id": "da9a6a33",
+   "id": "01754071",
    "metadata": {},
    "source": [
+    ":::\n",
+    "\n",
+    "::: {.fragment}\n",
     "Execution result: "
    ]
   },
@@ -2580,28 +2592,36 @@
   },
   {
    "cell_type": "markdown",
-   "id": "ead9d2b6",
+   "id": "412f2b78",
    "metadata": {},
    "source": [
+    "{{< bi circle-arrow-up >}} this should be a 4. The LLM didn't know about \n",
+    "the column value conventions of the database.\n",
+    ":::\n",
+    "\n",
+    "\n",
+    "\n",
     "---\n",
     "\n",
-    "## Improving the Generation with more context\n",
+    "## Running again with values {.smaller}\n",
     "\n",
-    "The BIRD mini has some CSV files that help understanding\n",
-    "the tables values and relationships\n",
+    "By modifying the prompt adding the relevant information from the CSVs \n",
+    "that were in the same folder as `california_schools.sqlite`\n",
     "\n",
-    "We're adding this context in a configuration file, that we will examine in the\n",
-    "next section. This is the `evidence` column from the dataset we saw earlier 💡\n",
+    "```yaml\n",
+    "  {extra_context}\n",
     "\n",
+    "  For the School table, consider this information for the Schools table\n",
+    "\n",
+    "  · F = Exclusively Virtual – The school has no physical building where students meet with each other or with teachers, all instruction is virtual.\n",
+    "```\n",
+    "\n",
+    "The result becomes...\n",
     "```{.bash}\n",
-    " uv run -m sql_with_llms.main ./config-custom.yaml  -c\n",
-    "\n",
-    "Provider List: https://docs.litellm.ai/docs/providers\n",
-    "\n",
-    "\n",
-    "Provider List: https://docs.litellm.ai/docs/providers\n",
-    "\n",
-    "Answer: {'sql': \"SELECT COUNT(*) FROM satscores INNER JOIN schools ON satscores.cds = schools.CDSCode WHERE satscores.AvgScrMath > 400 AND schools.Virtual = 'F'\", 'result': '[(4,)]'}\n",
+    "{'sql': \"SELECT COUNT(*) FROM satscores INNER JOIN schools \n",
+    "        ON satscores.cds = schools.CDSCode WHERE satscores.AvgScrMath > 400 \n",
+    "        AND schools.Virtual = 'F'\", \n",
+    " 'result': '[(4,)]'}\n",
     "```\n",
     "\n",
     "\n",
@@ -2649,15 +2669,11 @@
     "```{.python include=\"src/sql_with_llms/main.py\" snippet=\"graph\" dedent=\"4\" code-line-numbers=\"false\"}\n",
     "```\n",
     "\n",
-    "::: {.fragment}\n",
-    "Let's take a look at how we define those function and the data types\n",
-    "they receive and return\n",
-    ":::\n",
-    "\n",
     "\n",
     "::: notes\n",
-    "1. In Langraph the node functions must be defined before, but we're presenting this\n",
-    "   before for clarity\n",
+    "Let's take a look at how we define those function and the data types\n",
+    "they receive and return\n",
+    "\n",
     ":::\n",
     "\n",
     "---\n",
@@ -2754,10 +2770,13 @@
     "\n",
     "## Running the code\n",
     "\n",
+    "In order to try the pipeline, there's a small CLI that can be called\n",
+    "like this:\n",
+    "\n",
     "```{.bash}\n",
     "git clone https://github.com/D3f0/pycon-sql-llm.git\n",
     "uv sync\n",
-    "uv run -m sql_with_llms.main \n",
+    "uv run -m sql_with_llms.main <config file>\n",
     "```\n",
     "\n",
     "---\n",
@@ -2815,6 +2834,12 @@
     "  - Security (Python on WASM)\n",
     ":::\n",
     "\n",
+    "::: {.fragment}\n",
+    "- Make nodes Pydantic objects (`__call__`)\n",
+    "  - You can define the full pipeline in YAML \n",
+    "  - You can put the pipeline execution in an API\n",
+    ":::\n",
+    "\n",
     "---\n",
     "\n",
     "### Closing words\n",
@@ -2822,6 +2847,9 @@
     "::: {.fragment}\n",
     "- [Agentics](https://pypi.org/project/agentics-py/){target=\"_blank\"} is an OSS frameworks for writing agents created at IBM Research\n",
     "  - Example of text2sql [use case](https://github.com/IBM/Agentics/tree/main/applications/text2sql){target=\"_blank\"}\n",
+    "\n",
+    "\n",
+    "![[Current PyPI version](https://pypi.org/pypi/agentics-py) {{< bi link >}}](./img/agentics.png){width=\"30%\" target=\"_bank\"}\n",
     ":::\n",
     "\n",
     "::: notes\n",

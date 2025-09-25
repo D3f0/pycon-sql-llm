@@ -8,7 +8,7 @@
 - [x] put schema next to csv files
 - [ ] slide 22 put first the diagram with the pipeline to transition to the next step
 - [x] granite 3 or 8 b the one that is used is not listed on slide 22
-- [ ] Pre-trained LLMs are quite capable of writing functional SQL queries (add reference), from the code or coder ones,  finetuned ones show better performance for specific dialects (add reference) slide 22
+- [x] Pre-trained LLMs are quite capable of writing functional SQL queries (add reference), from the code or coder ones,  finetuned ones show better performance for specific dialects (add reference) slide 22
 - [x] slide 23: Research papers from our team on robust LLMs from our team:
 - [x] For this we will use a prompt string with some palace-holders .
 - [ ] don't put problem and solution on the same slide ... slide 23

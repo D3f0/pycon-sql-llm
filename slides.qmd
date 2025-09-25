@@ -402,8 +402,7 @@ with engine.connect() as conn:
 :::: {.columns}
 ::: {.column}
 ::: {.fragment .fade-left}
-LLMs are quite capable of writing functional SQL queries, from the named `code`/`coder`
-to specific ones for (`sql`) generation.
+Pretrained LLMs are quite capable of writing functional SQL queries, finetuned ones show better performance for specific SQL dialects.
 :::
 
 :::
@@ -415,7 +414,6 @@ For example, some IBM trained models include:
 
 - granite-3-2-8b-instruct
 - granite-34b-code-instruct
-- granite-20b-code-base-schema-linking
 - granite-20b-code-base-sql-gen
 
 [More info on these models {{< bi box-arrow-up-right >}}](https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-models-ibm.html?context=wx&locale=en&audience=wdp#granite-code-instruct-models) | 
@@ -607,6 +605,10 @@ print(messages[0]['content'])
 
 ---
 
+![](./img/LLMsSQL.svg)
+
+---
+
 ## Calling the LLM with the prompt {.smaller}
 
 `litellm` is a Open Source Python library (and also a Proxy) that can be
@@ -724,8 +726,13 @@ response = litellm.completion(
 output = SQLOutput.model_validate_json(
   response.choices[0].message.content)
 ```
-
 :::
+
+::: {.fragment}
+This methods is known as grammar constraint decoding, not all
+models are capable of it.
+:::
+
 ---
 
 ### Attributes of `output` object
@@ -749,12 +756,15 @@ output.explanation
 --- 
 
 ### LLM generated SQL vs dataset query
+::: {.fragment}
 ```{python}
 #| echo: true
 display(query)
 display(output.sql)
 ```
+:::
 
+::: {.fragment}
 Execution result: 
 
 ```{python}
@@ -765,26 +775,33 @@ try:
 except Exception as err:
   print(err)
 ```
+{{< bi circle-arrow-up >}} this should be a 4. The LLM didn't know about 
+the column value conventions of the database.
+:::
+
+
 
 ---
 
-## Improving the Generation with more context
+## Running again with values {.smaller}
 
-The BIRD mini has some CSV files that help understanding
-the tables values and relationships
+By modifying the prompt adding the relevant information from the CSVs 
+that were in the same folder as `california_schools.sqlite`
 
-We're adding this context in a configuration file, that we will examine in the
-next section. This is the `evidence` column from the dataset we saw earlier 💡
+```yaml
+  {extra_context}
 
+  For the School table, consider this information for the Schools table
+
+  · F = Exclusively Virtual – The school has no physical building where students meet with each other or with teachers, all instruction is virtual.
+```
+
+The result becomes...
 ```{.bash}
- uv run -m sql_with_llms.main ./config-custom.yaml  -c
-
-Provider List: https://docs.litellm.ai/docs/providers
-
-
-Provider List: https://docs.litellm.ai/docs/providers
-
-Answer: {'sql': "SELECT COUNT(*) FROM satscores INNER JOIN schools ON satscores.cds = schools.CDSCode WHERE satscores.AvgScrMath > 400 AND schools.Virtual = 'F'", 'result': '[(4,)]'}
+{'sql': "SELECT COUNT(*) FROM satscores INNER JOIN schools 
+        ON satscores.cds = schools.CDSCode WHERE satscores.AvgScrMath > 400 
+        AND schools.Virtual = 'F'", 
+ 'result': '[(4,)]'}
 ```
 
 
@@ -832,15 +849,11 @@ instead of global variables.
 ```{.python include="src/sql_with_llms/main.py" snippet="graph" dedent="4" code-line-numbers="false"}
 ```
 
-::: {.fragment}
-Let's take a look at how we define those function and the data types
-they receive and return
-:::
-
 
 ::: notes
-1. In Langraph the node functions must be defined before, but we're presenting this
-   before for clarity
+Let's take a look at how we define those function and the data types
+they receive and return
+
 :::
 
 ---
@@ -937,10 +950,13 @@ and bind it with `functools.partial`.
 
 ## Running the code
 
+In order to try the pipeline, there's a small CLI that can be called
+like this:
+
 ```{.bash}
 git clone https://github.com/D3f0/pycon-sql-llm.git
 uv sync
-uv run -m sql_with_llms.main 
+uv run -m sql_with_llms.main <config file>
 ```
 
 ---
@@ -998,6 +1014,12 @@ For example, the term Q1 can mean, *quarter one*, but it should
   - Security (Python on WASM)
 :::
 
+::: {.fragment}
+- Make nodes Pydantic objects (`__call__`)
+  - You can define the full pipeline in YAML 
+  - You can put the pipeline execution in an API
+:::
+
 ---
 
 ### Closing words
@@ -1005,6 +1027,9 @@ For example, the term Q1 can mean, *quarter one*, but it should
 ::: {.fragment}
 - [Agentics](https://pypi.org/project/agentics-py/){target="_blank"} is an OSS frameworks for writing agents created at IBM Research
   - Example of text2sql [use case](https://github.com/IBM/Agentics/tree/main/applications/text2sql){target="_blank"}
+
+
+![[Current PyPI version](https://pypi.org/pypi/agentics-py) {{< bi link >}}](./img/agentics.png){width="30%" target="_bank"}
 :::
 
 ::: notes

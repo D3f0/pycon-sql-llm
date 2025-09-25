@@ -46,4 +46,4 @@ dev = [
 ]
 
 [tool.ruff]
-line-length = 60
+line-length = 70
