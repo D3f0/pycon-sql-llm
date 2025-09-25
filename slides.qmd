@@ -436,11 +436,11 @@ about it, or create some flat out invalid SQL
 ::: {.fragment .fade-in-then-semi-out}
 We have to  provide __extra__ information about the structure in the instructions
 
-For this we will use a **prompt** string with some palace-holders {{< bi braces >}}.
+For this we will use a **prompt** string with some palaceholders {{< bi braces >}}.
 :::
 
 ::: {.fragment .fade-in-then-semi-out .small}
-Some research papers from our team from:
+Some research papers from our team on Robust LLMs:
 
 [{{< bi filetype-pdf >}} Weakly Supervised Detection of Hallucinations in LLMs](https://arxiv.org/pdf/2312.02798)
 :::
@@ -802,7 +802,6 @@ instead of global variables.
 
 ![](./img/LLMsSQL.svg)
 
-TODO highlight
 
 ---
 
