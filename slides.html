@@ -1614,14 +1614,14 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 <div class="fragment fade-in-then-semi-out">
 <img src="./img/langgraph.svg" height="40px" style="float: left; padding-top: .5em; padding-right: .25em">
 <p>
-<code>LangGraph</code> allows us to create state machines around LLM calls, using functions as nodes.
+<code>LangGraph</code> allows us to create state machines around LLM calls, using functions as nodes. The full can be checked out <a href="https://github.com/D3f0/pycon-sql-llm/blob/main/src/sql_with_llms/main.py"><code>src/sql_with_llms/main.py</code></a>
 </p>
 </div>
 <div class="fragment fade-in-then-semi-out">
 <p>We will now put the code we saw into node functions</p>
 </div>
 <div class="fragment fade-in-then-semi-out">
-<p>We will have a <code>Input</code>, and <code>Output</code> a shared <code>State</code> and some global configuration, instead of global variables</p>
+<p>We will have a <code>Input</code>, and <code>Output</code> a shared <code>State</code> and some global configuration, instead of global variables.</p>
 </div>
 </section>
 <section class="slide level2">
@@ -1633,19 +1633,18 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 <h2>Graph creation</h2>
 <div class="sourceCode" id="cb31" data-snippet="graph" data-startfrom="187"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 186;"><span id="cb31-187"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"init"</span>, init)</span>
 <span id="cb31-188"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-189"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"prompt_gen"</span>, partial(</span>
-<span id="cb31-190"><a aria-hidden="true" tabindex="-1"></a>    prompt_gen, sql_gen_config<span class="op">=</span>sql_gen_config))</span>
-<span id="cb31-191"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"call_llm"</span>, partial(call_llm, </span>
-<span id="cb31-192"><a aria-hidden="true" tabindex="-1"></a>    sql_gen_config<span class="op">=</span>sql_gen_config))</span>
-<span id="cb31-193"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"exec_sql"</span>, partial(exec_sql, </span>
-<span id="cb31-194"><a aria-hidden="true" tabindex="-1"></a>    sql_gen_config<span class="op">=</span>sql_gen_config))</span>
-<span id="cb31-195"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-196"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(START, <span class="st">"init"</span>)</span>
-<span id="cb31-197"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"init"</span>, <span class="st">"prompt_gen"</span>)</span>
-<span id="cb31-198"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"prompt_gen"</span>, <span class="st">"call_llm"</span>)</span>
-<span id="cb31-199"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"call_llm"</span>, <span class="st">"exec_sql"</span>)</span>
-<span id="cb31-200"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"exec_sql"</span>, END)</span>
-<span id="cb31-201"><a aria-hidden="true" tabindex="-1"></a>graph <span class="op">=</span> graph_builder.<span class="bu">compile</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb31-189"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(</span>
+<span id="cb31-190"><a aria-hidden="true" tabindex="-1"></a>    <span class="st">"prompt_gen"</span>, partial(prompt_gen, sql_gen_config<span class="op">=</span>sql_gen_config)</span>
+<span id="cb31-191"><a aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-192"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"call_llm"</span>, partial(call_llm, sql_gen_config<span class="op">=</span>sql_gen_config))</span>
+<span id="cb31-193"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"exec_sql"</span>, partial(exec_sql, sql_gen_config<span class="op">=</span>sql_gen_config))</span>
+<span id="cb31-194"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-195"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(START, <span class="st">"init"</span>)</span>
+<span id="cb31-196"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"init"</span>, <span class="st">"prompt_gen"</span>)</span>
+<span id="cb31-197"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"prompt_gen"</span>, <span class="st">"call_llm"</span>)</span>
+<span id="cb31-198"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"call_llm"</span>, <span class="st">"exec_sql"</span>)</span>
+<span id="cb31-199"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"exec_sql"</span>, END)</span>
+<span id="cb31-200"><a aria-hidden="true" tabindex="-1"></a>graph <span class="op">=</span> graph_builder.<span class="bu">compile</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="fragment">
 <p>Let’s take a look at how we define those function and the data types they receive and return</p>
 </div>
