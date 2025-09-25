@@ -440,7 +440,7 @@ For this we will use a **prompt** string with some palace-holders {{< bi braces 
 :::
 
 ::: {.fragment .fade-in-then-semi-out .small}
-Some research papers from our team from our team:
+Some research papers from our team from:
 
 [{{< bi filetype-pdf >}} Weakly Supervised Detection of Hallucinations in LLMs](https://arxiv.org/pdf/2312.02798)
 :::
