@@ -1,0 +1,26 @@
+Metadata-Version: 2.4
+Name: sql-with-llms
+Version: 0.1.0
+Summary: Code and Slides for PyCon 2025
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: aiohttp>=3.12.15
+Requires-Dist: datasets>=4.1.1
+Requires-Dist: diskcache>=5.6.3
+Requires-Dist: fsspec[http,libarchive,tqdm]>=2025.9.0
+Requires-Dist: invoke>=2.2.0
+Requires-Dist: jupyter>=1.1.1
+Requires-Dist: jupyter-cache>=1.0.1
+Requires-Dist: langchain-community>=0.3.29
+Requires-Dist: langchain-core>=0.3.76
+Requires-Dist: langgraph>=0.6.7
+Requires-Dist: litellm[caching,proxy]>=1.63.7
+Requires-Dist: ollama>=0.5.4
+Requires-Dist: pdbpp>=0.11.7
+Requires-Dist: prisma>=0.15.0
+Requires-Dist: pydantic-settings>=2.10.1
+Requires-Dist: requests>=2.32.4
+Requires-Dist: rich>=14.1.0
+Requires-Dist: textual>=6.1.0
+
+# PyCon Kenya 2025 - LLMs for SQL

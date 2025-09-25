@@ -1,0 +1,17 @@
+project:
+  type: website
+
+website:
+  title: "LLMs for SQL generation"
+  navbar:
+    left:
+      - href: slides.qmd
+        text: Home
+  drafts: 
+    - "*.qmd"
+    - "**/*.ipynb"
+
+render:
+  - slides.qmd
+  - "!*.qmd"
+  - "**/*.ipynb"

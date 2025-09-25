@@ -1,0 +1,40 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.16.2"
+  },
+  "cells": [
+    {
+      "id": "OevV",
+      "code_hash": "bac68e34ef31f1f9cff7d13345829471",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "dNuu",
+      "code_hash": "0cc175b9c0f1b6a831c399e269772661",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<pre style='font-size: 12px'>10</pre>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "gGxP",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    }
+  ]
+}

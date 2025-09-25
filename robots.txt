@@ -1,1 +1,0 @@
-Sitemap: git@work.github.com:D3f0/pycon-sql-llm.git/sitemap.xml

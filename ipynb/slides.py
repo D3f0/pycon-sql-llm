@@ -1,0 +1,638 @@
+# ---
+# title: '💬 {{< bi database >}} 🤖 Asking questions to your database with LLMs '
+# author: Nahuel Defossé <br>[nahuel.defosse@ibm.com](mailto:nahuel.defosse@ibm.com)<br>IBM Research Kenya Lab
+# date: September, 2025
+# embed-resources: false
+# footer: '*Asking question to {{< bi database >}} with LLMs* - 🐍 PyCon 🇰🇪 2025'
+# execute:
+#   cache: true
+#   keep-ipynb: true
+# format:
+#   revealjs:
+#     toc: false
+#     toc-depth: 1
+#     slide-number: true
+#     transition: slide
+#     code-copy: true
+#     highlight-style: github
+#     code-overflow: wrap
+#     theme:
+#       - solarized
+#       - custom.scss
+#     header-logo-right: ./img/pynbo.png
+#     header-logo-right-url: https://pycon-kenya-2025.sessionize.com/
+#     header-logo-right-height: 2em
+#     preview-links: auto
+# filters:
+#   - reveal-logo
+# jupyter:
+#   jupytext:
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.17.3
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+#     path: /Users/nahueldefosse/workspace/slides/pycon-2025-insights-from-sql-llms/.venv/share/jupyter/kernels/python3
+# ---
+
+# %%
+# %load_ext rich
+
+# %% [markdown]
+# ## About myself {.smaller}
+#
+# :::: {.columns}
+# ::: {.column width="40%"}
+# ![](./img/memes/myself.gif){height="12em"}
+# :::
+#
+# ::: {.column width="60%"}
+#
+# ::: {.incremental}
+# - 🐍 Pythonista with 18 years of experience.
+#   - Co-organized SciPy Latin America
+# - 🚜 Worked as CTO in  Hello Tractor
+# - 🧪 Software Engineer at IBM Research
+# - 🛰️ Worked in Foundational Models for Geospatial applications
+# - 💬 Currently working on [Flowpilot {{< bi link-45deg >}}](https://research.ibm.com/projects/flowpilot), providing core features to
+#   different products and divisions.
+# :::
+#
+# :::
+# ::::
+#
+#
+# ---
+#
+# ## Follow along (or at 🏡) {.center}
+#
+# {{< qrcode https://jmbuhr.de >}}
+#
+#
+# ---
+#
+# # Intro
+#
+# In this talk we're gonna show how to use Python to:
+#
+#   - Connect to a database and execute the queries
+#   - Convert natural language questions into SQL
+#   - Create a workflow
+#   - Fix common errors
+#   - Lessons learned
+#
+# TODO: Put some drawing & rephrase
+#
+# ---
+#
+# # Connect to a database and execute the queries
+#
+#
+# ---
+#
+# ## Public datasets used in text to SQL
+#
+# :::: {.columns}
+# ::: {.column}
+# ::: {.fragment .fade-right}
+#
+# :::
+#
+# ::: {.fragment .fade-right}
+# - [🕷️ Spider](https://yale-lily.github.io/spider){target="_bank"}
+# :::
+# ::: {.fragment .fade-right}
+# - [🕷️ 🕷️ Spider 2](https://spider2-sql.github.io/){target="_bank"}
+# :::
+# ::: {.fragment .fade-right}
+# - 🐦 [BIRD](https://bird-bench.github.io/){target="_bank"}
+# :::
+# ::: {.fragment .fade-right}
+# - [🏹 Archer](https://sig4kg.github.io/archer-bench/){target="_bank"}
+# :::
+# :::
+# ::: {.column}
+# ::: {.fragment .fade-left .small_text}
+# These datasets define:
+#
+# - ❓ Natural language questions
+# - 🫰 Expected SQL
+# - 🏗️ Database schema & content
+# - 🔎 Evaluation metrics
+# - 🥇 Leaderboard
+# :::
+# :::
+# ::::
+#
+#
+# ::: notes
+# :::
+#
+# ---
+#
+# ## BIRD
+#
+# ![](./img/ibm-granite-leaderboard.png){height="400px" fig-align="center"}
+#
+# [{{<bi article>}} article](https://research.ibm.com/blog/granite-LLM-text-to-SQL)
+#
+#
+# ::: notes
+# We're select BIRD dataset since we have some experience with it, we managed
+# to get to the top of the leatherboard in 2024/6
+# :::
+#
+# ---
+#
+# ### BIRD mini-dev
+#
+# - It consist of 500 queries classified as **simple**, **moderate** and **challenging** [{{< bi box-arrow-up-right >}}](https://github.com/bird-bench/mini_dev)
+#
+# ::: {.fragment .fade-left}
+
+# %%
+from rich.console import Console
+
+_c = Console(width=75)
+# Ensure print are contained within the range
+print = _c.print
+
+# %% output-location="slide"
+# | echo: true
+from datasets import load_dataset, DownloadConfig
+
+# Load the dataset
+dataset = load_dataset(
+    "birdsql/bird_mini_dev", download_config=DownloadConfig(disable_tqdm=True)
+)
+
+# Contents
+print("Database types: ", *dataset.keys())
+sqlite_df = dataset["mini_dev_sqlite"].to_pandas()
+sqlite_df = sqlite_df.drop(columns=["question_id"])
+display(sqlite_df.head(2))
+
+# %% [markdown]
+# :::
+#
+# ---
+#
+# ### Downloading BIRD databases
+#
+# <!-- - We will be using [`uvx`](https://docs.astral.sh/uv/concepts/tools/#tool-versions)[^uvx] with the `gdown` package as follows: -->
+#
+# ```shell
+# uvx gdown https://drive.google.com/file/d/13VLWIwpw5E3d5DUkMvzw7hvHE67a4XkG/
+# ```
+# ![](./img/download_minidev.png)
+# <!-- Or just download from the [ {{< bi google >}} {{< bi hdd >}} link](https://drive.google.com/file/d/13VLWIwpw5E3d5DUkMvzw7hvHE67a4XkG/view?usp=sharing)  -->
+#
+# Extracting the archive (3.3GiB)
+#
+# ```shell
+# unzip minidev_703.zip
+# ```
+# <!-- [^uvx]: It comes as part of `uv`, it's a shorthand for `uv tool run` -->
+#
+# ::: footer
+# :::
+# ---
+#
+# ### Picking the example database `california_schools`
+#
+# In `minidev/MINIDEV/dev_databases/california_schools/` we find the {{< bi database >}} {{< bi file >}}
+#
+# ![](./img/california_school.png)
+#
+#
+# ---
+#
+# ### Creating the `Engine`
+
+# %%
+# | echo: true
+# | code-overflow: wrap
+
+from sqlalchemy import create_engine
+
+path = "./minidev/MINIDEV/dev_databases/california_schools/california_schools.sqlite"
+engine = create_engine(f"sqlite:///{path}")
+engine
+
+# %% [markdown]
+# ---
+#
+# ### Grabbing a simple question and its  {{< bi database >}}
+
+# %%
+# | echo: true
+california_schools_df = sqlite_df[sqlite_df.db_id == "california_schools"]
+simple_queries_df = california_schools_df[sqlite_df.difficulty == "simple"]
+simple_queries_df.head(2).set_index("db_id")
+
+# %% [markdown]
+# ---
+
+# %%
+# | echo: true
+import pandas as pd
+
+pd.set_option("display.max_colwidth", 0)
+
+question_sql_df = simple_queries_df[["question", "SQL"]].reset_index()
+# question_sql_df[0:1].T
+
+# %% [markdown]
+# ::: {.fragment .fade-left}
+
+# %%
+# | echo: true
+
+question = question_sql_df.loc[0, "question"]
+query = question_sql_df.loc[0, "SQL"]
+print(f"{question!r}")
+print(f"{query!r}")
+
+# %% [markdown]
+# :::
+#
+# ---
+#
+# ### Execute the queries {.smaller}
+
+# %%
+# | echo: true
+
+from sqlalchemy import text
+
+with engine.connect() as conn:
+    result = conn.execute(text(query))
+    res_df = pd.DataFrame(result.fetchall())  # 🐼 ✨
+    print(
+        f"[bold]Question:[/bold] {question}, ",
+        f"[bold]SQL:[/bold] {query}",
+        "[bold]Result[/bold]",
+        sep="\n",
+    )
+    display(res_df)
+
+# %% [markdown]
+# ---
+#
+# ### Database schema with 🦜 ⛓️
+#
+# LangChain (🦜 ⛓️) community 🐍 📦 provides a simple class that can retrieve some schema information [^qa_lc]
+
+# %%
+# | echo: true
+# !uv pip install langchain-community
+
+# %%
+# | echo: true
+
+from langchain_community.utilities import SQLDatabase
+
+db = SQLDatabase(engine=engine)
+
+display(db.get_usable_table_names())
+
+# %% [markdown]
+# ::: {.fragment .slide-left}
+# As we can see, the table names may not be immediately understandable 🤔
+# :::
+# [^qa_lc]: [SQL Question Answering](https://python.langchain.com/docs/tutorials/sql_qa/#system-prompt){target="_blank"}
+#
+# ::: notes
+#
+# :::
+#
+# ---
+#
+# # Convert natural language questions into SQL {.smaller}
+#
+# :::: {.columns}
+# ::: {.column}
+# ::: {.fragment .fade-left}
+# LLMs are quite capable of writing functional SQL queries, from the `code` or `coder`
+# ones, to specific ones for SQL generation.
+# :::
+#
+#
+# :::
+#
+# ::: {.column}
+#
+# ::: {.fragment .fade-left}
+# For example, some IBM trained models include:
+#
+# - granite-20b-code-instruct
+# - granite-34b-code-instruct
+# - granite-20b-code-base-schema-linking
+# - granite-20b-code-base-sql-gen
+#
+# [More info on these models {{< bi box-arrow-up-right >}}](https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-models-ibm.html?context=wx&locale=en&audience=wdp#granite-code-instruct-models)
+# :::
+#
+# :::
+#
+# ::::
+#
+# ::: notes
+# For those of us who have been writing code for some time and
+# fell in love with ORMs when they were the *hot* new thing, LLMs
+# can take us to the next level!
+# :::
+#
+#
+# ## Prompts for SQL generation {transition="convex"}
+#
+#
+# ::: {.fragment .fade-in-then-semi-out}
+# LLMs don't know the  🏗️ structure of our database, and may hallucinate
+# about it, or create some flat out invalid SQL.
+# :::
+#
+# ::: {.fragment .fade-in-then-semi-out}
+# We have to  provide __extra__ information about the structure in the instructions.
+#
+# For this we will use a **prompt** string with some palace-holders {{< bi braces >}}.
+# :::
+#
+# ::: {.fragment .fade-in-then-semi-out}
+# Some research papers from our team from our team:
+#
+# [{{< bi filetype-pdf >}} Weakly Supervised Detection of Hallucinations in LLMs](https://arxiv.org/pdf/2312.02798)
+# :::
+#
+# ::: {.fragment .fade-in-then-semi-out}
+# [{{< bi filetype-pdf >}} Localizing Persona Representations In LLMs](https://arxiv.org/pdf/2505.24539)
+# :::
+#
+# ::: notes
+# In Flowpilot we created a framework inspired on LangGraph for this.
+# :::
+#
+# ---
+#
+# ### Prompts {.smaller}
+
+# %%
+# | echo: true
+# | code-line-numbers: 1-7|8-14|15-18
+
+system_message = """
+Given an input question, create a syntactically correct {dialect} query to
+run to help find the answer. Unless the user specifies in his question a
+specific number of examples they wish to obtain, always limit your query to
+at most {top_k} results. You can order the results by a relevant column to
+return the most interesting examples in the database.
+
+Never query for all the columns from a specific table, only ask for a the
+few relevant columns given the question.
+
+Pay attention to use only the column names that you can see in the schema
+description. Be careful to not query for columns that do not exist. Also,
+pay attention to which column is in which table.
+
+Only use the following tables:
+{table_info}
+"""
+
+
+# %% [markdown]
+# ::: {.small_text}
+#
+# [source {{< bi box-arrow-up-right >}}](https://python.langchain.com/docs/tutorials/sql_qa/#convert-question-to-sql-query)
+#
+# :::
+#
+# ---
+#
+# ## Creating a prompt {.smaller}
+#
+# Now we construct a list of messages. These are `dicts` which have a key
+# `user` or `system`, and a `content`.
+
+
+# %% output-location="slide"
+# | echo: true
+def generate_messages(question, dialect="SQL", top_k=5, table_info=""):
+    # Create a ChatPromptTemplate
+    messages = [
+        {
+            "role": "system",
+            "content": system_message.format(
+                dialect=dialect, top_k=top_k, table_info=table_info
+            ),
+        },
+        {"role": "user", "content": question},
+    ]
+
+    return messages
+
+
+messages = generate_messages(
+    question=question, dialect=db.dialect, top_k=10, table_info=db.get_table_info()
+)
+messages
+
+# %%
+# | echo: false
+import json
+
+with open("messages.json", "w") as fp:
+    json.dump(messages, fp)
+
+# %% [markdown]
+# ---
+#
+# ### Calling the LLM with the prompt {.smaller}
+#
+#
+# ::: {.fragment .fade-in-then-semi-out}
+#
+# `litellm` is a client for multiple LLM providers [{{< bi info-circle >}} `model` list](https://docs.litellm.ai/docs/providers)
+
+# %%
+# | echo: true
+# !uv add litellm --quiet   # it can be be added with uv
+
+# %% [markdown]
+# :::
+#
+# <!-- [^extras]:
+#   `caching` , `extra-proxy` , `mlflow` , `proxy` , `semantic-router`, `utils` -->
+#
+#
+# ::: {.fragment .fade-in}
+# To run inference, we just call the [`completions`](https://docs.litellm.ai/docs/completion/input) module function:
+#
+# <!-- Enable disk cachesq -->
+
+# %%
+# | echo: false
+# Speed up execution
+import litellm
+
+from litellm.caching.caching import Cache
+
+litellm.cache = Cache(type="disk")
+# Remove debug messages
+litellm.suppress_debug_info = True
+
+# %% output-location="slide"
+# | echo: true
+import litellm
+
+model = "ollama_chat/granite-code:20b"
+
+response = litellm.completion(
+    model=model,
+    messages=messages,
+)
+
+response
+
+# %% [markdown]
+# :::
+#
+#
+# ::: notes
+#
+# There are some reasonably good LLMs under the coder and instruct in Hugging Face.
+# Some of these can be run locally with some inference server like `Ollama`,
+# `llama.cpp` or `LMStudio`, and also use pubic
+# ones.
+#
+# :::
+#
+# ---
+#
+# ## Structured output
+#
+# ::: {.fragment}
+# Now that we get the SQL, we're going to use a popular feature to get the
+# SQL as JSON.
+# :::
+#
+# ::: {.fragment}
+
+# %% output-location="slide"
+# | echo: true
+
+from pydantic import BaseModel, Field
+
+
+class SQLOutput(BaseModel):
+    sql: str = Field(description="The SQL query")
+    explanation: str = Field(description="The reasoning for the query construction")
+
+
+# Optional
+litellm.enable_json_schema_validation = True
+
+response = litellm.completion(
+    model=model,
+    messages=messages,
+    response_format=SQLOutput,
+)
+response
+
+# %% [markdown]
+# :::
+#
+#
+#
+# ---
+#
+# # Create a workflow
+#
+# ---
+#
+# # Chaining generation and execution
+#
+# ::: {.fragment .fade-in-then-semi-out}
+# When our code starts to become larger than a script can handle 🏋🏾‍♀️, `LangGraph` is a great
+# tool to provide some reusable organization. We can add it with `uv add langgraph`.
+# :::
+#
+# ::: {.fragment .fade-in-then-semi-out}
+# This will help us to separate some concerns like  📐 *validation* , 🏃🏽 *execution* and later,  ☢️ *enrichment*.
+# :::
+#
+# ::: {.fragment .fade-in-then-semi-out .center}
+# Let's see how we can create something like this:
+# ```{mermaid}
+# %%| fig-align: center
+# flowchart LR
+#     S[Start]
+#     CallLLM[Call litellm's completion]
+#     S -->|State: Dict| CallLLM
+#     CallLLM --> End
+#
+# ```
+# :::
+#
+# ---
+#
+# ## State
+#
+# LangGraph uses state that is propagated through nodes.
+#
+# This state can be defined with a TypedDict or a Pydantic BaseModel.
+
+# %%
+# | echo: true
+from pydantic import BaseModel, Field
+from typing import Optional
+
+
+class State(BaseModel):
+    question: str = ""
+    schema: str = ""
+    sql: Optional[str] = Field(default=None, description="")
+
+
+# %% [markdown]
+# ---
+#
+# # Fix common errors
+# ## Adding a node for safety
+#
+# ::: notes
+# Usually done through LLMs in agentic workflows, we are going to take a
+# more deterministic approach.
+# :::
+#
+# ## Let's go for Bobby tables {.center}
+#
+# ![](./img/memes/exploits_of_a_mom.png)
+#
+# ::: footer
+# [`xkcd 327`](https://www.explainxkcd.com/wiki/index.php/327:_Exploits_of_a_Mom)
+# :::
+#
+# ---
+#
+# # Adding more information in the prompt
+#
+# ## Acronyms
+#
+#
+#
+# ---
+#
+# # Lessons learned
+#
+# ---
+#
+# ## Reducing the schema for simpler queries
+#
+#
+# ## Metadata about the columns
+#
+# ## Dynamic context

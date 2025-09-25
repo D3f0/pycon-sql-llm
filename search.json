@@ -81,70 +81,70 @@
     "href": "slides.html#improving-the-generation-with-more-context",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "Improving the Generation with more context",
-    "text": "Improving the Generation with more context\nThe BIRD mini has some CSV files that help understanding the tables values and relationships\nLet’s pass this to the prompt generation system message…\nTODO\n\nTo be completed for tomorrow"
+    "text": "Improving the Generation with more context\nThe BIRD mini has some CSV files that help understanding the tables values and relationships\nWe’re adding this context in a configuration file, that we will examine in the next section. This is the evidence column from the dataset we saw earlier 💡\n uv run -m sql_with_llms.main ./config-custom.yaml  -c\n\nProvider List: https://docs.litellm.ai/docs/providers\n\n\nProvider List: https://docs.litellm.ai/docs/providers\n\nAnswer: {'sql': \"SELECT COUNT(*) FROM satscores INNER JOIN schools ON satscores.cds = schools.CDSCode WHERE satscores.AvgScrMath &gt; 400 AND schools.Virtual = 'F'\", 'result': '[(4,)]'}"
   },
   {
     "objectID": "slides.html#graph-creation",
     "href": "slides.html#graph-creation",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "Graph creation",
-    "text": "Graph creation\ngraph_builder.add_node(\"init\", init)\n\ngraph_builder.add_node(\n    \"prompt_gen\", partial(prompt_gen, sql_gen_config=sql_gen_config)\n)\ngraph_builder.add_node(\"call_llm\", partial(call_llm, sql_gen_config=sql_gen_config))\ngraph_builder.add_node(\"exec_sql\", partial(exec_sql, sql_gen_config=sql_gen_config))\n\ngraph_builder.add_edge(START, \"init\")\ngraph_builder.add_edge(\"init\", \"prompt_gen\")\ngraph_builder.add_edge(\"prompt_gen\", \"call_llm\")\ngraph_builder.add_edge(\"call_llm\", \"exec_sql\")\ngraph_builder.add_edge(\"exec_sql\", END)\ngraph = graph_builder.compile()\n\nLet’s take a look at how we define those function and the data types they receive and return\n\n\n\nIn Langraph the node functions must be defined before, but we’re presenting this before for clarity"
+    "text": "Graph creation\ngraph_builder.add_node(\"init\", init)\n\ngraph_builder.add_node(\n    \"prompt_gen\",\n    partial(prompt_gen, sql_gen_config=sql_gen_config),\n)\ngraph_builder.add_node(\n    \"call_llm\",\n    partial(call_llm, sql_gen_config=sql_gen_config),\n)\ngraph_builder.add_node(\n    \"exec_sql\",\n    partial(exec_sql, sql_gen_config=sql_gen_config),\n)\n\ngraph_builder.add_edge(START, \"init\")\ngraph_builder.add_edge(\"init\", \"prompt_gen\")\ngraph_builder.add_edge(\"prompt_gen\", \"call_llm\")\ngraph_builder.add_edge(\"call_llm\", \"exec_sql\")\ngraph_builder.add_edge(\"exec_sql\", END)\ngraph = graph_builder.compile()\n\nLet’s take a look at how we define those function and the data types they receive and return\n\n\n\nIn Langraph the node functions must be defined before, but we’re presenting this before for clarity"
   },
   {
     "objectID": "slides.html#input-class",
     "href": "slides.html#input-class",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "Input class",
-    "text": "Input class\nThis is what we expect to be passed to our state machine\n@dataclass\nclass Input:\n    \"\"\"User provides the connection details and the question\"\"\"\n\n    question: str"
+    "text": "Input class\nThe input and output are these simple dataclasses.\n\n\n@dataclass\nclass Input:\n    \"\"\"User provides the connection\n    details and the question\"\"\"\n\n    question: str\n\n\n\n@dataclass\nclass Output:\n    \"\"\"SQL result and\n    LLM explanation\"\"\"\n\n    sql: str\n    result: str"
   },
   {
     "objectID": "slides.html#state-class",
     "href": "slides.html#state-class",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "State class",
-    "text": "State class\nThis is what the state machine will pass to the nodes (functions) and expect from them (except the first and last node which use Input/Output)\nclass Message(TypedDict):\n    role: Literal[\"user\", \"system\"]\n    content: str\n\n\n@dataclass\nclass State:\n    question: Optional[str] = None\n    messages: list[Message] = field(default_factory=list)\n    sql: Optional[str] = None"
-  },
-  {
-    "objectID": "slides.html#output-class",
-    "href": "slides.html#output-class",
-    "title": "💬  🤖 Asking questions to your database with LLMs",
-    "section": "Output class",
-    "text": "Output class\nThis is the response back to the user, we will use it in the last node\n@dataclass\nclass Output:\n    \"\"\"User provides the connection details and the question\"\"\"\n\n    sql: str\n    result: str"
+    "text": "State class\nThis the state passed between the inner. The first and last one will receive/return the Input/Output respectively.\nclass Message(TypedDict):\n    \"\"\"Message to pass to litellm\"\"\"\n\n    role: Literal[\"user\", \"system\"]\n    content: str\n\n\n@dataclass\nclass State:\n    question: Optional[str] = None\n    messages: list[Message] = field(default_factory=list)\n    sql: Optional[str] = None"
   },
   {
     "objectID": "slides.html#the-init-node-function",
     "href": "slides.html#the-init-node-function",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "The init node function",
-    "text": "The init node function\nThis node consumes the input converting the something of shape Input into a State. The next node will be prompt generation, so we will be save the question.\n\n\ndef init(\n    initial: Input,\n) -&gt; State:\n    \"\"\"Initializes the state\"\"\"\n\n    return State(\n        question=initial.question,\n    )"
+    "text": "The init node function\nThis node consumes the input converting the something of shape Input into a State. The next node will be prompt generation, so we will be save the question.\ndef init(\n    initial: Input,\n) -&gt; State:\n    \"\"\"Initializes the state\"\"\"\n    return State(\n        question=initial.question,\n    )"
   },
   {
     "objectID": "slides.html#global-configuration-class",
     "href": "slides.html#global-configuration-class",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "Global configuration class",
-    "text": "Global configuration class\nThe nodes beyond the initial one will require to have a bit more information that won’t change (not considered state), for this we will define a global\nclass SQLGenConfig(BaseModel):\n    db_url: str = Field(description=\"DB connection string\")\n    engine: Engine = Field(description=\"DB connection\")\n    db: SQLDatabase = Field(description=\"Basic schema info\")\n    system_message_tpl: str = Field(description=r\"Templated sys msg {}\")\n    llm: Dict[str, Union[str, Dict[str, str]]]\n\n    model_config = ConfigDict(\n        arbitrary_types_allowed=True,\n    )\nWe will pass it to the function nodes with functools.partial(..., conf=conf)"
+    "text": "Global configuration class\nThe nodes beyond the initial one will require to have a bit more information that won’t change (not considered state). We will provide this as a seconds argument and bind it with functools.partial.\nclass SQLGenConfig(BaseModel):\n    db_url: str = Field(description=\"DB connection string\")\n    engine: Engine = Field(description=\"DB connection\")\n    db: SQLDatabase = Field(description=\"Basic schema info\")\n    system_message_tpl: str = Field(\n        description=r\"Templated sys msg {}\", repr=False\n    )\n    llm: Dict[\n        str, Union[str, Dict[str, str], int, BaseModel]\n    ]\n    structured: bool = Field(\n        description=\"Enable/disable JSON Schema\"\n    )\n    extra_context: Dict[str, str] = Field(\n        default_factory=dict\n    )\n    # ..."
   },
   {
     "objectID": "slides.html#prompt-generation-function-node",
     "href": "slides.html#prompt-generation-function-node",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "Prompt generation function node",
-    "text": "Prompt generation function node\ndef prompt_gen(state: State, sql_gen_config: SQLGenConfig):\n    \"\"\"Formats the prompt\"\"\"\n    system_message_content = sql_gen_config.system_message_tpl.format(\n        dialect=sql_gen_config.db.dialect,\n        top_k=10,\n        # table_info=sql_gen_config.db.get_table_info(),\n        table_info=sql_gen_config.db.get_table_info(),\n    )\n    state.messages.extend(\n        [\n            {\"role\": \"system\", \"content\": system_message_content},\n            {\"role\": \"user\", \"content\": state.question},\n        ]\n    )\n    return state"
+    "text": "Prompt generation function node\ndef prompt_gen(state: State, sql_gen_config: SQLGenConfig):\n    \"\"\"Formats the prompt\"\"\"\n    system_message_content = (\n        sql_gen_config.system_message_tpl.format(\n            dialect=sql_gen_config.db.dialect,\n            top_k=10,\n            table_info=sql_gen_config.db.get_table_info(),\n            extra_context=sql_gen_config.extra_context,\n        )\n    )\n    state.messages.extend(\n        [\n            {\n                \"role\": \"system\",\n                \"content\": system_message_content,\n            },\n            {\"role\": \"user\", \"content\": state.question},\n        ]\n    )\n    return state"
   },
   {
     "objectID": "slides.html#llm-calling-function-node",
     "href": "slides.html#llm-calling-function-node",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "LLM calling function node",
-    "text": "LLM calling function node\ndef call_llm(state: State, sql_gen_config: SQLGenConfig) -&gt; State:\n    response = litellm.completion(\n        model=sql_gen_config.llm[\"model\"],\n        messages=state.messages,\n        response_format=SQLOutput,\n    )\n    state.sql = SQLOutput.model_validate_json(response.choices[0].message.content).sql\n\n    return state"
+    "text": "LLM calling function node\ndef call_llm(\n    state: State, sql_gen_config: SQLGenConfig\n) -&gt; State:\n    response = litellm.completion(\n        messages=state.messages,\n        response_format=SQLOutput\n        if sql_gen_config.structured\n        else None,\n        **sql_gen_config.llm,  # model here\n    )\n    if sql_gen_config.structured:\n        state.sql = SQLOutput.model_validate_json(\n            response.choices[0].message.content\n        ).sql\n    else:\n        state.sql = response.choices[0].message.content\n    logger.info(\n        f\"Generated SQL: {sql_gen_config.structured=} {state.sql=}\"\n    )\n    return state"
   },
   {
     "objectID": "slides.html#sql-execution-function-node",
     "href": "slides.html#sql-execution-function-node",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "SQL Execution function node",
-    "text": "SQL Execution function node\ndef exec_sql(state: State, sql_gen_config: SQLGenConfig) -&gt; Output:\n    with sql_gen_config.engine.connect() as conn:\n        result = conn.execute(text(state.sql))\n        try:\n            results = str(result.fetchall())\n        except Exception as error:\n            results = str(error)\n\n    assert state.sql is not None\n    return Output(sql=state.sql, result=results)"
+    "text": "SQL Execution function node\ndef exec_sql(\n    state: State, sql_gen_config: SQLGenConfig\n) -&gt; Output:\n    logger.info(f\"Executing SQL {state=}\")\n    with sql_gen_config.engine.connect() as conn:\n        result = conn.execute(text(state.sql))\n        try:\n            results = str(result.fetchall())\n        except Exception as error:\n            results = str(error)\n\n    assert state.sql is not None\n    return Output(sql=state.sql, result=results)"
+  },
+  {
+    "objectID": "slides.html#running-the-code",
+    "href": "slides.html#running-the-code",
+    "title": "💬  🤖 Asking questions to your database with LLMs",
+    "section": "Running the code",
+    "text": "Running the code\ngit clone https://github.com/D3f0/pycon-sql-llm.git\nuv sync\nuv run -m sql_with_llms.main"
   },
   {
     "objectID": "slides.html#extensibilit",

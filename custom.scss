@@ -1,0 +1,93 @@
+/*-- scss:defaults --*/
+
+
+
+/*-- scss:rules --*/
+
+
+.reveal .slide .background-dark {
+  width: 50% ;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+
+.reveal .slide .center-xy {
+  
+  // position: absolute;
+  display: block;
+  margin-left: 50%;
+  margin-right: 50%;
+  width: 50%;
+  
+}
+
+.reveal .slide figure svg {
+  width: 100%;
+}
+
+.small_text * p {
+  font-size: 30px;
+}
+
+.column .small_text {
+  font-size: 30px;
+}
+
+.test {
+  font-size: 1em;
+}
+
+.dataframe {
+
+  font-size: 20px
+}
+
+.scrollable {
+  max-height: 90%;
+  overflow-y: auto;
+}
+.slide .output-location-slide pre {
+  max-height: 90%;
+  overflow-y: auto;
+}
+
+
+.output-location-slide .cell-output-display {
+  max-height: 90%;
+  overflow-y: auto;
+}
+
+// https://github.com/quarto-dev/quarto-cli/discussions/557
+.reveal .slide-number > a[href*='title-slide'] {
+  display: none;
+}
+
+.reveal .slide .small {
+  font-size: .75em;
+}
+
+
+// Header logo
+.reveal-header .header-logo {
+  width: 20%; height: auto;
+}
+
+
+.qrcode {
+  size: 8em;
+}
+
+
+#qr2 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.reveal .header-logo-right img {
+  width: 10%;
+  height: auto;
+}

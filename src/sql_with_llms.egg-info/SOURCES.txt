@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+src/sql_with_llms/__init__.py
+src/sql_with_llms/debug.py
+src/sql_with_llms/main.py
+src/sql_with_llms.egg-info/PKG-INFO
+src/sql_with_llms.egg-info/SOURCES.txt
+src/sql_with_llms.egg-info/dependency_links.txt
+src/sql_with_llms.egg-info/requires.txt
+src/sql_with_llms.egg-info/top_level.txt

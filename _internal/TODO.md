@@ -1,0 +1,66 @@
+
+- [x] Worked in Foundational Models for Geospatial applications add link to Nasa projecct
+- [x] qr code not pointing to slides
+- [ ] trazo fino se ve raro en el dibujo
+- [x] high level diagram -> pipeline overview
+- [x] hearth emoji on public dataset slides
+- [x] df.sample(X) to show shuffle
+- [x] put schema next to csv files
+- [ ] slide 22 put first the diagram with the pipeline to transition to the next step
+- [x] granite 3 or 8 b the one that is used is not listed on slide 22
+- [ ] Pre-trained LLMs are quite capable of writing functional SQL queries (add reference), from the code or coder ones,  finetuned ones show better performance for specific dialects (add reference) slide 22
+- [x] slide 23: Research papers from our team on robust LLMs from our team:
+- [x] For this we will use a prompt string with some palace-holders .
+- [ ] don't put problem and solution on the same slide ... slide 23
+- [ ] use same style of reference in all slides
+- [x] remove footnote slide 24 put link directly like other cases before, slide 24
+- [ ] refrescar pipeline antes de slide 30
+- [ ] para transicionar Calling the LLM with the prompt
+- [x] remove commented code line 3 in slide 31 ollama
+- [x] check grammar on slide 33 no clear "Although it looks we have the SQL, LLMs currently support structured output Also known as JSON Schema, this allows us to also retrieve some explanation"
+---
+
+- [x] Something that is not on the slide title
+- [x] Punto finales, en items
+- [x] Gave talks in Pycon Argentina, Europython …. Etc
+- [x] Add fotos of workshop presenters
+- [ ] Test arcade
+- [x] Intro slide … change title
+- [x] No need to mention that is technical … is a tech talk
+- [x] Public datasets for what? Flip order, show define first … show names later
+- [ ] Emojis diff types on slides
+- [x] Date on leaderboard typo
+- [x] No need to name the path (slide 10
+- [ ] Drop db id …. Gives more espace to examples) slide 11
+- [ ] What does the engine allow us ?
+- [ ] Massaging no no word, manipulating,
+- [ ] Slide 17, any better way to show the sql query
+- [ ] Slide 18 needs and intro/transition to the next topic … need a wrap-up, so far we saw datasets with sql code + text queries
+- [ ] The context part is quite hanging not clear (when building prompt)
+- [ ] Too much text on the LLM
+- [ ] Slide 24 line 18 running long … check flake format
+- [x] You may not have easy access to the screen so keep in mind as you point a lot on 3d
+- [ ] Slides 27 can be be be typo .. comment not needed
+- [ ] Not sure how common is littlellm server like … maybe good to make a quick remark
+- [ ] Slide 28, breakdown response and talk about each part
+- [ ] Slide 29 add link to pydantic
+- [ ] Slide 29 line 4 running long, maybe flake will help
+- [ ] The code contexts move around with the mouse and lose info
+- [ ] Who is responsible of the explanation?
+- [ ] Don’t say things that you’re not doing … slide 34
+- [ ] Slide 25 transitions between topics are not seamless
+- [ ] Slide 36 add emojis to langgraph as langchain
+- [ ] Dataclass slide 36 seems an overkill, disrupts flow of script
+- [x] Ibm logo on footer
+- [ ] Remove lines 39
+- [ ] 34. Show graph before functions. …. slide 41 move up, and break down explanations
+- [ ] Slide 45 move from function to classes .. not clear why is better?
+- [ ] Lessons learned needs to show first the problem solved and then solution … currently seems like a lot of solutions to problems the audience is not aware 
+- [ ] Memes are missing maybe lessons learned is a good place to add, audience is tired or overloaded ive them something to laugh
+- [ ] Lessons learned is taking some time
+- [ ] Wasm link .. resources
+- [ ] Lessons learned section looks like things you didn’t get into the talk … needs to be more crisp
+
+
+
+----

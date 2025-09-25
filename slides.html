@@ -102,7 +102,7 @@
     code span.vs { color: #008000; } /* VerbatimString */
     code span.wa { color: #696969; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-2d0b672219e3013ba341350305e5fff6.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-ee5357b6f623223b9cee149fed2fd120.css">
   <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -690,10 +690,18 @@ Nahuel Defossé <i class="bi-envelope " style="" role="img" aria-hidden="true"><
 <section>
 <section id="convert-natural-language-questions-into-sql" class="title-slide slide level1 smaller center">
 <h1>Convert natural language questions into SQL</h1>
+
+</section>
+<section class="slide level2">
+
+
+<img data-src="./img/LLMsSQL.svg" class="r-stretch"></section>
+<section class="slide level2">
+
 <div class="columns">
 <div class="column">
 <div class="fragment fade-left">
-<p>LLMs are quite capable of writing functional SQL queries, from the <code>code</code> or <code>coder</code> ones, to specific ones for SQL generation</p>
+<p>LLMs are quite capable of writing functional SQL queries, from the named <code>code</code>/<code>coder</code> to specific ones for (<code>sql</code>) generation.</p>
 </div>
 </div><div class="column">
 <div class="fragment fade-left">
@@ -1415,7 +1423,7 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 <!-- [^extras]:   
   `caching` , `extra-proxy` , `mlflow` , `proxy` , `semantic-router`, `utils` -->
 <div class="fragment fade-in">
-<p>To run inference, we just call the <a href="https://docs.litellm.ai/docs/completion/input"><code>completions</code></a> module function:</p>
+<p>To run inference, we just call the <a href="https://docs.litellm.ai/docs/completion/input"><code>completions</code></a> function:</p>
 <!-- Enable disk cachesq -->
 <div id="9f64fba5" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a></a><span class="im">import</span> litellm</span>
@@ -1579,11 +1587,15 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 <section id="improving-the-generation-with-more-context" class="slide level2">
 <h2>Improving the Generation with more context</h2>
 <p>The BIRD mini has some CSV files that help understanding the tables values and relationships</p>
-<p>Let’s pass this to the prompt generation system message…</p>
-<h4 id="todo">TODO</h4>
-<div class="footer">
-<p>To be completed for tomorrow</p>
-</div>
+<p>We’re adding this context in a configuration file, that we will examine in the next section. This is the <code>evidence</code> column from the dataset we saw earlier 💡</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a></a> <span class="ex">uv</span> run <span class="at">-m</span> sql_with_llms.main ./config-custom.yaml  <span class="at">-c</span></span>
+<span id="cb31-2"><a></a></span>
+<span id="cb31-3"><a></a><span class="ex">Provider</span> List: https://docs.litellm.ai/docs/providers</span>
+<span id="cb31-4"><a></a></span>
+<span id="cb31-5"><a></a></span>
+<span id="cb31-6"><a></a><span class="ex">Provider</span> List: https://docs.litellm.ai/docs/providers</span>
+<span id="cb31-7"><a></a></span>
+<span id="cb31-8"><a></a><span class="ex">Answer:</span> {<span class="st">'sql'</span>: <span class="st">"SELECT COUNT(*) FROM satscores INNER JOIN schools ON satscores.cds = schools.CDSCode WHERE satscores.AvgScrMath &gt; 400 AND schools.Virtual = 'F'"</span>, <span class="st">'result'</span>: <span class="st">'[(4,)]'</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section class="slide level2">
 
@@ -1617,12 +1629,24 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 <code>LangGraph</code> allows us to create state machines around LLM calls, using functions as nodes. The full can be checked out <a href="https://github.com/D3f0/pycon-sql-llm/blob/main/src/sql_with_llms/main.py"><code>src/sql_with_llms/main.py</code></a>
 </p>
 </div>
-<div class="fragment fade-in-then-semi-out">
-<p>We will now put the code we saw into node functions</p>
-</div>
-<div class="fragment fade-in-then-semi-out">
-<p>We will have a <code>Input</code>, and <code>Output</code> a shared <code>State</code> and some global configuration, instead of global variables.</p>
-</div>
+<ul>
+<li class="fragment">Memory (cache)</li>
+<li class="fragment">Human in the Loop support</li>
+<li class="fragment">Durable execution</li>
+</ul>
+<aside class="notes">
+<p>We will now put the code we saw into node functions We will have a <code>Input</code>, and <code>Output</code> a shared <code>State</code> and some global configuration, instead of global variables.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section class="slide level2">
 
@@ -1630,20 +1654,27 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 <img data-src="./img/LLMsSQL.svg" class="r-stretch"></section>
 <section id="graph-creation" class="slide level2">
 <h2>Graph creation</h2>
-<div class="sourceCode" id="cb31" data-snippet="graph" data-startfrom="187"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 186;"><span id="cb31-187"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"init"</span>, init)</span>
-<span id="cb31-188"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-189"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(</span>
-<span id="cb31-190"><a aria-hidden="true" tabindex="-1"></a>    <span class="st">"prompt_gen"</span>, partial(prompt_gen, sql_gen_config<span class="op">=</span>sql_gen_config)</span>
-<span id="cb31-191"><a aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-192"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"call_llm"</span>, partial(call_llm, sql_gen_config<span class="op">=</span>sql_gen_config))</span>
-<span id="cb31-193"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"exec_sql"</span>, partial(exec_sql, sql_gen_config<span class="op">=</span>sql_gen_config))</span>
-<span id="cb31-194"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-195"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(START, <span class="st">"init"</span>)</span>
-<span id="cb31-196"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"init"</span>, <span class="st">"prompt_gen"</span>)</span>
-<span id="cb31-197"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"prompt_gen"</span>, <span class="st">"call_llm"</span>)</span>
-<span id="cb31-198"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"call_llm"</span>, <span class="st">"exec_sql"</span>)</span>
-<span id="cb31-199"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"exec_sql"</span>, END)</span>
-<span id="cb31-200"><a aria-hidden="true" tabindex="-1"></a>graph <span class="op">=</span> graph_builder.<span class="bu">compile</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb32" data-snippet="graph" data-startfrom="226"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 225;"><span id="cb32-226"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(<span class="st">"init"</span>, init)</span>
+<span id="cb32-227"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-228"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(</span>
+<span id="cb32-229"><a aria-hidden="true" tabindex="-1"></a>    <span class="st">"prompt_gen"</span>,</span>
+<span id="cb32-230"><a aria-hidden="true" tabindex="-1"></a>    partial(prompt_gen, sql_gen_config<span class="op">=</span>sql_gen_config),</span>
+<span id="cb32-231"><a aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-232"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(</span>
+<span id="cb32-233"><a aria-hidden="true" tabindex="-1"></a>    <span class="st">"call_llm"</span>,</span>
+<span id="cb32-234"><a aria-hidden="true" tabindex="-1"></a>    partial(call_llm, sql_gen_config<span class="op">=</span>sql_gen_config),</span>
+<span id="cb32-235"><a aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-236"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_node(</span>
+<span id="cb32-237"><a aria-hidden="true" tabindex="-1"></a>    <span class="st">"exec_sql"</span>,</span>
+<span id="cb32-238"><a aria-hidden="true" tabindex="-1"></a>    partial(exec_sql, sql_gen_config<span class="op">=</span>sql_gen_config),</span>
+<span id="cb32-239"><a aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-240"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-241"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(START, <span class="st">"init"</span>)</span>
+<span id="cb32-242"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"init"</span>, <span class="st">"prompt_gen"</span>)</span>
+<span id="cb32-243"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"prompt_gen"</span>, <span class="st">"call_llm"</span>)</span>
+<span id="cb32-244"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"call_llm"</span>, <span class="st">"exec_sql"</span>)</span>
+<span id="cb32-245"><a aria-hidden="true" tabindex="-1"></a>graph_builder.add_edge(<span class="st">"exec_sql"</span>, END)</span>
+<span id="cb32-246"><a aria-hidden="true" tabindex="-1"></a>graph <span class="op">=</span> graph_builder.<span class="bu">compile</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="fragment">
 <p>Let’s take a look at how we define those function and the data types they receive and return</p>
 </div>
@@ -1665,99 +1696,111 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 </section>
 <section class="slide level2">
 
-<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a></a><span class="im">from</span> sql_with_llms.main <span class="im">import</span> create_graph</span>
-<span id="cb32-2"><a></a>g.get_graph().draw_png()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a></a><span class="im">from</span> sql_with_llms.main <span class="im">import</span> create_graph</span>
+<span id="cb33-2"><a></a>g.get_graph().draw_png()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 <img data-src="./img/langraph_graph.png" class="r-stretch"></section>
 <section id="input-class" class="slide level2">
 <h2>Input class</h2>
-<p>This is what we expect to be passed to our state machine</p>
-<div class="sourceCode" id="cb33" data-snippet="input" data-startfrom="34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 33;"><span id="cb33-34"><a></a><span class="at">@dataclass</span></span>
-<span id="cb33-35"><a></a><span class="kw">class</span> Input:</span>
-<span id="cb33-36"><a></a>    <span class="co">"""User provides the connection details and the question"""</span></span>
-<span id="cb33-37"><a></a></span>
-<span id="cb33-38"><a></a>    question: <span class="bu">str</span></span>
-<span id="cb33-39"><a></a></span>
-<span id="cb33-40"><a></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The input and output are these simple dataclasses.</p>
+<div class="columns">
+<div class="column">
+<div class="sourceCode" id="cb34" data-snippet="input" data-startfrom="52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 51;"><span id="cb34-52"><a aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb34-53"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Input:</span>
+<span id="cb34-54"><a aria-hidden="true" tabindex="-1"></a>    <span class="co">"""User provides the connection</span></span>
+<span id="cb34-55"><a aria-hidden="true" tabindex="-1"></a><span class="co">    details and the question"""</span></span>
+<span id="cb34-56"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-57"><a aria-hidden="true" tabindex="-1"></a>    question: <span class="bu">str</span></span>
+<span id="cb34-58"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-59"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column">
+<div class="sourceCode" id="cb35" data-snippet="output" data-startfrom="64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 63;"><span id="cb35-64"><a aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb35-65"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Output:</span>
+<span id="cb35-66"><a aria-hidden="true" tabindex="-1"></a>    <span class="co">"""SQL result and</span></span>
+<span id="cb35-67"><a aria-hidden="true" tabindex="-1"></a><span class="co">    LLM explanation"""</span></span>
+<span id="cb35-68"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-69"><a aria-hidden="true" tabindex="-1"></a>    sql: <span class="bu">str</span></span>
+<span id="cb35-70"><a aria-hidden="true" tabindex="-1"></a>    result: <span class="bu">str</span></span>
+<span id="cb35-71"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-72"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
 </section>
 <section id="state-class" class="slide level2">
 <h2>State class</h2>
-<p>This is what the state machine will pass to the nodes (functions) and expect from them (except the first and last node which use <code>Input</code>/<code>Output</code>)</p>
-<div class="sourceCode" id="cb34" data-snippet="state" data-startfrom="18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 17;"><span id="cb34-18"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Message(TypedDict):</span>
-<span id="cb34-19"><a aria-hidden="true" tabindex="-1"></a>    role: Literal[<span class="st">"user"</span>, <span class="st">"system"</span>]</span>
-<span id="cb34-20"><a aria-hidden="true" tabindex="-1"></a>    content: <span class="bu">str</span></span>
-<span id="cb34-21"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-22"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-23"><a aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
-<span id="cb34-24"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> State:</span>
-<span id="cb34-25"><a aria-hidden="true" tabindex="-1"></a>    question: Optional[<span class="bu">str</span>] <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb34-26"><a aria-hidden="true" tabindex="-1"></a>    messages: <span class="bu">list</span>[Message] <span class="op">=</span> field(default_factory<span class="op">=</span><span class="bu">list</span>)</span>
-<span id="cb34-27"><a aria-hidden="true" tabindex="-1"></a>    sql: Optional[<span class="bu">str</span>] <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb34-28"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-29"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="output-class" class="slide level2">
-<h2>Output class</h2>
-<p>This is the response back to the user, we will use it in the <em>last</em> node</p>
-<div class="sourceCode" id="cb35" data-snippet="output" data-startfrom="45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 44;"><span id="cb35-45"><a aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
-<span id="cb35-46"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Output:</span>
-<span id="cb35-47"><a aria-hidden="true" tabindex="-1"></a>    <span class="co">"""User provides the connection details and the question"""</span></span>
-<span id="cb35-48"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-49"><a aria-hidden="true" tabindex="-1"></a>    sql: <span class="bu">str</span></span>
-<span id="cb35-50"><a aria-hidden="true" tabindex="-1"></a>    result: <span class="bu">str</span></span>
-<span id="cb35-51"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-52"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This the state passed between the <strong>inner</strong>. The first and last one will receive/return the <code>Input</code>/<code>Output</code> respectively.</p>
+<div class="sourceCode" id="cb36" data-snippet="state" data-startfrom="34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 33;"><span id="cb36-34"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Message(TypedDict):</span>
+<span id="cb36-35"><a aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Message to pass to litellm"""</span></span>
+<span id="cb36-36"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-37"><a aria-hidden="true" tabindex="-1"></a>    role: Literal[<span class="st">"user"</span>, <span class="st">"system"</span>]</span>
+<span id="cb36-38"><a aria-hidden="true" tabindex="-1"></a>    content: <span class="bu">str</span></span>
+<span id="cb36-39"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-40"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-41"><a aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb36-42"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> State:</span>
+<span id="cb36-43"><a aria-hidden="true" tabindex="-1"></a>    question: Optional[<span class="bu">str</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb36-44"><a aria-hidden="true" tabindex="-1"></a>    messages: <span class="bu">list</span>[Message] <span class="op">=</span> field(default_factory<span class="op">=</span><span class="bu">list</span>)</span>
+<span id="cb36-45"><a aria-hidden="true" tabindex="-1"></a>    sql: Optional[<span class="bu">str</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb36-46"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-47"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="the-init-node-function" class="slide level2">
 <h2>The init node function</h2>
 <p>This node consumes the input converting the something of shape <code>Input</code> into a <code>State</code>. The next node will be prompt generation, so we will be save the <code>question</code>.</p>
-<div class="sourceCode" id="cb36" data-snippet="init" data-startfrom="87"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 86;"><span id="cb36-87"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-88"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-89"><a aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> init(</span>
-<span id="cb36-90"><a aria-hidden="true" tabindex="-1"></a>    initial: Input,</span>
-<span id="cb36-91"><a aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> State:</span>
-<span id="cb36-92"><a aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Initializes the state"""</span></span>
-<span id="cb36-93"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-94"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> State(</span>
-<span id="cb36-95"><a aria-hidden="true" tabindex="-1"></a>        question<span class="op">=</span>initial.question,</span>
-<span id="cb36-96"><a aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb36-97"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-98"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb37" data-snippet="init" data-startfrom="128"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 127;"><span id="cb37-128"><a aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> init(</span>
+<span id="cb37-129"><a aria-hidden="true" tabindex="-1"></a>    initial: Input,</span>
+<span id="cb37-130"><a aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> State:</span>
+<span id="cb37-131"><a aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Initializes the state"""</span></span>
+<span id="cb37-132"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> State(</span>
+<span id="cb37-133"><a aria-hidden="true" tabindex="-1"></a>        question<span class="op">=</span>initial.question,</span>
+<span id="cb37-134"><a aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb37-135"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-136"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="global-configuration-class" class="slide level2">
+<section id="global-configuration-class" class="slide level2 smaller">
 <h2>Global configuration class</h2>
-<p>The nodes beyond the initial one will require to have a bit more information that won’t change (not considered state), for this we will define a global</p>
-<div class="sourceCode" id="cb37" data-snippet="cfg" data-startfrom="57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 56;"><span id="cb37-57"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SQLGenConfig(BaseModel):</span>
-<span id="cb37-58"><a aria-hidden="true" tabindex="-1"></a>    db_url: <span class="bu">str</span> <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"DB connection string"</span>)</span>
-<span id="cb37-59"><a aria-hidden="true" tabindex="-1"></a>    engine: Engine <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"DB connection"</span>)</span>
-<span id="cb37-60"><a aria-hidden="true" tabindex="-1"></a>    db: SQLDatabase <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"Basic schema info"</span>)</span>
-<span id="cb37-61"><a aria-hidden="true" tabindex="-1"></a>    system_message_tpl: <span class="bu">str</span> <span class="op">=</span> Field(description<span class="op">=</span><span class="vs">r"Templated sys msg {}"</span>)</span>
-<span id="cb37-62"><a aria-hidden="true" tabindex="-1"></a>    llm: Dict[<span class="bu">str</span>, Union[<span class="bu">str</span>, Dict[<span class="bu">str</span>, <span class="bu">str</span>]]]</span>
-<span id="cb37-63"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-64"><a aria-hidden="true" tabindex="-1"></a>    model_config <span class="op">=</span> ConfigDict(</span>
-<span id="cb37-65"><a aria-hidden="true" tabindex="-1"></a>        arbitrary_types_allowed<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb37-66"><a aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We will pass it to the function nodes with <code>functools.partial(..., conf=conf)</code></p>
+<p>The nodes beyond the initial one will require to have a bit more information that won’t change (not considered state). We will provide this as a seconds argument and bind it with <code>functools.partial</code>.</p>
+<div class="sourceCode" id="cb38" data-snippet="cfg" data-startfrom="77"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 76;"><span id="cb38-77"><a aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SQLGenConfig(BaseModel):</span>
+<span id="cb38-78"><a aria-hidden="true" tabindex="-1"></a>    db_url: <span class="bu">str</span> <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"DB connection string"</span>)</span>
+<span id="cb38-79"><a aria-hidden="true" tabindex="-1"></a>    engine: Engine <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"DB connection"</span>)</span>
+<span id="cb38-80"><a aria-hidden="true" tabindex="-1"></a>    db: SQLDatabase <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"Basic schema info"</span>)</span>
+<span id="cb38-81"><a aria-hidden="true" tabindex="-1"></a>    system_message_tpl: <span class="bu">str</span> <span class="op">=</span> Field(</span>
+<span id="cb38-82"><a aria-hidden="true" tabindex="-1"></a>        description<span class="op">=</span><span class="vs">r"Templated sys msg {}"</span>, <span class="bu">repr</span><span class="op">=</span><span class="va">False</span></span>
+<span id="cb38-83"><a aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-84"><a aria-hidden="true" tabindex="-1"></a>    llm: Dict[</span>
+<span id="cb38-85"><a aria-hidden="true" tabindex="-1"></a>        <span class="bu">str</span>, Union[<span class="bu">str</span>, Dict[<span class="bu">str</span>, <span class="bu">str</span>], <span class="bu">int</span>, BaseModel]</span>
+<span id="cb38-86"><a aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb38-87"><a aria-hidden="true" tabindex="-1"></a>    structured: <span class="bu">bool</span> <span class="op">=</span> Field(</span>
+<span id="cb38-88"><a aria-hidden="true" tabindex="-1"></a>        description<span class="op">=</span><span class="st">"Enable/disable JSON Schema"</span></span>
+<span id="cb38-89"><a aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-90"><a aria-hidden="true" tabindex="-1"></a>    extra_context: Dict[<span class="bu">str</span>, <span class="bu">str</span>] <span class="op">=</span> Field(</span>
+<span id="cb38-91"><a aria-hidden="true" tabindex="-1"></a>        default_factory<span class="op">=</span><span class="bu">dict</span></span>
+<span id="cb38-92"><a aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-93"><a aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="prompt-generation-function-node" class="slide level2">
 <h2>Prompt generation function node</h2>
-<div class="sourceCode" id="cb38" data-snippet="prompt_gen" data-startfrom="103"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 102;"><span id="cb38-103"><a aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prompt_gen(state: State, sql_gen_config: SQLGenConfig):</span>
-<span id="cb38-104"><a aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Formats the prompt"""</span></span>
-<span id="cb38-105"><a aria-hidden="true" tabindex="-1"></a>    system_message_content <span class="op">=</span> sql_gen_config.system_message_tpl.<span class="bu">format</span>(</span>
-<span id="cb38-106"><a aria-hidden="true" tabindex="-1"></a>        dialect<span class="op">=</span>sql_gen_config.db.dialect,</span>
-<span id="cb38-107"><a aria-hidden="true" tabindex="-1"></a>        top_k<span class="op">=</span><span class="dv">10</span>,</span>
-<span id="cb38-108"><a aria-hidden="true" tabindex="-1"></a>        <span class="co"># table_info=sql_gen_config.db.get_table_info(),</span></span>
-<span id="cb38-109"><a aria-hidden="true" tabindex="-1"></a>        table_info<span class="op">=</span>sql_gen_config.db.get_table_info(),</span>
-<span id="cb38-110"><a aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb38-111"><a aria-hidden="true" tabindex="-1"></a>    state.messages.extend(</span>
-<span id="cb38-112"><a aria-hidden="true" tabindex="-1"></a>        [</span>
-<span id="cb38-113"><a aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: system_message_content},</span>
-<span id="cb38-114"><a aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: state.question},</span>
-<span id="cb38-115"><a aria-hidden="true" tabindex="-1"></a>        ]</span>
-<span id="cb38-116"><a aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb38-117"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> state</span>
-<span id="cb38-118"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-119"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb39" data-snippet="prompt_gen" data-startfrom="141"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 140;"><span id="cb39-141"><a aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prompt_gen(state: State, sql_gen_config: SQLGenConfig):</span>
+<span id="cb39-142"><a aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Formats the prompt"""</span></span>
+<span id="cb39-143"><a aria-hidden="true" tabindex="-1"></a>    system_message_content <span class="op">=</span> (</span>
+<span id="cb39-144"><a aria-hidden="true" tabindex="-1"></a>        sql_gen_config.system_message_tpl.<span class="bu">format</span>(</span>
+<span id="cb39-145"><a aria-hidden="true" tabindex="-1"></a>            dialect<span class="op">=</span>sql_gen_config.db.dialect,</span>
+<span id="cb39-146"><a aria-hidden="true" tabindex="-1"></a>            top_k<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb39-147"><a aria-hidden="true" tabindex="-1"></a>            table_info<span class="op">=</span>sql_gen_config.db.get_table_info(),</span>
+<span id="cb39-148"><a aria-hidden="true" tabindex="-1"></a>            extra_context<span class="op">=</span>sql_gen_config.extra_context,</span>
+<span id="cb39-149"><a aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb39-150"><a aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb39-151"><a aria-hidden="true" tabindex="-1"></a>    state.messages.extend(</span>
+<span id="cb39-152"><a aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb39-153"><a aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="cb39-154"><a aria-hidden="true" tabindex="-1"></a>                <span class="st">"role"</span>: <span class="st">"system"</span>,</span>
+<span id="cb39-155"><a aria-hidden="true" tabindex="-1"></a>                <span class="st">"content"</span>: system_message_content,</span>
+<span id="cb39-156"><a aria-hidden="true" tabindex="-1"></a>            },</span>
+<span id="cb39-157"><a aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: state.question},</span>
+<span id="cb39-158"><a aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb39-159"><a aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb39-160"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> state</span>
+<span id="cb39-161"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-162"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section class="slide level2">
 
@@ -1765,32 +1808,52 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 <img data-src="./img/LLMsSQL.svg" class="r-stretch"></section>
 <section id="llm-calling-function-node" class="slide level2">
 <h2>LLM calling function node</h2>
-<div class="sourceCode" id="cb39" data-snippet="call_llm" data-startfrom="129"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 128;"><span id="cb39-129"><a aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> call_llm(state: State, sql_gen_config: SQLGenConfig) <span class="op">-&gt;</span> State:</span>
-<span id="cb39-130"><a aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> litellm.completion(</span>
-<span id="cb39-131"><a aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>sql_gen_config.llm[<span class="st">"model"</span>],</span>
-<span id="cb39-132"><a aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>state.messages,</span>
-<span id="cb39-133"><a aria-hidden="true" tabindex="-1"></a>        response_format<span class="op">=</span>SQLOutput,</span>
-<span id="cb39-134"><a aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb39-135"><a aria-hidden="true" tabindex="-1"></a>    state.sql <span class="op">=</span> SQLOutput.model_validate_json(response.choices[<span class="dv">0</span>].message.content).sql</span>
-<span id="cb39-136"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-137"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> state</span>
-<span id="cb39-138"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-139"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb40" data-snippet="call_llm" data-startfrom="174"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 173;"><span id="cb40-174"><a aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> call_llm(</span>
+<span id="cb40-175"><a aria-hidden="true" tabindex="-1"></a>    state: State, sql_gen_config: SQLGenConfig</span>
+<span id="cb40-176"><a aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> State:</span>
+<span id="cb40-177"><a aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> litellm.completion(</span>
+<span id="cb40-178"><a aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>state.messages,</span>
+<span id="cb40-179"><a aria-hidden="true" tabindex="-1"></a>        response_format<span class="op">=</span>SQLOutput</span>
+<span id="cb40-180"><a aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> sql_gen_config.structured</span>
+<span id="cb40-181"><a aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> <span class="va">None</span>,</span>
+<span id="cb40-182"><a aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>sql_gen_config.llm,  <span class="co"># model here</span></span>
+<span id="cb40-183"><a aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb40-184"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> sql_gen_config.structured:</span>
+<span id="cb40-185"><a aria-hidden="true" tabindex="-1"></a>        state.sql <span class="op">=</span> SQLOutput.model_validate_json(</span>
+<span id="cb40-186"><a aria-hidden="true" tabindex="-1"></a>            response.choices[<span class="dv">0</span>].message.content</span>
+<span id="cb40-187"><a aria-hidden="true" tabindex="-1"></a>        ).sql</span>
+<span id="cb40-188"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb40-189"><a aria-hidden="true" tabindex="-1"></a>        state.sql <span class="op">=</span> response.choices[<span class="dv">0</span>].message.content</span>
+<span id="cb40-190"><a aria-hidden="true" tabindex="-1"></a>    logger.info(</span>
+<span id="cb40-191"><a aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"Generated SQL: </span><span class="sc">{</span>sql_gen_config<span class="sc">.</span>structured<span class="op">=</span><span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>state<span class="sc">.</span>sql<span class="op">=</span><span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb40-192"><a aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb40-193"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> state</span>
+<span id="cb40-194"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-195"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="sql-execution-function-node" class="slide level2">
 <h2>SQL Execution function node</h2>
-<div class="sourceCode" id="cb40" data-snippet="exec_sql" data-startfrom="144"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 143;"><span id="cb40-144"><a aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exec_sql(state: State, sql_gen_config: SQLGenConfig) <span class="op">-&gt;</span> Output:</span>
-<span id="cb40-145"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> sql_gen_config.engine.<span class="ex">connect</span>() <span class="im">as</span> conn:</span>
-<span id="cb40-146"><a aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> conn.execute(text(state.sql))</span>
-<span id="cb40-147"><a aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
-<span id="cb40-148"><a aria-hidden="true" tabindex="-1"></a>            results <span class="op">=</span> <span class="bu">str</span>(result.fetchall())</span>
-<span id="cb40-149"><a aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> error:</span>
-<span id="cb40-150"><a aria-hidden="true" tabindex="-1"></a>            results <span class="op">=</span> <span class="bu">str</span>(error)</span>
-<span id="cb40-151"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-152"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> state.sql <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
-<span id="cb40-153"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Output(sql<span class="op">=</span>state.sql, result<span class="op">=</span>results)</span>
-<span id="cb40-154"><a aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-155"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb41" data-snippet="exec_sql" data-startfrom="200"><pre class="sourceCode python code-with-copy"><code class="sourceCode python" style="counter-reset: source-line 199;"><span id="cb41-200"><a aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exec_sql(</span>
+<span id="cb41-201"><a aria-hidden="true" tabindex="-1"></a>    state: State, sql_gen_config: SQLGenConfig</span>
+<span id="cb41-202"><a aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> Output:</span>
+<span id="cb41-203"><a aria-hidden="true" tabindex="-1"></a>    logger.info(<span class="ss">f"Executing SQL </span><span class="sc">{</span>state<span class="op">=</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb41-204"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> sql_gen_config.engine.<span class="ex">connect</span>() <span class="im">as</span> conn:</span>
+<span id="cb41-205"><a aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> conn.execute(text(state.sql))</span>
+<span id="cb41-206"><a aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb41-207"><a aria-hidden="true" tabindex="-1"></a>            results <span class="op">=</span> <span class="bu">str</span>(result.fetchall())</span>
+<span id="cb41-208"><a aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> error:</span>
+<span id="cb41-209"><a aria-hidden="true" tabindex="-1"></a>            results <span class="op">=</span> <span class="bu">str</span>(error)</span>
+<span id="cb41-210"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-211"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> state.sql <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb41-212"><a aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> Output(sql<span class="op">=</span>state.sql, result<span class="op">=</span>results)</span>
+<span id="cb41-213"><a aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-214"><a aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="running-the-code" class="slide level2">
+<h2>Running the code</h2>
+<div class="sourceCode" id="cb42"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a></a><span class="fu">git</span> clone https://github.com/D3f0/pycon-sql-llm.git</span>
+<span id="cb42-2"><a></a><span class="ex">uv</span> sync</span>
+<span id="cb42-3"><a></a><span class="ex">uv</span> run <span class="at">-m</span> sql_with_llms.main </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section class="slide level2">
 
@@ -1867,14 +1930,19 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 <li>Function nodes
 <ul>
 <li>Custom modifications</li>
+<li>Security (Python on WASM)</li>
 </ul></li>
 </ul>
 </div>
+</section>
+<section class="slide level2">
+
+<h3 id="closing-words">Closing words</h3>
 <div class="fragment">
 <ul>
-<li><a href="https://pypi.org/project/agentics-py/">Agentics</a> is an OSS frameworks for writing agents created at IBM Research
+<li><a href="https://pypi.org/project/agentics-py/" target="_blank">Agentics</a> is an OSS frameworks for writing agents created at IBM Research
 <ul>
-<li>Example of text2sql <a href="https://github.com/IBM/Agentics/tree/main/applications/text2sql">use case</a></li>
+<li>Example of text2sql <a href="https://github.com/IBM/Agentics/tree/main/applications/text2sql" target="_blank">use case</a></li>
 </ul></li>
 </ul>
 </div>
@@ -1913,7 +1981,7 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
 
 <div class="reveal-header">
 <div class="header-logo-left">
-
+<img data-src="">
 </div>
 <div class="header-logo-right">
 <img data-src="./img/logo.svg">
@@ -2204,7 +2272,7 @@ Robell  laura@envisionacademy.org       <span style="color: #800080; text-decora
         }
           var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
           var mailtoRegex = new RegExp(/^mailto:/);
-            var filterRegex = new RegExp("git@work\.github\.com:D3f0\/pycon-sql-llm\.git");
+            var filterRegex = new RegExp('/' + window.location.host + '/');
           var isInternal = (href) => {
               return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
           }
