@@ -773,13 +773,21 @@ except Exception as err:
 The BIRD mini has some CSV files that help understanding
 the tables values and relationships
 
-Let's pass this to the prompt generation system message...
+We're adding this context in a configuration file, that we will examine in the
+next section. This is the `evidence` column from the dataset we saw earlier 💡
 
-#### TODO
+```{.bash}
+ uv run -m sql_with_llms.main ./config-custom.yaml  -c
 
-::: footer
-To be completed for tomorrow
-:::
+Provider List: https://docs.litellm.ai/docs/providers
+
+
+Provider List: https://docs.litellm.ai/docs/providers
+
+Answer: {'sql': "SELECT COUNT(*) FROM satscores INNER JOIN schools ON satscores.cds = schools.CDSCode WHERE satscores.AvgScrMath > 400 AND schools.Virtual = 'F'", 'result': '[(4,)]'}
+```
+
+
 
 ---
 
@@ -888,7 +896,7 @@ a `State`. The next node will be prompt generation, so we will be save the
 
 ---
 
-## Global configuration class
+## Global configuration class {.smaller}
 
 The nodes beyond the initial one will require to have a bit more information
 that won't change (not considered state). We will provide this as a seconds argument 
@@ -986,7 +994,8 @@ For example, the term Q1 can mean, *quarter one*, but it should
 
 ::: {.fragment}
 - Function nodes
-  - Custom modifications 
+  - Custom modifications
+  - Security (Python on WASM)
 :::
 
 ---

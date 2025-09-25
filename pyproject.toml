@@ -44,3 +44,6 @@ package = true
 dev = [
     "invoke>=2.2.0",
 ]
+
+[tool.ruff]
+line-length = 60

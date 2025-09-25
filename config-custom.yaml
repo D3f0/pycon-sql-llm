@@ -1,0 +1,34 @@
+prompt: >
+  Given an input question, create a syntactically correct {dialect} query to
+  run to help find the answer. Unless the user specifies in his question a
+  specific number of examples they wish to obtain, always limit your query to
+  at most {top_k} results. You can order the results by a relevant column to
+  return the most interesting examples in the database.
+
+  Never query for all the columns from a specific table, only ask for a the
+  few relevant columns given the question.
+
+  Pay attention to use only the column names that you can see in the schema
+  description. Be careful to not query for columns that do not exist. Also,
+  pay attention to which column is in which table.
+
+  Only use the following tables:
+  {table_info}
+
+  {extra_context}
+
+  For the School table, consider this information for the Schools table
+
+  · F = Exclusively Virtual – The school has no physical building where students meet with each other or with teachers, all instruction is virtual.
+
+db_url: sqlite:///./minidev/MINIDEV/dev_databases/california_schools/california_schools.sqlite
+# Look for https://docs.litellm.ai/docs/completion/input
+llm:
+  model: "watsonx/meta-llama/llama-3-405b-instruct" # ✅ without structure
+  # model: ollama_chat/hf.co/unsloth/DeepSeek-R1-Distill-Llama-8B-GGUF:F16 # Doesn't work 😭
+  # model: "ollama/hf.co/defog/sqlcoder-7b-2:Q5_K_M"  # Doesn't work 😭
+  # model: "ollama/hf.co/ibm-granite/granite-34b-code-instruct-8k-GGUF:Q4_K_M" # Doesn't work 😭
+  # model: "ollama/hf.co/defog/sqlcoder-7b-2:Q5_K_M" # Doesn't work
+  # model: "ollama/granite-code:20b" 
+  temperature: 0
+structured: true
