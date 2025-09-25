@@ -729,7 +729,7 @@ output = SQLOutput.model_validate_json(
 :::
 
 ::: {.fragment}
-This methods is known as grammar constraint decoding, not all
+This methods is known as [grammar constraint decoding](https://medium.com/@emrekaratas-ai/structured-output-generation-in-llms-json-schema-and-grammar-based-decoding-6a5c58b698a6), not all
 models are capable of it.
 :::
 
