@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>git@work.github.com:D3f0/pycon-sql-llm.git/img/Untitled.html</loc>
+    <lastmod>2025-09-25T09:09:38.372Z</lastmod>
+  </url>
+  <url>
+    <loc>git@work.github.com:D3f0/pycon-sql-llm.git/Untitled.html</loc>
+    <lastmod>2025-09-25T09:14:58.093Z</lastmod>
+  </url>
+  <url>
     <loc>git@work.github.com:D3f0/pycon-sql-llm.git/slides.html</loc>
-    <lastmod>2025-09-24T13:33:26.401Z</lastmod>
+    <lastmod>2025-09-25T10:16:30.239Z</lastmod>
   </url>
 </urlset>
