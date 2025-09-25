@@ -46,7 +46,7 @@
     "href": "slides.html#prompts-for-sql-generation",
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "Prompts for SQL generation",
-    "text": "Prompts for SQL generation\n\nLLMs don’t know the 🏗️ structure of our database, and may hallucinate about it, or create some flat out invalid SQL\n\n\nWe have to provide extra information about the structure in the instructions\nFor this we will use a prompt string with some palaceholders .\n\n\nSome research papers from our team on Robust LLMs:\n Weakly Supervised Detection of Hallucinations in LLMs\n\n\n Localizing Persona Representations In LLMs\n\n\nNow we’re gonna see what we’re put in the prompt, for starters the schema"
+    "text": "Prompts for SQL generation\n\nLLMs don’t know the 🏗️ structure of our database, and may hallucinate about it, or create some flat out invalid SQL\n\n\nWe have to provide extra information about the structure in the instructions\nFor this we will use a prompt string with some placeholders .\n\n\nSome research papers from our team on Robust LLMs:\n Weakly Supervised Detection of Hallucinations in LLMs\n\n\n Localizing Persona Representations In LLMs\n\n\nNow we’re gonna see what we’re put in the prompt, for starters the schema"
   },
   {
     "objectID": "slides.html#the-messages-that-constitute-the-prompt",
@@ -159,5 +159,12 @@
     "title": "💬  🤖 Asking questions to your database with LLMs",
     "section": "Thank you & Questions",
     "text": "Thank you & Questions\n\n\n\n\n\n\n    \n\n\n\n\n nahuel.defosse@ibm.com"
+  },
+  {
+    "objectID": "slides.html#coding-models",
+    "href": "slides.html#coding-models",
+    "title": "💬  🤖 Asking questions to your database with LLMs",
+    "section": "Coding models",
+    "text": "Coding models\n\n\n\nLLMs are quite capable of writing functional SQL queries, from the named code/coder to specific ones for (sql) generation.\n\n\n\nFor example, some IBM trained models include:\n\ngranite-3-2-8b-instruct\ngranite-34b-code-instruct\ngranite-20b-code-base-schema-linking\ngranite-20b-code-base-sql-gen\n\nMore info on these models  | And also in 🤗 \n\n\n\nFor those of us who have been writing code for some time and fell in love with ORMs when they were the hot new thing, LLMs can take us to the next level!"
   }
 ]
