@@ -15,5 +15,7 @@ prompt: >
   Only use the following tables:
   {table_info}
 db_url: sqlite:///./minidev/MINIDEV/dev_databases/california_schools/california_schools.sqlite
+# Look for https://docs.litellm.ai/docs/completion/input
 llm:
   model: watsonx/ibm/granite-3-2-8b-instruct
+  temperature: 0

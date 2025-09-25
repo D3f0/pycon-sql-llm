@@ -391,11 +391,19 @@ with engine.connect() as conn:
 
 # Convert natural language questions into SQL {.smaller}
 
+---
+
+![](./img/LLMsSQL.svg)
+
+---
+
+
+
 :::: {.columns}
 ::: {.column}
 ::: {.fragment .fade-left}
-LLMs are quite capable of writing functional SQL queries, from the `code` or `coder`
-ones, to specific ones for SQL generation
+LLMs are quite capable of writing functional SQL queries, from the named `code`/`coder`
+to specific ones for (`sql`) generation.
 :::
 
 :::
@@ -634,7 +642,7 @@ Among the provider lists we have:
 
 
 ::: {.fragment .fade-in}
-To run inference, we just call the [`completions`](https://docs.litellm.ai/docs/completion/input) module function:
+To run inference, we just call the [`completions`](https://docs.litellm.ai/docs/completion/input) function:
 
 <!-- Enable disk cachesq -->
 
@@ -789,13 +797,17 @@ To be completed for tomorrow
 <img src="./img/langgraph.svg" height="40px" style="float: left; padding-top: .5em; padding-right: .25em"/> 
 <p>`LangGraph` allows us to create state machines around LLM calls, using
 functions as nodes. The full can be checked out [`src/sql_with_llms/main.py`](https://github.com/D3f0/pycon-sql-llm/blob/main/src/sql_with_llms/main.py)</p>
+
 :::
 
-::: {.fragment .fade-in-then-semi-out}
+::: {.incremental}
+- Memory (cache)
+- Human in the Loop support
+- Durable execution
+:::
+
+::: notes
 We will now put the code we saw into node functions
-:::
-
-::: {.fragment .fade-in-then-semi-out}
 We will have a `Input`, and `Output` a shared `State` and some global configuration, 
 instead of global variables.
 :::
@@ -838,27 +850,29 @@ g.get_graph().draw_png()
 
 ## Input class
 
-This is what we expect to be passed to our state machine 
+The input and output are these simple dataclasses.
 
-```{.python include="src/sql_with_llms/main.py" snippet="input"}
+::: {.columns}
+::: {.column}
+```{.python include="src/sql_with_llms/main.py" snippet="input" code-line-numbers="false"}
 ```
+:::
+::: {.column}
+
+```{.python include="src/sql_with_llms/main.py" snippet="output" code-line-numbers="false"}
+```
+
+:::
+:::
 
 ---
 
 ## State class
 
-This is what the state machine will pass to the nodes (functions)
-and expect from them (except the first and last node which use `Input`/`Output`)
+This the state passed between the **inner**.
+The first and last one will receive/return the `Input`/`Output` respectively.
 
 ```{.python include="src/sql_with_llms/main.py" snippet="state" code-line-numbers="false"}
-```
-
----
-
-## Output class
-
-This is the response back to the user, we will use it in the *last* node 
-```{.python include="src/sql_with_llms/main.py" snippet="output" code-line-numbers="false"}
 ```
 
 ---
@@ -877,10 +891,12 @@ a `State`. The next node will be prompt generation, so we will be save the
 ## Global configuration class
 
 The nodes beyond the initial one will require to have a bit more information
-that won't change (not considered state), for this we will define a global 
+that won't change (not considered state). We will provide this as a seconds argument 
+and bind it with `functools.partial`. 
+
 ```{.python include="src/sql_with_llms/main.py" snippet="cfg" code-line-numbers="false"}
 ```
-We will pass it to the function nodes with `functools.partial(..., conf=conf)` 
+
 
 ---
 
@@ -907,6 +923,16 @@ We will pass it to the function nodes with `functools.partial(..., conf=conf)`
 ## SQL Execution function node
 
 ```{.python include="src/sql_with_llms/main.py" snippet="exec_sql" code-line-numbers="false"}
+```
+
+---
+
+## Running the code
+
+```{.bash}
+git clone https://github.com/D3f0/pycon-sql-llm.git
+uv sync
+uv run -m sql_with_llms.main 
 ```
 
 ---
@@ -963,9 +989,13 @@ For example, the term Q1 can mean, *quarter one*, but it should
   - Custom modifications 
 :::
 
+---
+
+### Closing words
+
 ::: {.fragment}
-- [Agentics](https://pypi.org/project/agentics-py/) is an OSS frameworks for writing agents created at IBM Research
-  - Example of text2sql [use case](https://github.com/IBM/Agentics/tree/main/applications/text2sql)
+- [Agentics](https://pypi.org/project/agentics-py/){target="_blank"} is an OSS frameworks for writing agents created at IBM Research
+  - Example of text2sql [use case](https://github.com/IBM/Agentics/tree/main/applications/text2sql){target="_blank"}
 :::
 
 ::: notes

@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from functools import partial
-from inspect import signature
-from typing import Any, Callable, Dict, Literal, Optional, TypedDict, Union
+from typing import Any, Dict, Literal, Optional, TypedDict, Union
 
 import litellm
 import yaml
@@ -10,12 +9,16 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import Engine, create_engine, text
 from rich.traceback import install
+from loguru import logger
+import click
 
 install()
 
 
 # start snippet state
 class Message(TypedDict):
+    """Message to pass to litellm"""
+
     role: Literal["user", "system"]
     content: str
 
@@ -33,7 +36,8 @@ class State:
 # start snippet input
 @dataclass
 class Input:
-    """User provides the connection details and the question"""
+    """User provides the connection
+    details and the question"""
 
     question: str
 
@@ -44,7 +48,8 @@ class Input:
 # start snippet output
 @dataclass
 class Output:
-    """User provides the connection details and the question"""
+    """SQL result and
+    LLM explanation"""
 
     sql: str
     result: str
@@ -59,12 +64,14 @@ class SQLGenConfig(BaseModel):
     engine: Engine = Field(description="DB connection")
     db: SQLDatabase = Field(description="Basic schema info")
     system_message_tpl: str = Field(description=r"Templated sys msg {}")
-    llm: Dict[str, Union[str, Dict[str, str]]]
+    llm: Dict[str, Union[str, Dict[str, str], int, BaseModel]]
+    extra_context: Dict[str, str] = Field(default_factory=dict)
+    # ...
+    # end snippet cfg
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
     )
-    # end snippet cfg
 
     @classmethod
     def from_yaml(cls, path: str, **overrides: Any) -> "SQLGenConfig":
@@ -84,13 +91,10 @@ class SQLGenConfig(BaseModel):
 
 
 # start snippet init_
-
-
 def init(
     initial: Input,
 ) -> State:
     """Initializes the state"""
-
     return State(
         question=initial.question,
     )
@@ -105,8 +109,8 @@ def prompt_gen(state: State, sql_gen_config: SQLGenConfig):
     system_message_content = sql_gen_config.system_message_tpl.format(
         dialect=sql_gen_config.db.dialect,
         top_k=10,
-        # table_info=sql_gen_config.db.get_table_info(),
         table_info=sql_gen_config.db.get_table_info(),
+        extra_context=sql_gen_config.extra_context,
     )
     state.messages.extend(
         [
@@ -128,9 +132,9 @@ class SQLOutput(BaseModel):
 # start snippet call_llm
 def call_llm(state: State, sql_gen_config: SQLGenConfig) -> State:
     response = litellm.completion(
-        model=sql_gen_config.llm["model"],
         messages=state.messages,
         response_format=SQLOutput,
+        **sql_gen_config.llm,  # model here
     )
     state.sql = SQLOutput.model_validate_json(response.choices[0].message.content).sql
 
@@ -156,26 +160,28 @@ def exec_sql(state: State, sql_gen_config: SQLGenConfig) -> Output:
 # end snippet exec_sql
 
 
-# start snippet ext_lg
-class ConfigAwareStateGraph(StateGraph):
-    def __init__(self, *args, sql_gen_config: BaseModel, **kwargs: Any):
-        super().__init__(**kwargs)
-        self.sql_gen_config = sql_gen_config
+# # start snippet ext_lg
+# class ConfigAwareStateGraph(StateGraph):
+#     def __init__(self, *args, sql_gen_config: BaseModel, **kwargs: Any):
+#         super().__init__(**kwargs)
+#         self.sql_gen_config = sql_gen_config
 
-    def add_node(self, key: str, node: Callable, **kwargs: Any) -> None:
-        """Add a node with automatic config injection if needed."""
-        sig = signature(node)
-        if "sql_gen_config" in sig.parameters and self.sql_gen_config is not None:
-            node = partial(node, sql_gen_config=self.sql_gen_config)
+#     def add_node(self, key: str, node: Callable, **kwargs: Any) -> None:
+#         """Add a node with automatic config injection if needed."""
+#         sig = signature(node)
+#         if "sql_gen_config" in sig.parameters and self.sql_gen_config is not None:
+#             node = partial(node, sql_gen_config=self.sql_gen_config)
 
-        super().add_node(key, node, **kwargs)
+#         super().add_node(key, node, **kwargs)
 
 
-# end snippet ext_lg
+# # end snippet ext_lg
 
 
 def create_graph(config: str = "./config.yaml"):
     sql_gen_config: SQLGenConfig = SQLGenConfig.from_yaml(config)
+    logger.info(sql_gen_config)
+
     graph_builder = StateGraph(
         input_schema=Input,
         state_schema=State,
@@ -202,8 +208,15 @@ def create_graph(config: str = "./config.yaml"):
     return graph
 
 
-if __name__ == "__main__":
-    graph = create_graph()
+@click.command()
+@click.argument("config_pth", type=click.Path(file_okay=True), default="config.yaml")
+@click.argument("-c/--cache", "use_cache", help="Use litellm cache")
+def main(
+    config_pth,
+    use_cache,
+):
+    logger.info(f"Using config file: {config_pth}")
+    graph = create_graph(config_pth)
     result = graph.invoke(
         Input(
             question="How many schools with an average score in Math greater than 400 in the SAT test are exclusively virtual?",
@@ -211,3 +224,7 @@ if __name__ == "__main__":
     )
 
     print(f"Answer: {result}")
+
+
+if __name__ == "__main__":
+    main()
