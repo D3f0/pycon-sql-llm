@@ -397,7 +397,7 @@ with engine.connect() as conn:
 
 ---
 
-
+## Coding models
 
 :::: {.columns}
 ::: {.column}
@@ -446,7 +446,7 @@ about it, or create some flat out invalid SQL
 ::: {.fragment .fade-in-then-semi-out}
 We have to  provide __extra__ information about the structure in the instructions
 
-For this we will use a **prompt** string with some palaceholders {{< bi braces >}}.
+For this we will use a **prompt** string with some placeholders {{< bi braces >}}.
 :::
 
 ::: {.fragment .fade-in-then-semi-out .small}
@@ -1009,11 +1009,6 @@ For example, the term Q1 can mean, *quarter one*, but it should
 
 ::: notes
 
-## Extensibilit
-- Offload node responsibilities into external services (e.g. DB execution) 
-- Pipelines defined as YAML
-- Use Python's built in `entry-point` system to *install* nodes
-  This is a good approach to separate production from 
 :::
 ---
 
