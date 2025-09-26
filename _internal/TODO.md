@@ -14,8 +14,7 @@
 - [ ] don't put problem and solution on the same slide ... slide 23
 - [ ] use same style of reference in all slides
 - [x] remove footnote slide 24 put link directly like other cases before, slide 24
-- [ ] refrescar pipeline antes de slide 30
-- [ ] para transicionar Calling the LLM with the prompt
+- [ ] refrescar pipeline antes de slide 30 para transicionar Calling the LLM with the prompt
 - [x] remove commented code line 3 in slide 31 ollama
 - [x] check grammar on slide 33 no clear "Although it looks we have the SQL, LLMs currently support structured output Also known as JSON Schema, this allows us to also retrieve some explanation"
 ---
